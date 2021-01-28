@@ -2,7 +2,7 @@
 
 #footer {
   color: #FFFFFF;
-  background-color:#a4244a;
+  background-color: $maincolor;
   height:$footerHeight;
   border-top:1px solid #000000;
   position:fixed;
@@ -35,7 +35,7 @@
 }
 
 #sidebarButton {
-  background: #a4244a;
+  background: $maincolor;
   border-top-left-radius: $buttonSize * 2;
   border-top-right-radius: $buttonSize * 2;
   height: $buttonSize;

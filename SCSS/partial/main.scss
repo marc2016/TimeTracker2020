@@ -100,7 +100,7 @@ body {
 }
 
 .btn-default {
-    background-color: #a4244a;
+    background-color: $maincolor;
     color: #fff !important;
     border-color: #adadad;
     border-radius: 5px;
@@ -115,11 +115,11 @@ body {
 }
 
 .nav-item.selected {
-    background-color: #8d1e3f;
+    background-color: $maincolor;
 }
 
 .navbar {
-    background-color: #a4244a;
+    background-color: $maincolor;
     color: #FFFFFF !important; // padding: 0;
     height: $navbar-height;
 }
