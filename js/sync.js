@@ -63,37 +63,6 @@ class Sync {
     checkLogin(){
         return this.syncSystem.checkLogin()
     }
-        
-    async syncJobtypes(){
-        if(!this.baseUrl){
-            toastr.error('Die Basis URL des Rest Service wurde nicht gesetzt.')
-            return;  
-        }
-        if(!this.checkLogin()){
-            toastr.error('Sie sind nicht am externen System angemeldet.')
-            return
-        }
-
-        var requestData = this.syncSystem.getDataJobtypes(this.baseUrl)
-        await this.client.get(requestData.url,requestData.args, async function (data, response) {
-            if(response.statusCode != 200){
-                toastr.error('Aufgaben Arten wurden nicht synchronisiert.')
-                return
-            }
-            
-            var responseData = this.syncSystem.handleResponseJobtypes(data,response)
-
-            var countOfUpdates = 0;
-            await _.forEach(responseData, async function(element) {
-                await dataAccess.getDb('jobtypes').update({ externalId: element.externalId }, { externalId: element.externalId, name:element.name, active: element.active }, { upsert: true });
-                dataAccess.getDb('jobtypes').nedb.persistence.compactDatafile()
-            })
-            
-            dataAccess.jobtypesChanged.next()
-
-            toastr.success('Aufgaben Arten wurden synchronisiert.')
-        }.bind(this));
-    }
     
     async syncProjects(){
         if(!this.baseUrl){
@@ -129,7 +98,7 @@ class Sync {
         }.bind(this))
     }
 
-    syncJob(job,projectList,jobtypeList){
+    syncJob(job,projectList){
         if(!this.baseUrl){
             toastr.error('Die Basis URL des Rest Service wurde nicht gesetzt.')
             return;  
@@ -146,13 +115,7 @@ class Sync {
         if(!projectExternalId) {
             toastr.warning("Externe ID des Projektes ist nicht gesetzt.")
         }
-        var jobtypeMatch = ko.utils.arrayFirst(jobtypeList(), function(item) {
-            return item._id == job.jobtypeId();
-        });
-        var jobTypeId = jobtypeMatch.externalId
-        if(!jobTypeId) {
-            toastr.warning("Externe ID der Aufgaben Art ist nicht gesetzt.")
-        }
+        
 
         var duration =  moment.duration(job.elapsedSeconds(), "seconds").format("h", 2)
         duration = utils.roundDuration(store.get('roundDuration','round'),duration.replace(",","."))
@@ -160,7 +123,6 @@ class Sync {
 
         var jobToSync = ko.mapping.toJS(job);
 
-        jobToSync.externalJobtypeId = jobTypeId
         jobToSync.externalProjectId = projectExternalId
           
         var requestData = this.syncSystem.getDataSyncJob(this.baseUrl, jobToSync)

@@ -56,7 +56,6 @@ toastr.options = {
 }
 
 var ProjectsSettings = require('./js/projectssettings.js')
-var JobtypeSettings = require('./js/jobtypesettings.js')
 var AppSettings = require('./js/appsettings.js')
 var jobtable = require('./js/jobtable.js')
 var TimerList = require('./js/timerlist.js')
@@ -67,7 +66,6 @@ var footer = require('./js/footer.js')
 this.projectsSettingViewModel = undefined
 this.appSettingsViewModel = undefined
 this.jobtableViewModel = undefined
-this.jobtypeSettingsViewModel = undefined
 this.timerlistViewModel = undefined
 
 const WindowsToaster = require('node-notifier').WindowsToaster;
@@ -118,7 +116,6 @@ onload = function() {
   this.loginClick = loginClick
   this.syncLogin = syncLogin
   this.syncProjects = syncProjects
-  this.syncJobtypes = syncJobTypes
   this.saveSyncRestUrl = saveSyncRestUrl
   this.checkForUpdatesClick = checkForUpdatesClick
   this.closeApp = closeApp
@@ -146,9 +143,6 @@ onload = function() {
   var btnProjectsSettings = document.getElementById('btnProjectsSettings')
   btnProjectsSettings.addEventListener("click", openProjectsSettings.bind(this) )
 
-  var btnJobtypeSettings = document.getElementById('btnJobtypeSettings')
-  btnJobtypeSettings.addEventListener("click", openJobtypeSettings.bind(this))
-
   var btnJobTable = document.getElementById('btnJobTable')
   btnJobTable.addEventListener("click", openJobTable.bind(this) )
   
@@ -159,7 +153,6 @@ onload = function() {
   btnAppSettings.addEventListener("click", openAppSettings.bind(this) )
 
   this.projectsSettingViewModel = new ProjectsSettings(['projectssettingsMainContent','modalAddNewProject'])
-  this.jobtypeSettingsViewModel = new JobtypeSettings(['jobtypeSettingsMainContent','modalAddNewJobtype'])
   this.appSettingsViewModel = new AppSettings(['appsettingsMainContent'], store)
   this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote','modalChangeJobDuration','modalDeleteEntry','modalUploadEntryAgain'], jobtimer)
   this.jobtableViewModel = new jobtable(['jobtableMainContent', 'modalDelete'])
@@ -303,15 +296,6 @@ function openProjectsSettings(){
   $('#navProjectsSettings').addClass("selected");
 }
 
-function openJobtypeSettings(){
-  changeView(undefined)
-  $('#mainContent').show()
-  $('#mainContent').load('pages/jobtypesettings.html', function(){
-    this.jobtypeSettingsViewModel.onLoad()
-  }.bind(this))
-  $('#navProjectsSettings').addClass("selected");
-}
-
 function changeView(newViewModel){
   if(this.currentViewModel && this.currentViewModel == newViewModel)
     return;
@@ -345,11 +329,4 @@ async function syncProjects(){
   
 }
 
-async function syncJobTypes(){
-  try{
-    await sync.syncJobtypes()
-  } catch(error){
-    toastr.error("Beim Synchronisieren der Aufgabenarten ist ein Fehler aufgetreten.")
-  }
-}
 

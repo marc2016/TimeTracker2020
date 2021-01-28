@@ -37,10 +37,10 @@ var self = module.exports = {
         return (Math.floor(value * 4) / 4).toFixed(2)
     },
 
-    jobProperties: ['projectId', 'jobtypeId', 'jobNote', 'lastSync', 'billable'],
+    jobProperties: ['projectId', 'jobNote', 'lastSync', 'billable'],
 
     addMissingProperties: function(job) {
-        _.defaults(job, {'projectId' : ko.observable(), 'jobtypeId': ko.observable(), 'jobNote': ko.observable(), 'lastSync': ko.observable(), 'billable': ko.observable()});
+        _.defaults(job, {'projectId' : ko.observable(), 'jobNote': ko.observable(), 'lastSync': ko.observable(), 'billable': ko.observable()});
     },
 
     durationConvertBack: function(value){

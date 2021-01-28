@@ -53,7 +53,6 @@ class TimerList extends BaseViewModel {
     this.jobtimer = jobtimer
 
     dataAccess.projectsChanged.subscribe(value => this.refreshProjectList())
-    dataAccess.jobtypesChanged.subscribe(value => this.refreshJobtypeList())
   
     $('#timerList').load('pages/timerlist.html', function(){
       this.hide()
@@ -69,10 +68,10 @@ class TimerList extends BaseViewModel {
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
-      this.db_jobtypes = dataAccess.getDb('jobtypes')
+      
       this.jobTimerList = ko.observableArray()
       this.projectList = ko.observableArray()
-      this.jobtypeList = ko.observableArray()
+
 
       if(this.koWatcher){
         this.koWatcher.dispose()
@@ -125,7 +124,7 @@ class TimerList extends BaseViewModel {
     $('#background').css('background-image', 'url('+store.get('backgroundSrc')+')')
 
     this.refreshProjectList()
-    this.refreshJobtypeList()
+    
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
   
@@ -180,7 +179,7 @@ class TimerList extends BaseViewModel {
   syncEntry(that,data){
     $('#modalUploadEntryAgain').modal('hide')
     try{
-      sync.syncJob(data,that.projectList,that.jobtypeList)
+      sync.syncJob(data,that.projectList)
     } catch(error){
       toastr.error("Beim Synchronisieren der Aufgabe ist ein Fehler aufgetreten.")
     }
@@ -244,19 +243,10 @@ class TimerList extends BaseViewModel {
     this.projectList.removeAll()
     ko.utils.arrayPushAll(this.projectList, docs)
   }
-  async refreshJobtypeList(){
-    var docs = await this.db_jobtypes.find({active:true})
-    docs = _.sortBy(docs, 'name')
-    this.jobtypeList.removeAll()
-    ko.utils.arrayPushAll(this.jobtypeList, docs)
-  }
 
   applySelectize() {
     $('select.projectSelect').not('.selectized').selectize({
       placeholder: 'Projekt auswählen...'
-    })
-    $('select.jobtypeSelect').not('.selectized').selectize({
-      placeholder: 'Art der Aufgabe auswählen...'
     })
   }
 
@@ -264,9 +254,6 @@ class TimerList extends BaseViewModel {
     docs.forEach(function(item, index){
       if(!item.projectId){
         item.projectId = ""
-      }
-      if(!item.jobtypeId){
-        item.jobtypeId = ""
       }
       if(!item.jobNote){
         item.jobNote = ""
@@ -344,7 +331,7 @@ class TimerList extends BaseViewModel {
   
   async transferEntry(that,data){
     var newDate = new moment()
-    var newEntry = {jobNote:data.jobNote(), jobtypeId: data.jobtypeId(), projectId: data.projectId(),elapsedSeconds:0, description:data.description(), date:newDate.format('YYYY-MM-DD'), billable:that.billable(), lastSync: ""}
+    var newEntry = {jobNote:data.jobNote(), projectId: data.projectId(),elapsedSeconds:0, description:data.description(), date:newDate.format('YYYY-MM-DD'), billable:that.billable(), lastSync: ""}
     await that.db.insert(newEntry)
     that.currentDate(newDate)
   }
@@ -355,7 +342,7 @@ class TimerList extends BaseViewModel {
   
   async saveAll(){
     await _.forEach(this.jobTimerList(), async function (element) {
-      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), jobtypeId: element.jobtypeId() } },{ multi: false })
+      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId() } },{ multi: false })
     }.bind(this))
     
     this.db.nedb.persistence.compactDatafile()
@@ -388,7 +375,7 @@ class TimerList extends BaseViewModel {
     if(!jobDescription){
       jobDescription = ""
     }
-    var newEntry = {jobNote:"", jobtypeId: "", projectId: "",elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var newEntry = {jobNote:"", projectId: "",elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()

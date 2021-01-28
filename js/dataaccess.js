@@ -12,10 +12,8 @@ class DataAccess {
         var userDataPath = app.getPath('userData')+'/userdata/'
         this.dbJobs = new Datastore({ filename: userDataPath+'/jobs.db', autoload: true });
         this.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
-        this.dbJobtypes = new Datastore({ filename: userDataPath+'/jobtypes.db', autoload: true });
 
         this.projectsChanged = new Subject()
-        this.jobtypesChanged = new Subject()
 
         return DataAccess.instance;
     }
@@ -26,8 +24,6 @@ class DataAccess {
                 return this.dbJobs
             case 'projects':
                 return this.dbProjects
-            case 'jobtypes':
-                return this.dbJobtypes
             default:
                 return undefined
         }

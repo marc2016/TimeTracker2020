@@ -65,34 +65,6 @@ class ProcasSync {
         return true;
     }
 
-    getDataJobtypes(baseUrl){
-        var url = buildUrl(baseUrl, {
-            path: 'activity/list'
-        });
-        var args = {
-            headers: { "Cookie" : this.cookie }
-        }
-        var data = {
-            url: url,
-            args: args
-        }
-        return data
-    }
-        
-    handleResponseJobtypes(data,response){
-        var responseData = []
-        _.forEach(data, function(element) {
-            var resultElement = {
-                externalId: element.id,
-                name:element.beschreibung,
-                active: true
-            }
-            responseData.push(resultElement)
-        })
-        
-        return responseData
-    }
-
     getDataProjects(baseUrl){
         var now = new moment();
         var month = now.format('MM');
@@ -155,7 +127,6 @@ class ProcasSync {
         _.set(syncJobParameter, "arbeitszeit", duration)
         _.set(syncJobParameter, "beschreibung", job.description)
         _.set(syncJobParameter, "projekt_id", job.externalProjectId)
-        _.set(syncJobParameter, "taetigkeit_id", job.externalJobtypeId)
         _.set(syncJobParameter, "projektzusatz", job.jobNote)
         _.set(syncJobParameter, "abrechenbar", billable)
         

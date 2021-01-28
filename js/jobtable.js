@@ -57,7 +57,6 @@ class JobTable extends BaseViewModel {
             { title:"Datum", data: 'date()', filter: true},
             { title:"Aufgabe", data: 'description()',  filter: true},
             { title:"Projekt", data: 'projectId()', filter: true},
-            { title:"Art", data: 'jobtypeId()', filter: true},
             { title:"Dauer", data: 'elapsedSeconds()'},
             { title:"Dauer (dez.)", data: 'formattedTimeDeciaml()', name:'durationDecimal'},
             { title:"Sync", data: 'lastSync()'},
@@ -72,7 +71,6 @@ class JobTable extends BaseViewModel {
 
         this.db = dataAccess.getDb('jobs');
         this.db_projects = dataAccess.getDb('projects')
-        this.db_jobtypes = dataAccess.getDb('jobtypes')
 
         this.jobList = ko.observableArray()
         this.currentRange = ko.observable(moment().startOf('month').range('month'))
@@ -149,7 +147,7 @@ class JobTable extends BaseViewModel {
     }
 
     async save(job){
-        await this.db.update({ _id:job._id() }, { $set: { billable: job.billable(), lastSync: job.lastSync(), jobNote: job.jobNote(), description: job.description(), elapsedSeconds: job.elapsedSeconds(), projectId: job.projectId(), jobtypeId: job.jobtypeId() } },{ multi: false })
+        await this.db.update({ _id:job._id() }, { $set: { billable: job.billable(), lastSync: job.lastSync(), jobNote: job.jobNote(), description: job.description(), elapsedSeconds: job.elapsedSeconds(), projectId: job.projectId() } },{ multi: false })
         this.db.nedb.persistence.compactDatafile()
     }
 
@@ -183,7 +181,6 @@ class JobTable extends BaseViewModel {
     async refreshTable(currentRange){
         this.inProgress(true)
         this.projectDocs = await this.db_projects.find({})
-        this.jobtypeDocs = await this.db_jobtypes.find({})
 
         var days = Array.from(currentRange.by('day'));
         var dates = days.map(m => m.format('YYYY-MM-DD'))
@@ -210,7 +207,6 @@ class JobTable extends BaseViewModel {
     async initTable(){
 
         this.projectDocs = await this.db_projects.find({})
-        this.jobtypeDocs = await this.db_jobtypes.find({})
 
         var that = this
         this.jobTable = $('#jobs').DataTable({
@@ -251,16 +247,6 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     targets: 3,
-                    
-                    render: function(data){
-                        var jobtype = _.find(that.jobtypeDocs, {'_id':data})
-                        if(jobtype){
-                            return jobtype.name
-                        }
-                    }
-                },
-                {
-                    targets: 4,
                     render: function(data){
                         var formatted = moment.duration(data, "seconds").format("hh:mm:ss",{trim: false})
                         return formatted
@@ -313,13 +299,7 @@ class JobTable extends BaseViewModel {
         })
         projectValues = _.sortBy(projectValues, ['display'])
 
-        var jobtypeValues = _.map(this.jobtypeDocs, function(value){
-            return {
-                "value": value._id,
-                "display": value.name
-            }
-        })
-        jobtypeValues = _.sortBy(jobtypeValues, ['display'])
+        
 
         this.jobTable.MakeCellsEditable({
             "columns": [0,1,2,3,4],
@@ -339,12 +319,7 @@ class JobTable extends BaseViewModel {
                     "options":projectValues
                 },
                 {
-                    "column":3, 
-                    "type": "list",
-                    "options":jobtypeValues
-                },
-                {
-                    "column": 4,
+                    "column": 3,
                     "type": "duration",
                     "convert": function(oldValue) { return moment.duration(oldValue, "seconds").format("hh:mm:ss",{trim: false})},
                     "convertback": utils.durationConvertBack
