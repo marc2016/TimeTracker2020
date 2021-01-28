@@ -1,0 +1,130 @@
+@media (max-width: 720px){
+    .collapsedBySize {
+      display: none;
+    }
+    .visibleBySize {
+      display: inline-block !important;
+    }
+}
+
+.selectize-input {
+  height: 31px !important;
+  min-height: 31px !important;
+  padding-top: 3px !important;
+}
+
+.selectize-control {
+  padding: 0px;
+  height: 31px;
+}
+
+.timer-second-row {
+  margin-top: 5px;
+}
+
+.job-duration-button:hover {
+  text-decoration: none;
+}
+
+.job-duration-button:focus {
+  border-color: #de698c;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(164, 36, 74, 0.25);
+}
+
+.job-duration {
+  color: black;
+}
+
+.visibleBySize {
+  display: none;
+}
+
+.timer-btn .timer-play-btn{
+  display: inline-block;
+}
+
+.timer-btn.active .timer-play-btn{
+  display: none;
+}
+
+.timer-btn .timer-pause-btn{
+  display: none;
+}
+
+.timer-btn.active .timer-pause-btn{
+  display: inline-block;
+}
+
+.text-input-job{
+  box-shadow: none !important;
+}
+
+.job-list-item{
+  margin: 3px;
+  border-radius: 0.5rem !important;
+  background-color: rgba(255,255,255,0.75) !important;
+}
+
+.currentEntry {
+  border-color: $maincolor;
+  border-width: 2px;
+}
+
+.hLine {
+  background-color: $maincolor;
+  width: 100%;
+  height: 2px;
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 1px;
+}
+
+.btnDateChange {
+  margin: 3px;
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+}
+
+.btnDateChange:focus{
+  background-color: $maincolor !important;
+  border-color: gray !important;
+}
+
+.dateSelector {
+  border-bottom: $maincolor;
+  border-style: solid;
+  border-width: 0px 0px 2px 0px;
+  height: 40px;
+  text-align: center;
+  vertical-align: text-top;
+  background-color: rgba(255,255,255,0.75);
+  width: 100%;
+}
+
+.currentDate {
+  cursor: pointer;
+  margin: auto;
+  vertical-align: text-top;
+  width: auto;
+  font-size: 20px;
+  border: 0px;
+  width: 101px;
+  background-color: rgba(255,255,255,0);
+  font-family: Roboto;
+  font-weight: 300;
+}
+
+.datepicker {
+  z-index: 9999999;
+}
+
+.datepicker--day-name {
+  color: #a4244a;
+}
+
+.noteTextArea{
+  height: 150px;
+  resize: none;
+}
