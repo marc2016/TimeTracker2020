@@ -123,7 +123,7 @@ class TimerList extends BaseViewModel {
 
     $('#background').css('background-image', 'url('+store.get('backgroundSrc')+')')
 
-    this.refreshProjectList()
+    await this.refreshProjectList()    
     
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
@@ -245,8 +245,19 @@ class TimerList extends BaseViewModel {
   }
 
   applySelectize() {
-    $('select.projectSelect').not('.selectized').selectize({
-      placeholder: 'Projekt auswählen...'
+    var that = this
+    $('select.projectSelect').selectize({
+      placeholder: 'Projekt auswählen...',
+      options: that.projectList(),
+      labelField: "name",
+      valueField: "_id",
+      create: function(input, callback) {
+        var newProject = {name:input, active:true}
+        that.db_projects.insert(newProject).then((dbEntry) => {
+          that.projectList.push(dbEntry)
+          callback( { 'name': dbEntry.name, '_id': dbEntry._id} )
+        })
+      }
     })
   }
 
@@ -382,7 +393,6 @@ class TimerList extends BaseViewModel {
     dbEntry.isRunning(false)
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
-    this.applySelectize()
     await this.saveAll()
   }
   
