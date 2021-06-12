@@ -76,8 +76,14 @@ class TimerList extends BaseViewModel {
       if(this.koWatcher){
         this.koWatcher.dispose()
       }
+      var that = this
       this.koWatcher = ko.watch(this.jobTimerList, { depth: -1 }, function(parents, child, item) {
-        // log.info("Job timer changed: "+child())
+        var isProject = _.find(parents, function(e) {
+          return e.projectId() == child()
+        })
+        if(isProject) {
+          that.updateProjectScore(child())
+        }
         this.saveAll()
       }.bind(this));
 
@@ -239,23 +245,57 @@ class TimerList extends BaseViewModel {
   }
   async refreshProjectList(){
     var docs = await this.db_projects.find({active:true})
+    var newDate = new moment()
+    await _.forEach(docs, async function(item, index){
+      if(!item.score){
+        item.score = 0
+      }
+      if(!item.lastUse){
+        item.lastUse = newDate.format('YYYY-MM-DD')
+      } else {
+        var date = new moment(item.lastUse)
+        var diff = (new moment()).diff(date, 'days')
+        if(diff > 5) {
+          await that.db_projects.update({ _id:element._id() }, { score: 0 },{ })
+        }
+      }
+    }.bind(this))
     docs = _.sortBy(docs, 'name')
     this.projectList.removeAll()
     ko.utils.arrayPushAll(this.projectList, docs)
   }
 
+  async updateProjectScore(id) {
+    if(!id) {
+      return
+    }
+    var doc = await this.db_projects.findOne({_id:id})
+    var oldScore = doc.score
+    if(!oldScore) {
+      oldScore = 0
+    }
+    var newScore = oldScore + 1
+    await this.db_projects.update({ _id:doc._id }, { $set: { score: newScore } },{ })
+  }
+
   applySelectize() {
     var that = this
-    $('select.projectSelect').selectize({
+    var element = $('select.projectSelect').selectize({
       placeholder: 'Projekt auswählen...',
       options: that.projectList(),
       labelField: "name",
+      sortField: ['score', 'name'],
       valueField: "_id",
       create: function(input, callback) {
-        var newProject = {name:input, active:true}
+        var newDate = new moment()
+        var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
         that.db_projects.insert(newProject).then((dbEntry) => {
           that.projectList.push(dbEntry)
-          callback( { 'name': dbEntry.name, '_id': dbEntry._id} )
+          callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
+          $('select.projectSelect').each(function(index, item) {
+            item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
+          })
+          
         })
       }
     })
@@ -393,6 +433,7 @@ class TimerList extends BaseViewModel {
     dbEntry.isRunning(false)
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
+    this.applySelectize()
     await this.saveAll()
   }
   
