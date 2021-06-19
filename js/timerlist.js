@@ -172,24 +172,6 @@ class TimerList extends BaseViewModel {
 
   }
 
-  syncEntryWithCheck(that,data){
-    if(data.lastSync()) {
-      $('#modalUploadEntryAgain').modal('show')
-      that.itemToSync(data)
-    } else {
-      that.syncEntry(that, data)
-    }
-  }
-
-  syncEntry(that,data){
-    $('#modalUploadEntryAgain').modal('hide')
-    try{
-      sync.syncJob(data,that.projectList)
-    } catch(error){
-      toastr.error("Beim Synchronisieren der Aufgabe ist ein Fehler aufgetreten.")
-    }
-  }
-
   saveJobDurationInput(data, that){
     if(event.keyCode === 13) {
       var jobId = $(data).attr('jobId')
