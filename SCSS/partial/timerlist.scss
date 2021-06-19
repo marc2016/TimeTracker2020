@@ -66,6 +66,10 @@
   background-color: rgba(255,255,255,0.75) !important;
 }
 
+.job-container {
+  margin-top: 14px;
+}
+
 .currentEntry {
   border-color: $maincolor;
   border-width: 2px;
@@ -128,3 +132,26 @@
   height: 150px;
   resize: none;
 }
+
+.inputName{
+  font-size: small;
+}
+
+label {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  font-size: 16px;
+  margin: 4px;
+  padding: 0 10px;
+  -webkit-transition: top .2s ease-in-out,  font-size .2s ease-in-out;
+  transition: top .2s ease-in-out,  font-size .2s ease-in-out;
+}
+ 
+.active {
+  top: -24px;
+  font-size: 14px;
+  padding-left: 3px;
+  margin-left: 0px;
+}
+ 

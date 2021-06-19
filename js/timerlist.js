@@ -72,7 +72,6 @@ class TimerList extends BaseViewModel {
       this.jobTimerList = ko.observableArray()
       this.projectList = ko.observableArray()
 
-
       if(this.koWatcher){
         this.koWatcher.dispose()
       }
@@ -246,6 +245,7 @@ class TimerList extends BaseViewModel {
   async refreshProjectList(){
     var docs = await this.db_projects.find({active:true})
     var newDate = new moment()
+    var that = this
     await _.forEach(docs, async function(item, index){
       if(!item.score){
         item.score = 0
@@ -256,7 +256,7 @@ class TimerList extends BaseViewModel {
         var date = new moment(item.lastUse)
         var diff = (new moment()).diff(date, 'days')
         if(diff > 5) {
-          await that.db_projects.update({ _id:element._id() }, { score: 0 },{ })
+          await that.db_projects.update({ _id:item._id }, { $set: { score: 0 }},{ })
         }
       }
     }.bind(this))
@@ -281,11 +281,13 @@ class TimerList extends BaseViewModel {
   applySelectize() {
     var that = this
     var element = $('select.projectSelect').selectize({
-      placeholder: 'Projekt auswählen...',
       options: that.projectList(),
       labelField: "name",
-      sortField: ['score', 'name'],
+      sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
       valueField: "_id",
+      placeholder: "",
+      allowEmptyOption: true,
+      items: [{}],
       create: function(input, callback) {
         var newDate = new moment()
         var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
@@ -324,6 +326,13 @@ class TimerList extends BaseViewModel {
     this.jobTimerList.removeAll()
     var observableDocs = ko.mapping.fromJS(docs,this.jobTimerList);
 
+    _.forEach(observableDocs(), function(item) {
+      var projectId = item.projectId()
+      item.projectIsSet = ko.computed(function() {
+        return projectId;
+      }, this);
+    })
+
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
     if(this.currentJob && this.currentJob()){
       var newCurrentJob = ko.utils.arrayFirst(this.jobTimerList(), function(value){
@@ -336,6 +345,33 @@ class TimerList extends BaseViewModel {
 
     this.createAutoComplete()
     this.applySelectize()
+
+    this.registerFocusEvents()
+  }
+
+  registerFocusEvents() {
+    $('.text-input-job').off()
+    $('.projectSelect').off()
+
+    $('.text-input-job').on('focusin', function() {
+      $(this).parent().parent().find('label').addClass('active');
+    });
+    
+    $('.text-input-job').on('focusout', function() {
+      if (!this.value) {
+        $(this).parent().parent().find('label').removeClass('active');
+      }
+    });
+
+    $('.projectSelect').on('focusin', function() {
+      $(this).parent().find('label').addClass('active');
+    });
+    
+    $('.projectSelect').on('focusout', function() {
+      if ($(this).find('.item').length < 1) {
+        $(this).parent().find('label').removeClass('active');
+      }
+    });
   }
   
   async currentDateChanged(value){
@@ -431,9 +467,15 @@ class TimerList extends BaseViewModel {
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
     dbEntry.isRunning(false)
+    var projectId = dbEntry.projectId()
+    dbEntry.projectIsSet = ko.computed(function() {
+      return projectId;
+    }, this);
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
     this.applySelectize()
+
+    this.registerFocusEvents()
     await this.saveAll()
   }
   
