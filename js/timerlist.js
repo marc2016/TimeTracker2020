@@ -68,9 +68,11 @@ class TimerList extends BaseViewModel {
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
+      this.db_tickets = dataAccess.getDb('tickets')
       
       this.jobTimerList = ko.observableArray()
       this.projectList = ko.observableArray()
+      this.ticketList = ko.observableArray()
 
       if(this.koWatcher){
         this.koWatcher.dispose()
@@ -82,6 +84,12 @@ class TimerList extends BaseViewModel {
         })
         if(isProject) {
           that.updateProjectScore(child())
+        }
+        var isTicket = _.find(parents, function(e) {
+          return e.ticketId() == child()
+        })
+        if(isTicket) {
+          that.updateTicketScore(child())
         }
         this.saveAll()
       }.bind(this));
@@ -128,7 +136,8 @@ class TimerList extends BaseViewModel {
 
     $('#background').css('background-image', 'url('+store.get('backgroundSrc')+')')
 
-    await this.refreshProjectList()    
+    await this.refreshProjectList()
+    await this.refreshTicketList()    
     
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
@@ -247,6 +256,29 @@ class TimerList extends BaseViewModel {
     ko.utils.arrayPushAll(this.projectList, docs)
   }
 
+  async refreshTicketList(){
+    var docs = await this.db_tickets.find({active:true})
+    var newDate = new moment()
+    var that = this
+    await _.forEach(docs, async function(item, index){
+      if(!item.score){
+        item.score = 0
+      }
+      if(!item.lastUse){
+        item.lastUse = newDate.format('YYYY-MM-DD')
+      } else {
+        var date = new moment(item.lastUse)
+        var diff = (new moment()).diff(date, 'days')
+        if(diff > 5) {
+          await that.db_tickets.update({ _id:item._id }, { $set: { score: 0 }},{ })
+        }
+      }
+    }.bind(this))
+    docs = _.sortBy(docs, 'name')
+    this.ticketList.removeAll()
+    ko.utils.arrayPushAll(this.ticketList, docs)
+  }
+
   async updateProjectScore(id) {
     if(!id) {
       return
@@ -260,29 +292,61 @@ class TimerList extends BaseViewModel {
     await this.db_projects.update({ _id:doc._id }, { $set: { score: newScore } },{ })
   }
 
+  async updateTicketScore(id) {
+    if(!id) {
+      return
+    }
+    var doc = await this.db_tickets.findOne({_id:id})
+    var oldScore = doc.score
+    if(!oldScore) {
+      oldScore = 0
+    }
+    var newScore = oldScore + 1
+    await this.db_tickets.update({ _id:doc._id }, { $set: { score: newScore } },{ })
+  }
+
   applySelectize() {
     var that = this
-    var element = $('select.projectSelect').selectize({
-      options: that.projectList(),
+    var options = {
       labelField: "name",
       sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
       valueField: "_id",
       placeholder: "",
       allowEmptyOption: true,
       items: [{}],
-      create: function(input, callback) {
-        var newDate = new moment()
-        var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
-        that.db_projects.insert(newProject).then((dbEntry) => {
-          that.projectList.push(dbEntry)
-          callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
-          $('select.projectSelect').each(function(index, item) {
-            item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
-          })
-          
+    }
+
+    var createFunc = function(input, callback, selector) {
+      var newDate = new moment()
+      var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
+      that.db_projects.insert(newProject).then((dbEntry) => {
+        that.projectList.push(dbEntry)
+        callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
+        $(selector).each(function(index, item) {
+          item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
         })
-      }
-    })
+        
+      })
+    }
+
+    $('select.projectSelect').selectize(
+      _.merge(
+        {
+          options: that.projectList(),
+          create: (input, callback) => createFunc(input, callback, 'select.projectSelect')
+        },
+        options
+      )
+    )
+    $('select.ticketSelect').selectize(
+      _.merge(
+        {
+          options: that.ticketList(),
+          create: (input, callback) => createFunc(input, callback, 'select.ticketSelect')
+        },
+        options
+      )
+    )
   }
 
   refreshJobTimerList(docs){
@@ -290,14 +354,14 @@ class TimerList extends BaseViewModel {
       if(!item.projectId){
         item.projectId = ""
       }
+      if(!item.ticketId){
+        item.ticketId = ""
+      }
       if(!item.jobNote){
         item.jobNote = ""
       }
       if(!item.lastSync){
         item.lastSync = ""
-      }
-      if(!item.billable){
-        item.billable = false
       }
       item.isRunning = false
       if(this.currentJob && this.currentJob() && this.currentJob()._id && this.currentJob()._id() == item._id){
@@ -312,6 +376,11 @@ class TimerList extends BaseViewModel {
       var projectId = item.projectId()
       item.projectIsSet = ko.computed(function() {
         return projectId;
+      }, this);
+
+      var ticketId = item.ticketId()
+      item.ticketIsSet = ko.computed(function() {
+        return ticketId;
       }, this);
     })
 
@@ -334,6 +403,7 @@ class TimerList extends BaseViewModel {
   registerFocusEvents() {
     $('.text-input-job').off()
     $('.projectSelect').off()
+    $('.ticketSelect').off()
 
     $('.text-input-job').on('focusin', function() {
       $(this).parent().parent().find('label').addClass('active');
@@ -345,11 +415,11 @@ class TimerList extends BaseViewModel {
       }
     });
 
-    $('.projectSelect').on('focusin', function() {
+    $('.selectbox').on('focusin', function() {
       $(this).parent().find('label').addClass('active');
     });
     
-    $('.projectSelect').on('focusout', function() {
+    $('.selectbox').on('focusout', function() {
       if ($(this).find('.item').length < 1) {
         $(this).parent().find('label').removeClass('active');
       }
@@ -400,7 +470,7 @@ class TimerList extends BaseViewModel {
   
   async transferEntry(that,data){
     var newDate = new moment()
-    var newEntry = {jobNote:data.jobNote(), projectId: data.projectId(),elapsedSeconds:0, description:data.description(), date:newDate.format('YYYY-MM-DD'), billable:that.billable(), lastSync: ""}
+    var newEntry = {jobNote:data.jobNote(), ticketId: data.ticketId(), projectId: data.projectId(),elapsedSeconds:0, description:data.description(), date:newDate.format('YYYY-MM-DD'), billable:that.billable(), lastSync: ""}
     await that.db.insert(newEntry)
     that.currentDate(newDate)
   }
@@ -444,15 +514,22 @@ class TimerList extends BaseViewModel {
     if(!jobDescription){
       jobDescription = ""
     }
-    var newEntry = {jobNote:"", projectId: "",elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var newEntry = {jobNote:"", projectId: "", ticketId: "",elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
     dbEntry.isRunning(false)
+    
     var projectId = dbEntry.projectId()
     dbEntry.projectIsSet = ko.computed(function() {
       return projectId;
     }, this);
+
+    var ticketId = dbEntry.ticketId()
+    dbEntry.ticketIsSet = ko.computed(function() {
+      return ticketId;
+    }, this);
+
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
     this.applySelectize()
