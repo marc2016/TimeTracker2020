@@ -126,7 +126,7 @@ body {
 
 .navbar-seperator {
     width: 1px;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: $accentColor;
     height: $navbar-height - 6px;
     margin-top: 3px;
     margin-left: 10px;

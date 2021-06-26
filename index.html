@@ -51,7 +51,7 @@
   <script>require('./renderer.js')</script>
 
   <nav class="navbar navbar-expand-sm fixed-top navbar-dark" id="mainNavbar">
-    <div class="navbar-brand" data-bind="click: openTimerList" style="cursor: pointer;" tabindex="-1">
+    <div class="navbar-brand navbar-forground" data-bind="click: openTimerList" style="cursor: pointer;" tabindex="-1">
       <img src="icons/logo.png" width="25" height="25" alt="" class="d-inline-block logo">
       TimeTracker2020
     </div>
@@ -62,28 +62,28 @@
     <div class="navbar-collapse collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+          <a class="nav-link dropdown-toggle navbar-forground" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false" tabindex="-1">
             <i class="fa fa-bars" title="Navigation"></i><span class="collapsedText"> Navigation</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" id="btnJobTimer" href="#">
+            <a class="dropdown-item navbar-forground" id="btnJobTimer" href="#">
               <i class="far fa-clock" title="Timer"></i> Timer
             </a>
-            <a class="dropdown-item" id="btnProjectsSettings" href="#">
+            <a class="dropdown-item navbar-forground" id="btnProjectsSettings" href="#">
               <i class="fa fa-inbox" title="Projekte"></i> Projekte
             </a>
-            <a class="dropdown-item" id="btnJobTable" href="#">
+            <a class="dropdown-item navbar-forground" id="btnJobTable" href="#">
               <i class="fa fa-table" title="Tabelle"></i> Tabelle
             </a>
-            <a class="dropdown-item" id="btnAppSettings" href="#">
+            <a class="dropdown-item navbar-forground" id="btnAppSettings" href="#">
               <i class="fas fa-sliders-h" title="Einstellungen"></i> Einstellungen
             </a>
           </div>
         </li>
         <!-- ko foreach: pagemenu -->
         <li class="nav-item">
-          <a class="nav-link" href="#" data-bind="click: $parent.menuClick" tabindex="-1">
+          <a class="nav-link navbar-forground" href="#" data-bind="click: $parent.menuClick" tabindex="-1">
             <i data-bind="css: icon"></i> <span class="collapsedText" data-bind="text: name"></span>
           </a>
         </li>
@@ -101,34 +101,34 @@
             </div>
           </li> -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" tabindex="-1">
+          <a class="nav-link dropdown-toggle navbar-forground" data-toggle="dropdown" href="#" tabindex="-1">
             <img class="loginImg" alt="Avatar" data-bind="attr:{src: avatar}">
           </a>
           <div class="dropdown-menu dropdown-menu-right">
-            <a class="dropdown-item" href="#"><span data-bind="text: accountName"></span></a>
-            <a class="dropdown-item" href="#" data-bind="click: syncLogin"><i class="fas fa-sign-in-alt"></i> Login</a>
-            <a class="dropdown-item" href="#" data-bind="click: syncProjects"><i class="fas fa-sync-alt"></i> Projekte
+            <a class="dropdown-item navbar-forground" href="#"><span data-bind="text: accountName"></span></a>
+            <a class="dropdown-item navbar-forground" href="#" data-bind="click: syncLogin"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a class="dropdown-item navbar-forground" href="#" data-bind="click: syncProjects"><i class="fas fa-sync-alt"></i> Projekte
               synchronisieren</a>
           </div>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-target="#modalAbout" data-toggle="modal" tabindex="-1">
+          <a class="nav-link navbar-forground" href="#" data-target="#modalAbout" data-toggle="modal" tabindex="-1">
             <i class="fas fa-info-circle"></i><span>&zwnj;</span>
           </a>
         </li>
         <div class="navbar-seperator"></div>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-bind="click: minimizeWindow" tabindex="-1">
+          <a class="nav-link navbar-forground" href="#" data-bind="click: minimizeWindow" tabindex="-1">
             <i class="fas fa-window-minimize"></i><span>&zwnj;</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-bind="click: maximizeWindow" tabindex="-1">
+          <a class="nav-link navbar-forground" href="#" data-bind="click: maximizeWindow" tabindex="-1">
             <i class="fas fa-window-maximize"></i><span>&zwnj;</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-bind="click: closeWindow" tabindex="-1">
+          <a class="nav-link navbar-forground" href="#" data-bind="click: closeWindow" tabindex="-1">
             <i class="fas fa-window-close"></i><span>&zwnj;</span>
           </a>
         </li>
@@ -152,7 +152,7 @@
     </div>
 
 
-    <div id="footer">
+    <div id="footer" class="navbar-forground">
       <div id="footerLeftContent">
         <i class="fa fa-check-square" aria-hidden="true"></i> <span id="currentTaskDescription" data-bind="text:leftJobDescription">keine
           laufende Aufgabe</span> <i class="fa fa-clock-o" aria-hidden="true"></i> <span id="currentTaskTime" data-bind="text:leftJobDuration"></span>
