@@ -90,6 +90,11 @@ class TimerList extends BaseViewModel {
         })
         if(isTicket) {
           that.updateTicketScore(child())
+
+          var docs = async () => await this.db.find({ticketId: child()}).sort({date: 1})
+          docs().then((tmp) => {
+            console.log("TEST")
+          })
         }
         this.saveAll()
       }.bind(this));
@@ -307,45 +312,53 @@ class TimerList extends BaseViewModel {
 
   applySelectize() {
     var that = this
-    var options = {
-      labelField: "name",
-      sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
-      valueField: "_id",
-      placeholder: "",
-      allowEmptyOption: true,
-      items: [{}],
-    }
-
-    var createFunc = function(input, callback, selector) {
-      var newDate = new moment()
-      var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
-      that.db_projects.insert(newProject).then((dbEntry) => {
-        that.projectList.push(dbEntry)
-        callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
-        $(selector).each(function(index, item) {
-          item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
-        })
-        
-      })
-    }
 
     $('select.projectSelect').selectize(
-      _.merge(
         {
           options: that.projectList(),
-          create: (input, callback) => createFunc(input, callback, 'select.projectSelect')
-        },
-        options
-      )
+          create: function(input, callback) {
+            var newDate = new moment()
+            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
+            that.db_projects.insert(newProject).then((dbEntry) => {
+              that.projectList.push(dbEntry)
+              callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
+              $('select.projectSelect').each(function(index, item) {
+                item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
+              })
+              
+            })
+          },
+          labelField: "name",
+          sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
+          valueField: "_id",
+          placeholder: "",
+          allowEmptyOption: true,
+          items: [{}],
+        }
     )
     $('select.ticketSelect').selectize(
-      _.merge(
-        {
-          options: that.ticketList(),
-          create: (input, callback) => createFunc(input, callback, 'select.ticketSelect')
+      {
+        options: that.ticketList(),
+        create: function(input, callback) {
+          var newDate = new moment()
+          var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
+          that.db_tickets.insert(newProject).then((dbEntry) => {
+            that.projectList.push(dbEntry)
+            callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
+            $('select.ticketSelect').each(function(index, item) {
+              item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
+            })
+            
+          })
         },
-        options
-      )
+        labelField: "name",
+        sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
+        valueField: "_id",
+        placeholder: "",
+        allowEmptyOption: true,
+        items: [{}],
+     
+      }
     )
   }
 
@@ -401,9 +414,12 @@ class TimerList extends BaseViewModel {
   }
 
   registerFocusEvents() {
-    $('.text-input-job').off()
-    $('.projectSelect').off()
-    $('.ticketSelect').off()
+    $('.text-input-job').off('focusin')
+    $('.projectSelect').off('focusin')
+    $('.ticketSelect').off('focusin')
+    $('.text-input-job').off('focusout')
+    $('.projectSelect').off('focusout')
+    $('.ticketSelect').off('focusout')
 
     $('.text-input-job').on('focusin', function() {
       $(this).parent().parent().find('label').addClass('active');
@@ -481,10 +497,10 @@ class TimerList extends BaseViewModel {
   
   async saveAll(){
     await _.forEach(this.jobTimerList(), async function (element) {
-      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId() } },{ multi: false })
+      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
     }.bind(this))
     
-    this.db.nedb.persistence.compactDatafile()
+    this.db.__original.persistence.compactDatafile()
 
     this.createAutoComplete()
   }

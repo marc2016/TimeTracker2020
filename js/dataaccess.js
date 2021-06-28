@@ -1,5 +1,5 @@
 const { Observable, Subject, ReplaySubject, from, of, range, timer, interval, never } = require('rxjs');
-var Datastore = require('nedb-promise')
+var Datastore = require('nedb-promises')
 const remote = require('electron').remote;
 const app = remote.app;
 
