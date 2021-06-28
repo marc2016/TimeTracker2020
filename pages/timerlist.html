@@ -48,7 +48,7 @@
             </div>
             <div class="col collapsedBySize">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name}, optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
+                return item.name}, options: $parent.projectList(), optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
               <label class="label-placeholder" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: projectIsSet() }">Projekt</label>
             </div>
