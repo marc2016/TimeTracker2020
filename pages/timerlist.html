@@ -19,7 +19,7 @@
               
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
-              <label data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
+              <label class="label-placeholder" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
               <div class="row timer-second-row">
                 <a class="col-md-auto job-duration job-duration-button" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
                 data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
