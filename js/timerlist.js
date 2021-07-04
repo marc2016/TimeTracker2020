@@ -70,9 +70,11 @@ class TimerList extends BaseViewModel {
       this.db_projects = dataAccess.getDb('projects')
       this.db_tickets = dataAccess.getDb('tickets')
       
-      this.jobTimerList = ko.observableArray()
+      this.jobTimerList = ko.observableArray().extend({ deferred: true })
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
+
+      this.myPostProcessingLogic = this.myPostProcessingLogic.bind(this)
 
       if(this.koWatcher){
         this.koWatcher.dispose()
@@ -91,9 +93,15 @@ class TimerList extends BaseViewModel {
         if(isTicket) {
           that.updateTicketScore(child())
 
-          var docs = async () => await this.db.find({ticketId: child()}).sort({date: 1})
-          docs().then((tmp) => {
-            console.log("TEST")
+          var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
+          docs().then((jobs) => {
+            var job = _.find(jobs, function(o) { return o.projectId != undefined })
+            if (!job) return
+            
+            var element = $('#project-job_'+parents[0]._id())[0].selectize
+            element.addItem(job.projectId)
+            that.jobTimerList()[0].projectId(job.projectId)
+            parents[0].projectIsSet(true)
           })
         }
         this.saveAll()
@@ -134,6 +142,11 @@ class TimerList extends BaseViewModel {
       this.addNewItem(jobDescription)
     }.bind(this))
     
+  }
+
+  myPostProcessingLogic() {
+    this.applySelectize()
+    this.registerFocusEvents()
   }
 
   async onLoad() {
@@ -331,7 +344,7 @@ class TimerList extends BaseViewModel {
           labelField: "name",
           sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
           valueField: "_id",
-          placeholder: ""
+          placeholder: " "
         }
     )
     $('select.ticketSelect').selectize(
@@ -382,14 +395,10 @@ class TimerList extends BaseViewModel {
 
     _.forEach(observableDocs(), function(item) {
       var projectId = item.projectId()
-      item.projectIsSet = ko.computed(function() {
-        return projectId;
-      }, this);
+      item.projectIsSet = ko.observable(projectId);
 
       var ticketId = item.ticketId()
-      item.ticketIsSet = ko.computed(function() {
-        return ticketId;
-      }, this);
+      item.ticketIsSet = ko.observable(ticketId);
     })
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
@@ -403,9 +412,9 @@ class TimerList extends BaseViewModel {
     }
 
     this.createAutoComplete()
-    this.applySelectize()
+    // this.applySelectize()
 
-    this.registerFocusEvents()
+    // this.registerFocusEvents()
   }
 
   registerFocusEvents() {
@@ -543,9 +552,9 @@ class TimerList extends BaseViewModel {
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
-    this.applySelectize()
+    // this.applySelectize()
 
-    this.registerFocusEvents()
+    // this.registerFocusEvents()
     await this.saveAll()
   }
   
