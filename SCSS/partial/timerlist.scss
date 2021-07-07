@@ -24,16 +24,17 @@
 
 .job-duration-button:hover {
   text-decoration: none;
-}
-
-.job-duration-button:focus {
-  border-color: #de698c;
+  border-color: $maincolor;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(164, 36, 74, 0.25);
+  box-shadow: 0 0 0 0.2rem $maincolorOpacitiy;
 }
 
 .job-duration {
   color: black;
+}
+
+.job-duration:hover {
+  text-decoration: none;
 }
 
 .visibleBySize {

@@ -21,15 +21,19 @@
                 type="text">
               <label class="label-placeholder" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
               <div class="row timer-second-row">
-                <a class="col-md-auto job-duration job-duration-button" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
-                data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
-                  <div class="row no-gutters" style="cursor: pointer;">
-                    <div class="col-sm-auto" style="margin-right: 3px">Dauer: </div>
-                    <div class="col-sm-auto">
-                      <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
-                    </div>
+                <div class="col-md-auto">
+                  <div class="job-duration-button">
+                    <a class="job-duration" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
+                    data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
+                      <div class="row no-gutters" style="cursor: pointer;">
+                        <div class="col-sm-auto" style="margin-right: 3px">Dauer: </div>
+                        <div class="col-sm-auto">
+                          <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                </a>
+                </div>
                 <div class="col-md-auto job-duration collapsedBySize" data-bind="visible: lastSync">
                     <div class="row no-gutters">
                       <div class="col-sm-auto" style="margin-right: 3px">Letzte Sync.: </div>
