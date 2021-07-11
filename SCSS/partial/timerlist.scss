@@ -138,7 +138,10 @@
   font-size: small;
 }
 
-label {
+
+
+.label-placeholder {
+  cursor: pointer;
   z-index: 1;
   position: absolute;
   top: 0;
@@ -147,10 +150,6 @@ label {
   padding: 0 10px;
   -webkit-transition: top .2s ease-in-out,  font-size .2s ease-in-out;
   transition: top .2s ease-in-out,  font-size .2s ease-in-out;
-}
-
-.label-placeholder {
-  cursor: pointer;
 }
  
 .label-placeholder.active {
