@@ -49,6 +49,7 @@
     "electron-builder": "^20.28.4"
   },
   "dependencies": {
+    "@fontsource/open-sans": "^4.5.0",
     "@fortawesome/fontawesome-free": "^5.3.1",
     "@trodi/electron-splashscreen": "^0.3.1",
     "air-datepicker": "^2.2.3",
