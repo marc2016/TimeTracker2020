@@ -87,7 +87,7 @@ var self = module.exports = {
             labels: daysArray,
             datasets: [{
                 data: data,
-                backgroundColor: 'rgb(164, 36, 74)'
+                backgroundColor: 'rgb(230, 92, 0)'
             }]
         },
         options: {
