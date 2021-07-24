@@ -82,6 +82,7 @@ class AppSettings extends BaseViewModel {
             }).extend({ notify: 'always' });
 
             this.states = ko.observable()
+            this.states(this.getStates(this.selectedCountry()))
 
             this.selectedState = ko.pureComputed({
                 read: function () {

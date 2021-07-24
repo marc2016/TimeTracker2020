@@ -267,9 +267,10 @@ class JobTable extends BaseViewModel {
                 var sum = _.sumBy(api.column( 'durationDecimal:name',  {"filter": "applied"} ).data(), function(element){
                     return parseFloat(element.replace(",","."))
                 })
-                
+                var range = that.currentRange()
                 $('#tableFooterLeft').html(
-                    'Summe Dauer: '+sum.toFixed(2).replace(".",",") + ' h ' + '('+moment().startOf('month').businessDiff(moment())*8+'/'+moment().endOf('month').businessDaysIntoMonth()*8+' h)'
+                    'Ist Dauer: '+sum.toFixed(2).replace(".",",") + ' h <br>'
+                    + 'Soll Dauer: '+range.start.businessDiff(range.end)*8+' h'
                 );
             }
         });
