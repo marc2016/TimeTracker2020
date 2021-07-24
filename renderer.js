@@ -140,9 +140,6 @@ onload = function() {
       return hours+':'+minutes+':'+seconds;
   }
 
-  var btnProjectsSettings = document.getElementById('btnProjectsSettings')
-  btnProjectsSettings.addEventListener("click", openProjectsSettings.bind(this) )
-
   var btnJobTable = document.getElementById('btnJobTable')
   btnJobTable.addEventListener("click", openJobTable.bind(this) )
   
