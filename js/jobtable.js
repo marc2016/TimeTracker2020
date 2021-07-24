@@ -59,7 +59,6 @@ class JobTable extends BaseViewModel {
             { title:"Projekt", data: 'projectId()', filter: true},
             { title:"Dauer", data: 'elapsedSeconds()'},
             { title:"Dauer (dez.)", data: 'formattedTimeDeciaml()', name:'durationDecimal'},
-            { title:"Sync", data: 'lastSync()'},
             { title:"Aktion", data: null, defaultContent:
                 '<div class="btn-group" role="group">'+
                     '<a class="btn btn-default btn-sm table-btn"><i class="fas fa-sticky-note" title="Notiz"></i></a>'+
@@ -233,7 +232,7 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     targets: 1,
-                    width: "40%",
+                    width: "50%",
                 },
                 {
                     targets: 2,
@@ -251,8 +250,11 @@ class JobTable extends BaseViewModel {
                         var formatted = moment.duration(data, "seconds").format("hh:mm:ss",{trim: false})
                         return formatted
                     }
+                },
+                {
+                    targets: 4,
+                    className: 'dt-body-right'
                 }
-                
                 
             ],
             orderCellsTop: true,
