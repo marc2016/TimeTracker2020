@@ -75,6 +75,7 @@ class JobTable extends BaseViewModel {
         this.currentRange = ko.observable(moment().startOf('month').range('month'))
         this.itemToDelete = ko.observable()
         this.inProgress = ko.observable(false)
+        this.definedRange = ko.observable()
 
         $('#jobtable').load('pages/jobtable.html', function(){
             this.hide()
@@ -99,6 +100,32 @@ class JobTable extends BaseViewModel {
             }.bind(this));
             
             this.currentRange.subscribe(this.refreshTable.bind(this));
+            
+            this.currentRange.subscribe((value)=>{
+                $.find('#textCurrentMonth')[0].value = value.start.format('DD.MM.YY') + "-" + value.end.format('DD.MM.YY')
+            });
+            this.definedRange.subscribe((value) => {
+                if(value == 'week') {
+                    this.currentRange(moment.range(
+                        moment().startOf('week'),
+                        moment().endOf('week')
+                        )
+                    )
+                } else if(value == 'month') {
+                    this.currentRange(moment.range(
+                        moment().startOf('month'),
+                        moment().endOf('month')
+                        )
+                    )
+                } else if(value == 'quarter') {
+                    this.currentRange(moment.range(
+                        moment().startOf('quarter'),
+                        moment().endOf('quarter')
+                        )
+                    )
+                }
+                
+            })
 
             this.jobTable = undefined
 

@@ -1,7 +1,21 @@
 <div id="jobtableMainContent">
   
     <div class="container-fluid" style="margin-top: 10px;">
-        <div class="row justify-content-end">
+        <div class="row justify-content">
+            <div class="col-md">
+              <div class="checkbox-container">
+                <input class="checkbox-checkmark" id="currentWeek" type="radio" name="range" value="week" data-bind="checked: definedRange">
+                <label class="checkbox-label pseudo offset" for="currentWeek">Aktuelle Woche</label>
+              </div>
+              <div class="checkbox-container">
+                <input class="checkbox-checkmark" id="currentMonth" type="radio" name="range" value="month" data-bind="checked: definedRange">
+                <label class="checkbox-label pseudo offset" for="currentMonth">Aktueller Monat</label>
+              </div>
+              <div class="checkbox-container">
+                <input class="checkbox-checkmark" id="currentQuarter" type="radio" name="range" value="quarter" data-bind="checked: definedRange">
+                <label class="checkbox-label pseudo offset" for="currentQuarter">Aktuelles Quartal</label>
+              </div>
+            </div>
             <div class="col-md-auto">
                 <label for="textCurrentMonth">Monat</label>
                 <input type="text" id="textCurrentMonth" class="form-control currentMonth" data-language='de' data-range="true"
