@@ -56,6 +56,7 @@ class JobTable extends BaseViewModel {
         this.columns = [
             { title:"Datum", data: 'date()', filter: true},
             { title:"Aufgabe", data: 'description()',  filter: true},
+            { title:"Ticket", data: 'ticketId()', filter: true},
             { title:"Projekt", data: 'projectId()', filter: true},
             { title:"Dauer", data: 'elapsedSeconds()'},
             { title:"Dauer (dez.)", data: 'formattedTimeDeciaml()', name:'durationDecimal'},
@@ -70,6 +71,7 @@ class JobTable extends BaseViewModel {
 
         this.db = dataAccess.getDb('jobs');
         this.db_projects = dataAccess.getDb('projects')
+        this.db_tickets = dataAccess.getDb('tickets')
 
         this.jobList = ko.observableArray()
         this.currentRange = ko.observable(moment().startOf('month').range('month'))
@@ -173,8 +175,8 @@ class JobTable extends BaseViewModel {
     }
 
     async save(job){
-        await this.db.update({ _id:job._id() }, { $set: { billable: job.billable(), lastSync: job.lastSync(), jobNote: job.jobNote(), description: job.description(), elapsedSeconds: job.elapsedSeconds(), projectId: job.projectId() } },{ multi: false })
-        this.db.nedb.persistence.compactDatafile()
+        await this.db.update({ _id:job._id() }, { $set: { date: job.date(), lastSync: job.lastSync(), jobNote: job.jobNote(), description: job.description(), elapsedSeconds: job.elapsedSeconds(), projectId: job.projectId(), ticketId: job.ticketId() } },{ multi: false })
+        this.db.__original.persistence.compactDatafile()
     }
 
     show(){
@@ -207,6 +209,7 @@ class JobTable extends BaseViewModel {
     async refreshTable(currentRange){
         this.inProgress(true)
         this.projectDocs = await this.db_projects.find({})
+        this.ticketDocs = await this.db_tickets.find({})
 
         var days = Array.from(currentRange.by('day'));
         var dates = days.map(m => m.format('YYYY-MM-DD'))
@@ -233,6 +236,7 @@ class JobTable extends BaseViewModel {
     async initTable(){
 
         this.projectDocs = await this.db_projects.find({})
+        this.ticketDocs = await this.db_tickets.find({})
 
         var that = this
         this.jobTable = $('#jobs').DataTable({
@@ -252,7 +256,7 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     targets:0,
-                    width: "80px",
+                    width: "90px",
                     render: function(data){
                         return moment(data, 'YYYY-MM-DD').format('DD.MM.YYYY');
                     }
@@ -263,7 +267,17 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     targets: 2,
-                    width: "15%",
+                    width: "10%",
+                    render: function(data){
+                        var ticket = _.find(that.ticketDocs, {'_id':data})
+                        if(ticket){
+                            return ticket.name
+                        }
+                    }
+                },
+                {
+                    targets: 3,
+                    width: "10%",
                     render: function(data){
                         var project = _.find(that.projectDocs, {'_id':data})
                         if(project){
@@ -272,14 +286,14 @@ class JobTable extends BaseViewModel {
                     }
                 },
                 {
-                    targets: 3,
+                    targets: 4,
                     render: function(data){
                         var formatted = moment.duration(data, "seconds").format("hh:mm:ss",{trim: false})
                         return formatted
                     }
                 },
                 {
-                    targets: 4,
+                    targets: 5,
                     className: 'dt-body-right'
                 }
                 
@@ -321,6 +335,10 @@ class JobTable extends BaseViewModel {
 
         }.bind(this), null, "arrayChange")
 
+        var emptyElement = {
+            "value": "",
+            "display": "-"
+        }
         var projectValues = _.map(this.projectDocs, function(value){
             return {
                 "value": value._id,
@@ -328,11 +346,19 @@ class JobTable extends BaseViewModel {
             }
         })
         projectValues = _.sortBy(projectValues, ['display'])
+        projectValues = [emptyElement].concat(projectValues)
 
-        
+        var ticketValues = _.map(this.ticketDocs, function(value){
+            return {
+                "value": value._id,
+                "display": value.name
+            }
+        })
+        ticketValues = _.sortBy(ticketValues, ['display'])
+        ticketValues = [emptyElement].concat(ticketValues)
 
         this.jobTable.MakeCellsEditable({
-            "columns": [0,1,2,3,4],
+            "columns": [0,1,2,3,4,5],
             "inputCss": "form-control table-input",
             "selectCss": "form-control selectpicker table-select",
             "onUpdate": this.tableCellChanged,
@@ -344,12 +370,21 @@ class JobTable extends BaseViewModel {
                     "convertback": function(oldValue) { return moment(oldValue, 'DD.MM.YYYY').format('YYYY-MM-DD') },
                 },
                 {
+                    "column":1, 
+                    "type": "",
+                },
+                {
                     "column":2, 
+                    "type": "list",
+                    "options":ticketValues
+                },
+                {
+                    "column":3, 
                     "type": "list",
                     "options":projectValues
                 },
                 {
-                    "column": 3,
+                    "column": 4,
                     "type": "duration",
                     "convert": function(oldValue) { return moment.duration(oldValue, "seconds").format("hh:mm:ss",{trim: false})},
                     "convertback": utils.durationConvertBack

@@ -157,7 +157,7 @@ function getInputHtml(currentColumnIndex, settings, oldValue) {
     }
     switch (inputType) {
         case "list":
-            input.html = "<select class='" + selectCss + "' onchange='$(this).updateEditableCell(this);'>";
+            input.html = "<select id='ejbeatycelledit' class='" + selectCss + "' onchange='$(this).updateEditableCell(this);' onfocusout='$(this).cancelEditableCell(this);'>";
             $.each(inputSetting.options, function (index, option) {
                 if (oldValue == option.value) {
                    input.html = input.html + "<option value='" + option.value + "' selected>" + option.display + "</option>"
@@ -166,7 +166,7 @@ function getInputHtml(currentColumnIndex, settings, oldValue) {
                 }
             });
             input.html = input.html + "</select>";
-            input.focus = false;
+            input.focus = true;
             break;
         case "datepicker": //Both datepicker options work best when confirming the values
             
