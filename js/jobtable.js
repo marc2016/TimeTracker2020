@@ -61,11 +61,7 @@ class JobTable extends BaseViewModel {
             { title:"Dauer", data: 'elapsedSeconds()'},
             { title:"Dauer (dez.)", data: 'formattedTimeDeciaml()', name:'durationDecimal'},
             { title:"Aktion", data: null, defaultContent:
-                '<div class="btn-group" role="group">'+
-                    '<a class="btn btn-default btn-sm table-btn"><i class="fas fa-sticky-note" title="Notiz"></i></a>'+
-                    '<a class="btn btn-default btn-sm table-btn"><i class="fas fa-sync-alt" title="Synchronisieren"></i></a>'+
-                    '<a class="btn btn-default btn-sm table-btn" data-bind="click: removeItemModal" ><i class="fas fa-trash" title="Löschen"></i></a>'+
-                '</div>'
+            '<a class="btn btn-default btn-sm table-btn" data-bind="click: removeItemModal" ><i class="fas fa-trash" title="Löschen"></i></a>'
             }
         ]
 
@@ -295,6 +291,10 @@ class JobTable extends BaseViewModel {
                 {
                     targets: 5,
                     className: 'dt-body-right'
+                },
+                {
+                    targets: 6,
+                    className: 'dt-body-center'
                 }
                 
             ],
