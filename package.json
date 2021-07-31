@@ -2,7 +2,7 @@
   "build": {
     "appId": "de.timetracker.app",
     "productName": "TimeTracker",
-    "copyright": "Copyright © 2020 Marc Lammers",
+    "copyright": "Copyright © 2021 Marc Lammers",
     "extraResources": [
       "icons/logonotification.png"
     ],
@@ -24,7 +24,7 @@
   },
   "productName": "TimeTracker",
   "name": "timetracker",
-  "version": "0.10.1",
+  "version": "1.0.0",
   "description": "Simple time tracking tool.",
   "main": "main.js",
   "scripts": {
@@ -43,7 +43,7 @@
     "TimeTracker"
   ],
   "author": "Marc Lammers",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^4.0.0-beta.7",
     "electron-builder": "^20.28.4"
