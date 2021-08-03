@@ -352,9 +352,9 @@ class TimerList extends BaseViewModel {
         options: that.ticketList(),
         create: function(input, callback) {
           var newDate = new moment()
-          var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
-          that.db_tickets.insert(newProject).then((dbEntry) => {
-            that.projectList.push(dbEntry)
+          var newTicket = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
+          that.db_tickets.insert(newTicket).then((dbEntry) => {
+            that.ticketList.push(dbEntry)
             callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
             $('select.ticketSelect').each(function(index, item) {
               item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
