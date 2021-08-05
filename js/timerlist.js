@@ -541,14 +541,10 @@ class TimerList extends BaseViewModel {
     dbEntry.isRunning(false)
     
     var projectId = dbEntry.projectId()
-    dbEntry.projectIsSet = ko.computed(function() {
-      return projectId;
-    }, this);
+    dbEntry.projectIsSet = ko.observable(projectId);
 
     var ticketId = dbEntry.ticketId()
-    dbEntry.ticketIsSet = ko.computed(function() {
-      return ticketId;
-    }, this);
+    dbEntry.ticketIsSet = ko.observable(ticketId);
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
