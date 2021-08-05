@@ -40,7 +40,7 @@ var self = module.exports = {
     jobProperties: ['projectId', 'jobNote', 'lastSync', 'billable'],
 
     addMissingProperties: function(job) {
-        _.defaults(job, {'projectId' : ko.observable(), 'jobNote': ko.observable(), 'lastSync': ko.observable(), 'billable': ko.observable()});
+        _.defaults(job, { 'ticketId' : ko.observable(), 'projectId' : ko.observable(), 'jobNote': ko.observable(), 'lastSync': ko.observable() });
     },
 
     durationConvertBack: function(value){
