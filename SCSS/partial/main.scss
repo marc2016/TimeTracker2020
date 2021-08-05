@@ -162,6 +162,14 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-user-select: none;
 }
 
+.dropdown-menu {
+    background-color: $maincolor;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: $≤maincolorAccent;
+}
+
 input[type="submit"],
 input[type="reset"],
 input[type="button"],
