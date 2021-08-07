@@ -345,7 +345,10 @@ class TimerList extends BaseViewModel {
           labelField: "name",
           sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
           valueField: "_id",
-          placeholder: " "
+          searchField: ["name"],
+          placeholder: " ",
+          delimiter: "|",
+          closeAfterSelect: true,
         }
     )
     $('select.ticketSelect').selectize(
@@ -366,7 +369,10 @@ class TimerList extends BaseViewModel {
         labelField: "name",
         sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
         valueField: "_id",
-        placeholder: ""
+        searchField: ["name"],
+        placeholder: "",
+        delimiter: "|",
+        closeAfterSelect: true,
       }
     )
   }

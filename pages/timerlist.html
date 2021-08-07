@@ -15,7 +15,7 @@
         <div class="container-fluid job-container">
           
           <div class="form-row">
-            <div class="col-5 input-group-sm">
+            <div class="col input-group-sm">
               
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
@@ -44,13 +44,13 @@
                 </div>
               </div>
             </div>
-            <div class="col collapsedBySize">
+            <div class="col-3 collapsedBySize">
               <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.ticketList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
               </select>
               <label class="label-placeholder" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticketIsSet() }">Ticket</label>
             </div>
-            <div class="col collapsedBySize">
+            <div class="col-3 collapsedBySize">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
