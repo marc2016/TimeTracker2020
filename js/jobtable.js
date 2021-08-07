@@ -1,6 +1,7 @@
 var remote = require('electron').remote;
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
+const { clipboard } = require('electron')
 
 var _ = require('lodash');
 var toastr = require('toastr');
@@ -61,7 +62,10 @@ class JobTable extends BaseViewModel {
             { title:"Dauer", data: 'elapsedSeconds()'},
             { title:"Dauer (dez.)", data: 'formattedTimeDeciaml()', name:'durationDecimal'},
             { title:"Aktion", data: null, defaultContent:
-            '<a class="btn btn-default btn-sm table-btn" data-bind="click: removeItemModal" ><i class="fas fa-trash" title="Löschen"></i></a>'
+                '<div class="btn-group" role="group">'+
+                    '<a class="btn btn-default btn-sm table-btn" data-bind="click: copyJob"><i class="fa fa-copy" title="Kopieren"></i></a>'+
+                    '<a class="btn btn-default btn-sm table-btn" data-bind="click: removeItemModal" ><i class="fas fa-trash" title="Löschen"></i></a>'+
+                '</div>'
             }
         ]
 
@@ -151,6 +155,29 @@ class JobTable extends BaseViewModel {
             this.loaded = true
         }.bind(this))
     }
+
+    copyJob(that,data){
+        var id = $(data.currentTarget).closest('tr').attr('id')
+        var job = _.find(this.jobList(), element => element._id() == id)
+
+        var ticket = _.find(that.ticketDocs, {_id: job.ticketId()})
+        var project = _.find(that.projectDocs, {_id: job.projectId()})
+        var result = ""
+        result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
+        result += `Tätigkeit: ${job.description() || "-"}\n`
+        result += `Projekt: ${project ? project.name || "-" : "-"}\n`
+        result += `Dauer: ${that.getTimeString(job.elapsedSeconds())}\n`
+        clipboard.writeText(result)
+    }
+    getTimeString(seconds){
+        if(!seconds)
+          return "00:00:00/0.00"
+      
+        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+      
+        return formated + "/" + decimal
+      }
 
     removeItemModal(that,data){
         $('#modalDelete').modal('show');

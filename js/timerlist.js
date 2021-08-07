@@ -1,5 +1,6 @@
 const electron = require('electron')
 const app = require('electron').remote.app
+const { clipboard } = require('electron')
 
 const { Observable, Subject, ReplaySubject, from, of, range } = require('rxjs');
 const { auditTime } = require('rxjs/operators');
@@ -563,6 +564,17 @@ class TimerList extends BaseViewModel {
     await that.db.remove({ _id: data._id() }, {})
     that.jobTimerList.remove(function (item) { return item._id() == data._id(); })
     $('#modalDeleteEntry').modal('hide');
+  }
+
+  copyJob(that,data){
+    var ticket = _.find(that.ticketList(), {_id: data.ticketId()})
+    var project = _.find(that.projectList(), {_id: data.projectId()})
+    var result = ""
+    result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
+    result += `Tätigkeit: ${data.description() || "-"}\n`
+    result += `Projekt: ${project ? project.name || "-" : "-"}\n`
+    result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
+    clipboard.writeText(result)
   }
 
   pauseTimer(){
