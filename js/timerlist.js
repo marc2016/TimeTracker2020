@@ -32,7 +32,7 @@ toastr.options = {
   "debug": false,
   "newestOnTop": false,
   "progressBar": false,
-  "positionClass": "toast-bottom-right",
+  "positionClass": "toast-bottom-center",
   "preventDuplicates": false,
   "onclick": null,
   "showDuration": "300",
@@ -615,6 +615,7 @@ class TimerList extends BaseViewModel {
     result += `Projekt: ${project ? project.name || "-" : "-"}\n`
     result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
     clipboard.writeText(result)
+    toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
 
   pauseTimer(){
