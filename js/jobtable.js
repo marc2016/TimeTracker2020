@@ -286,15 +286,15 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     targets: 1,
-                    width: "50%",
+                    width: "35%",
                 },
                 {
                     targets: 2,
-                    width: "10%",
+                    width: "25%",
                     render: function(data){
                         var ticket = _.find(that.ticketDocs, {'_id':data})
                         if(ticket){
-                            return ticket.name
+                            return ticket.name.length > 45 ? ticket.name.substr( 0, 45 ).trim() +'…' : ticket.name;
                         }
                     }
                 },
