@@ -326,7 +326,7 @@ class TimerList extends BaseViewModel {
 
   applySelectize() {
     var that = this
-
+    var jiraIssueRegex = "[A-Z]{2,}-\d+"
     $('select.projectSelect').selectize(
         {
           options: that.projectList(),
@@ -351,6 +351,36 @@ class TimerList extends BaseViewModel {
           closeAfterSelect: true,
         }
     )
+    var renderItemFunc = function (item, escape) {
+      var regex = /([A-Z]{2,}-\d+)(:|-)?(.*)?/
+      var match = regex.exec(item.name)
+      
+      if(!match) {
+        return '<div class="item">'+item.name+'</div>';
+      }
+      var issueNumber = match[1]
+      var issueName = match[3]
+      return '<div class="item">'+
+      '<span class="issueNumber">'+issueNumber+'</span>'+
+      '<span class="issueName">: '+issueName+'</span>'+
+      '</div>';
+    }
+  
+    var renderOptionFunc = function (item, escape) {
+      var regex = /([A-Z]{2,}-\d+)(:|-)?(.*)?/
+      var match = regex.exec(item.name)
+      
+      if(!match) {
+        return '<div class="option">'+item.name+'</div>';
+      }
+      var issueNumber = match[1]
+      var issueName = match[3]
+      return '<div class="option">'+
+      '<span class="issueNumber">'+issueNumber+'</span>'+
+      '<span class="issueName">: '+issueName+'</span>'+
+      '</div>';
+    }
+
     $('select.ticketSelect').selectize(
       {
         options: that.ticketList(),
@@ -365,6 +395,10 @@ class TimerList extends BaseViewModel {
             })
             
           })
+        },
+        render: {
+          item: renderItemFunc,
+          option: renderOptionFunc
         },
         labelField: "name",
         sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],

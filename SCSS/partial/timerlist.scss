@@ -175,4 +175,11 @@
   overflow: hidden;
   width: calc(100% - 30px);
 }
- 
+
+.selectize-input {
+  padding-right: 40px !important;
+}
+
+.issueNumber {
+  font-weight: bold;
+}
