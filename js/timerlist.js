@@ -352,14 +352,14 @@ class TimerList extends BaseViewModel {
         }
     )
     var renderItemFunc = function (item, escape) {
-      var regex = /([A-Z]{2,}-\d+)(:|-)?(.*)?/
+      var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
       var match = regex.exec(item.name)
       
       if(!match) {
         return '<div class="item">'+item.name+'</div>';
       }
       var issueNumber = match[1]
-      var issueName = match[3]
+      var issueName = match[4]
       return '<div class="item">'+
       '<span class="issueNumber">'+issueNumber+'</span>'+
       '<span class="issueName">: '+issueName+'</span>'+
@@ -367,14 +367,14 @@ class TimerList extends BaseViewModel {
     }
   
     var renderOptionFunc = function (item, escape) {
-      var regex = /([A-Z]{2,}-\d+)(:|-)?(.*)?/
+      var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
       var match = regex.exec(item.name)
       
       if(!match) {
         return '<div class="option">'+item.name+'</div>';
       }
       var issueNumber = match[1]
-      var issueName = match[3]
+      var issueName = match[4]
       return '<div class="option">'+
       '<span class="issueNumber">'+issueNumber+'</span>'+
       '<span class="issueName">: '+issueName+'</span>'+
