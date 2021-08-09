@@ -217,11 +217,7 @@ class JobTable extends BaseViewModel {
     
     getMenu(){
         return [
-            {
-              icon: 'fas fa-sync-alt',
-              name: 'Alle synchronisieren',
-              method: this.syncAllFilteredJobs.bind(this)
-            }
+            
           ]
     }
 
