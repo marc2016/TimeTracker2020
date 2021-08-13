@@ -13,3 +13,14 @@
   font-weight: 300;
   font-style: italic;
 }
+
+.nav-link {
+  margin-left: 14px;
+}
+.nav-link:hover {
+  background-color: $maincolorAccent;
+}
+
+.nav-link-icon {
+  margin-right: 5px;
+}
