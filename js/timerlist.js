@@ -10,7 +10,11 @@ var BaseViewModel = require('./base.js')
 var ko = require('knockout');
 ko.mapping = require('knockout-mapping')
 
-var moment = require('moment');
+const Moment = require('moment');
+const MomentRange = require('moment-range');
+
+const moment = MomentRange.extendMoment(Moment);
+
 var _ = require('lodash');
 var momentDurationFormatSetup = require("moment-duration-format");
 var remote = require('electron').remote;
@@ -66,10 +70,13 @@ class TimerList extends BaseViewModel {
       this.lastJobBeforeJobDurationChange = ko.observable()
       this.itemToDelete = ko.observable()
       this.itemToSync = ko.observable()
+      this.currentAbsencePeriod = ko.observable()
+      this.absenceToday = ko.observable(false)
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
       this.db_tickets = dataAccess.getDb('tickets')
+      this.db_absences = dataAccess.getDb('absences')
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
       this.projectList = ko.observableArray()
@@ -119,6 +126,19 @@ class TimerList extends BaseViewModel {
           this.currentDate(moment(date))
         }.bind(this)
       })
+
+      $('#textAbsencePeriod').datepicker({
+        range: true,
+        language: 'de',
+        autoClose: true,
+        todayButton: false,
+        dateFormat: 'dd.mm.yy',
+        onSelect:function onSelect(fd, date) {
+          if(date && date.length == 2){
+              this.currentAbsencePeriod(moment.range(date[0],date[1]))
+          }
+      }.bind(this)
+    })
 
     
       footer.onLoad(this.currentDate(), this.db, jobtimer)
@@ -188,6 +208,11 @@ class TimerList extends BaseViewModel {
         icon: 'fa fa-plus-circle',
         name: 'Neuer Eintrag',
         method: this.addNewItem.bind(this)
+      },
+      {
+        icon: 'fa fa-umbrella-beach',
+        name: 'Neue Abwesenheit',
+        method: this.addNewAbsence.bind(this)
       }
     ]
   }
@@ -211,6 +236,18 @@ class TimerList extends BaseViewModel {
   saveJobDurationButton(data, that){
     var jobId = $(data).attr('jobId')
     that.saveJobDuration(jobId, that)
+  }
+
+  async saveAbsencePeriodButton(data, that){
+    for (let day of that.currentAbsencePeriod().by('day')) {
+      var docs = await this.db_absences.find({date: day.format('YYYY-MM-DD')})
+      if(!docs) {
+        continue
+      }
+      var newAbsence = {date:day.format('YYYY-MM-DD')}
+      await this.db_absences.insert(newAbsence)
+    }
+    $('#modalAbsencePeriod').modal('hide');
   }
 
   saveJobDuration(jobId, that){
@@ -495,6 +532,13 @@ class TimerList extends BaseViewModel {
     this.refreshJobTimerList(docs)
     this.refreshTimeSum()
     footer.initChart(value)
+    var absenceDocs = await this.db_absences.find({date: value.format('YYYY-MM-DD')})
+    if (absenceDocs.length > 0) {
+      this.absenceToday(true)
+    } else {
+      this.absenceToday(false)
+    }
+    
   }
   
   nextDay(){
@@ -593,6 +637,16 @@ class TimerList extends BaseViewModel {
 
     // this.registerFocusEvents()
     await this.saveAll()
+  }
+
+  addNewAbsence() {
+    this.currentAbsencePeriod(null)
+    $('#modalAbsencePeriod').modal('show');
+  }
+
+  async removeAbsence() {
+    await this.db_absences.remove({date: this.currentDate().format('YYYY-MM-DD')})
+    this.absenceToday(false)
   }
   
   removeItemModal(that,data){

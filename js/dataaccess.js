@@ -13,6 +13,7 @@ class DataAccess {
         this.dbJobs = new Datastore({ filename: userDataPath+'/jobs.db', autoload: true });
         this.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
         this.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });
+        this.dbAbsences = new Datastore({ filename: userDataPath+'/absences.db', autoload: true });
 
         this.projectsChanged = new Subject()
 
@@ -27,6 +28,8 @@ class DataAccess {
                 return this.dbProjects
             case 'tickets':
                 return this.dbTickets
+            case 'absences':
+                return this.dbAbsences
             default:
                 return undefined
         }

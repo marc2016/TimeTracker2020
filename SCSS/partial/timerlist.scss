@@ -61,6 +61,47 @@
   box-shadow: none !important;
 }
 
+.absence-entry-container {
+  margin-top: 8px;
+  margin-left: 8px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.absence-entry {
+  width: 100%;
+  border-radius: 0.5rem !important;
+  background-color: rgba(255,255,255,0.75) !important;
+  text-align: center;
+  padding: 10px;
+}
+
+.absence-entry-text {
+  margin: 0px !important;
+  font-weight: bold;
+}
+
+.absence-entry-overlay {
+  position: absolute;
+  width: calc(100% - 16px);
+  border-radius: 0.5rem !important;
+  background-color: $maincolor;
+  display: none;
+  padding: 10px;
+  text-align: center;
+  color: $accentColor;
+}
+
+.absence-entry-overlay:hover {
+  display: block;
+}
+
+.absence-entry-container:hover > .absence-entry-overlay {
+  
+  display: block;
+}
+
+
 .job-list-item{
   margin: 8px;
   border-radius: 0.5rem !important;

@@ -8,7 +8,21 @@
       <i class="fa fa-angle-double-right" title="Weiter"></i>
     </button>
   </div>
-
+  <div class="absence-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
+    <div class="absence-entry-overlay">
+      <h2 class="absence-entry-text">
+        <i class="fa fa-trash"></i> Zum Löschen, anklicken.
+      </h2>
+    </div>
+    <div class="absence-entry" >
+      <h2 class="absence-entry-text">
+        <i class="fa fa-umbrella-beach"></i> Abwesend
+      </h2>
+      
+    </div>
+    
+  </div>
+    
   <div>
     <ul class="list-group" id="list" data-bind="foreach: jobTimerList, childrenComplete: myPostProcessingLogic">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }, css: { 'currentEntry': isRunning }">
@@ -168,6 +182,31 @@
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
               <button id="btnSaveDuration" type="button" class="btn btn-primary" data-bind="click: saveJobDurationButton.bind($data,$element)">Speichern</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalAbsencePeriod" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Neue Abwesenheit eintragen...</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Zeitraum</span>
+                  </div>
+                  <input type="text" id="textAbsencePeriod" class="form-control absencePeriod" data-language='de' data-range="true" data-multiple-dates-separator=" - "  data-position="left top" />
+                </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
+              <button id="btnSaveAbsencePeriod" type="button" class="btn btn-primary" data-bind="click: saveAbsencePeriodButton.bind($data,$element)">Speichern</button>
           </div>
       </div>
   </div>
