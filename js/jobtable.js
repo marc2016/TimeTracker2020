@@ -72,6 +72,7 @@ class JobTable extends BaseViewModel {
         this.db = dataAccess.getDb('jobs');
         this.db_projects = dataAccess.getDb('projects')
         this.db_tickets = dataAccess.getDb('tickets')
+        this.db_absences = dataAccess.getDb('absences')
 
         this.jobList = ko.observableArray()
         this.currentRange = ko.observable(moment().startOf('month').range('month'))
@@ -182,13 +183,17 @@ class JobTable extends BaseViewModel {
     removeItemModal(that,data){
         $('#modalDelete').modal('show');
         var id = $(data.currentTarget).closest('tr').attr('id')
-        var item = _.find(this.jobList(), element => element._id() == id)
-        that.itemToDelete(item)
+        // var item = _.find(this.jobList(), element => element._id() == id)
+        // if(!item) {
+            
+        // }
+        that.itemToDelete({ id: id })
       }
     
       async removeItem(that,data){
-        await that.db.remove({ _id: data._id() }, {})
-        that.jobList.remove(function (item) { return item._id() == data._id(); })
+        await that.db.remove({ _id: data.id }, {})
+        that.jobList.remove(function (item) { return item._id() == data.id; })
+        await that.db_absences.remove({ _id: data.id }, {})
         $('#modalDelete').modal('hide');
       }
 
@@ -239,7 +244,7 @@ class JobTable extends BaseViewModel {
             // value.formattedTime = formatted
             
             var decimal = moment.duration(value.elapsedSeconds, "seconds").format("h", 2)
-            decimal = utils.roundDuration(this.store.get('roundDuration','round'),parseFloat(decimal.replace(",",".")))
+            // decimal = utils.roundDuration(this.store.get('roundDuration','round'),parseFloat(decimal.replace(",",".")))
             value.formattedTimeDeciaml = decimal.replace('.',',')
         }.bind(this))
         
@@ -249,6 +254,21 @@ class JobTable extends BaseViewModel {
             utils.addMissingProperties(value)
         });
         ko.utils.arrayPushAll(this.jobList, tmpJobList())
+
+        var absenceDocs = await this.db_absences.find({date: { $in: dates}})
+        _.forEach(absenceDocs, function(value){
+            value.description = "Abwesend"
+            value.formattedTimeDeciaml = "8,00"
+            value.elapsedSeconds = 28800
+            value.jobNote = ""
+            value.lastSync = ""
+            value.ticketId = ""
+            value.projectId = ""
+            value.readOnly = true
+        }.bind(this))
+        var tmpAbsenceList = ko.mapping.fromJS(absenceDocs)
+        ko.utils.arrayPushAll(this.jobList, tmpAbsenceList())
+
         this.inProgress(false)
     }
 
@@ -326,16 +346,31 @@ class JobTable extends BaseViewModel {
                 "url": "resources/dataTables.german.lang"
             },
             responsive: true,
-            drawCallback: function () {
+            drawCallback: async function () {
                 var api = this.api();
                 var sum = _.sumBy(api.column( 'durationDecimal:name',  {"filter": "applied"} ).data(), function(element){
                     return parseFloat(element.replace(",","."))
                 })
+
                 var range = that.currentRange()
+                var absenceSum = 0
+                for (let day of range.by('day')) {
+                    var docs = await that.db_absences.find({date: day.format('YYYY-MM-DD')})
+                    if(!docs || docs.length <= 0) {
+                      continue
+                    }
+                    var dateFromDb = moment(docs[0].date)
+                    if(dateFromDb.isBusinessDay()) {
+                        absenceSum += 8
+                    }
+                  }
+                  var sumIst = sum.toFixed(2).replace(".",",")
+                  var endClone = range.end.clone()
+                  var sumSoll = range.start.businessDiff(endClone.add(1, 'days'))*8-absenceSum
                 $('#tableFooterLeft').html(
-                    'Ist Dauer: '+sum.toFixed(2).replace(".",",") + ' h <br>'
-                    + 'Soll Dauer: '+range.start.businessDiff(range.end)*8+' h'
-                );
+                    'Ist Dauer: '+ sumIst + ' h <br>'
+                    + 'Soll Dauer: '+ sumSoll +' h'
+                )
             }
         });
         
@@ -429,6 +464,7 @@ class JobTable extends BaseViewModel {
             onSelect:function onSelect(fd, date) {
                 if(date && date.length == 2){
                     this.currentRange(moment.range(date[0],date[1]))
+                    this.definedRange("")
                 }
             }.bind(this)
         })
