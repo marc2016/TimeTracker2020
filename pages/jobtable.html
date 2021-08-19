@@ -26,8 +26,36 @@
         <div id="table" class="jobTable">
             <table id="jobs" class="table table-striped table-bordered"></table>
         </div>
-        <div id="tableFooter" class="row">
-            <div class="col-sm" id="tableFooterLeft"></div>
+        <div id="tableFooter" class="row justify-content-end">
+            
+            <div class="col-sm-auto" id="tableFooterLeft">
+              <table class="footer-table">
+                <tbody>
+                  <tr>
+                    <td>Diff. bis heute:</td>
+                    <td class="footer-table-cell-value"><span data-bind="text: diffUntilToday"></span>h</td>
+                  </tr>
+                  <tr>
+                    <td>SOLL bis heute:</td>
+                    <td class="footer-table-cell-value"><span data-bind="text: targetDurationUntilToday"></span>h</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-sm-auto" id="tableFooterLeft">
+              <table class="footer-table">
+                <tbody>
+                  <tr>
+                    <td>IST:</td>
+                    <td class="footer-table-cell-value"><span data-bind="text: actualDuration"></span>h</td>
+                  </tr>
+                  <tr>
+                    <td>SOLL:</td>
+                    <td class="footer-table-cell-value"><span data-bind="text: targetDuration"></span>h</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
         </div>
     </div>
     <div class="progress-view" data-bind="visible: inProgress()">

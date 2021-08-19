@@ -79,6 +79,10 @@ class JobTable extends BaseViewModel {
         this.itemToDelete = ko.observable()
         this.inProgress = ko.observable(false)
         this.definedRange = ko.observable()
+        this.actualDuration = ko.observable()
+        this.targetDuration = ko.observable()
+        this.targetDurationUntilToday = ko.observable()
+        this.diffUntilToday = ko.observable()
 
         $('#jobtable').load('pages/jobtable.html', function(){
             this.hide()
@@ -353,24 +357,37 @@ class JobTable extends BaseViewModel {
                 })
 
                 var range = that.currentRange()
-                var absenceSum = 0
-                for (let day of range.by('day')) {
-                    var docs = await that.db_absences.find({date: day.format('YYYY-MM-DD')})
-                    if(!docs || docs.length <= 0) {
-                      continue
+
+                var daysUntilToday = 0
+                var rangeUntilToday = moment.range(range.start, moment());
+                for (let day of rangeUntilToday.by('day')) {
+                    if(day.isBusinessDay()) {
+                        daysUntilToday += 1
                     }
-                    var dateFromDb = moment(docs[0].date)
+                }
+                
+                var absenceDays = 0
+                var days = Array.from(range.by('day'));
+                var dates = days.map(m => m.format('YYYY-MM-DD'))
+                var absenceDocs = await that.db_absences.find({date: { $in: dates}})
+                _.forEach(absenceDocs, (value) => {
+                    var dateFromDb = moment(value.date)
                     if(dateFromDb.isBusinessDay()) {
-                        absenceSum += 8
+                        absenceDays += 1
                     }
-                  }
-                  var sumIst = sum.toFixed(2).replace(".",",")
-                  var endClone = range.end.clone()
-                  var sumSoll = range.start.businessDiff(endClone.add(1, 'days'))*8-absenceSum
-                $('#tableFooterLeft').html(
-                    'Ist Dauer: '+ sumIst + ' h <br>'
-                    + 'Soll Dauer: '+ sumSoll +' h'
-                )
+                    if(dateFromDb.isBetween(rangeUntilToday.start, rangeUntilToday.end)) {
+                        daysUntilToday -= 1
+                    }
+                })
+                
+                
+                var endClone = range.end.clone()
+                var sumSoll = range.start.businessDiff(endClone.add(1, 'days'))-absenceDays
+
+                that.actualDuration(sum.toLocaleString(undefined,{ minimumFractionDigits: 2 }))
+                that.targetDuration((sumSoll*8).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
+                that.targetDurationUntilToday((daysUntilToday*8).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
+                that.diffUntilToday((sum-(daysUntilToday*8)).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
             }
         });
         

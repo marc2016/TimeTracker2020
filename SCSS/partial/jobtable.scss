@@ -98,6 +98,20 @@ td {
       float: left;
       margin-right: 10px;
   }
+
+  .footer-table {
+    border-spacing: 5px 0px !important;
+    border-collapse: separate;
+    margin-top: -22px;
+  }
+
+  .footer-table > tbody > tr > td {
+      padding: 0px !important;
+  } 
+  .footer-table-cell-value {
+      text-align: right;
+  }
+
   
   
 //   /* Style the checkmark/indicator */
