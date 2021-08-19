@@ -1,4 +1,4 @@
-@media (max-width: 720px){
+@media (max-width: 870px){
     .collapsedText {
       display: none;
   }
@@ -14,13 +14,15 @@
   font-style: italic;
 }
 
-.nav-link {
-  margin-left: 14px;
+.navbar-nav-left > .nav-item {
+  padding-left: 8px;
+  padding-right: 8px;
 }
-.nav-link:hover {
+
+.nav-item:hover {
   background-color: $maincolorAccent;
 }
 
-.nav-link-icon {
-  margin-right: 5px;
+.nav-link-text {
+  margin-left: 6px;
 }

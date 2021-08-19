@@ -61,11 +61,11 @@
       <i class="fa fa-bars" aria-hidden="true" style="color: #FFFFFF;"></i>
     </button>
     <div class="navbar-collapse collapse" id="navbarNav">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav navbar-nav-left mr-auto">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle navbar-forground" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false" tabindex="-1">
-            <i class="fa fa-bars" title="Navigation"></i><span class="collapsedText"> Navigation</span>
+            <i class="fa fa-bars" title="Navigation"></i><span class="collapsedText nav-link-text"> Navigation</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item navbar-forground" id="btnJobTimer" href="#">
@@ -82,7 +82,7 @@
         <!-- ko foreach: pagemenu -->
         <li class="nav-item">
           <a class="nav-link navbar-forground" href="#" data-bind="click: $parent.menuClick" tabindex="-1">
-            <i class="nav-link-icon" data-bind="css: icon"></i> <span class="collapsedText" data-bind="text: name"></span>
+            <i class="nav-link-icon" data-bind="css: icon"></i> <span class="collapsedText nav-link-text" data-bind="text: name"></span>
           </a>
         </li>
         <!-- /ko -->
