@@ -345,7 +345,7 @@ class TimerList extends BaseViewModel {
       oldScore = 0
     }
     var newScore = oldScore + 1
-    await this.db_projects.update({ _id:doc._id }, { $set: { score: newScore } },{ })
+    await this.db_projects.update({ _id:doc._id }, { $set: { score: newScore, lastUse: moment().format('YYYY-MM-DD') } },{ })
   }
 
   async updateTicketScore(id) {
@@ -358,7 +358,7 @@ class TimerList extends BaseViewModel {
       oldScore = 0
     }
     var newScore = oldScore + 1
-    await this.db_tickets.update({ _id:doc._id }, { $set: { score: newScore } },{ })
+    await this.db_tickets.update({ _id:doc._id }, { $set: { score: newScore, lastUse: moment().format('YYYY-MM-DD') } },{ })
   }
 
   applySelectize() {
