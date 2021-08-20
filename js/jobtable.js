@@ -352,8 +352,14 @@ class JobTable extends BaseViewModel {
             responsive: true,
             drawCallback: async function () {
                 var api = this.api();
-                var sum = _.sumBy(api.column( 'durationDecimal:name',  {"filter": "applied"} ).data(), function(element){
-                    return parseFloat(element.replace(",","."))
+                var columns = api.columns( [1,5],  {"filter": "applied"} ).data()
+                var zippedColumns = _.zipWith(columns[0], columns[1], (a,b) => {return {description: a, duration: b}})
+                var sumTableHours = _.sumBy(zippedColumns, function(element){
+                    if (element.description == "Abwesend") {
+                        return 0;
+                    }
+                    var duration = element.duration
+                    return parseFloat(duration.replace(",","."))
                 })
 
                 var range = that.currentRange()
@@ -380,14 +386,22 @@ class JobTable extends BaseViewModel {
                     }
                 })
                 
-                
-                var endClone = range.end.clone()
-                var sumSoll = range.start.businessDiff(endClone.add(1, 'days'))-absenceDays
+                var targetDays = range.start.businessDiff(range.end)-absenceDays
+                var targetHours = targetDays*8
 
-                that.actualDuration(sum.toLocaleString(undefined,{ minimumFractionDigits: 2 }))
-                that.targetDuration((sumSoll*8).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
-                that.targetDurationUntilToday((daysUntilToday*8).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
-                that.diffUntilToday((sum-(daysUntilToday*8)).toLocaleString(undefined,{ minimumFractionDigits: 2 }))
+                var hoursUntilToday = daysUntilToday*8
+
+                var diffUntilTodayHours = sumTableHours-(daysUntilToday*8)
+
+                var sumTableHoursString = sumTableHours.toLocaleString(undefined,{ minimumFractionDigits: 2 })
+                var targetHoursString = targetHours.toLocaleString(undefined,{ minimumFractionDigits: 2 })
+                var hoursUntilTodayString = hoursUntilToday.toLocaleString(undefined,{ minimumFractionDigits: 2 })
+                var diffUntilTodayHoursString = diffUntilTodayHours.toLocaleString(undefined,{ minimumFractionDigits: 2 })
+
+                that.actualDuration(sumTableHoursString)
+                that.targetDuration(targetHoursString)
+                that.targetDurationUntilToday(hoursUntilTodayString)
+                that.diffUntilToday(diffUntilTodayHoursString)
             }
         });
         
