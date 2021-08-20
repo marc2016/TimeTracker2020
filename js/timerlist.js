@@ -129,6 +129,7 @@ class TimerList extends BaseViewModel {
 
       $('#textAbsencePeriod').datepicker({
         range: true,
+        toggleSelected: false,
         language: 'de',
         autoClose: true,
         todayButton: false,
@@ -187,6 +188,12 @@ class TimerList extends BaseViewModel {
     var docs = await this.db.find({date: this.currentDate().format('YYYY-MM-DD')})
     this.refreshJobTimerList(docs)
     this.refreshTimeSum()
+    var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
+    if (absenceDocs.length > 0) {
+      this.absenceToday(true)
+    } else {
+      this.absenceToday(false)
+    }
   }
 
   show(){
@@ -240,6 +247,9 @@ class TimerList extends BaseViewModel {
 
   async saveAbsencePeriodButton(data, that){
     for (let day of that.currentAbsencePeriod().by('day')) {
+      if(that.currentDate().isSame(day, 'day')) {
+        this.absenceToday(true)
+      }
       var docs = await this.db_absences.find({date: day.format('YYYY-MM-DD')})
       if(!docs) {
         continue
@@ -538,7 +548,6 @@ class TimerList extends BaseViewModel {
     } else {
       this.absenceToday(false)
     }
-    
   }
   
   nextDay(){
@@ -641,6 +650,7 @@ class TimerList extends BaseViewModel {
 
   addNewAbsence() {
     this.currentAbsencePeriod(null)
+    $('#textAbsencePeriod').val('')
     $('#modalAbsencePeriod').modal('show');
   }
 
