@@ -88,11 +88,6 @@ if (!gotTheLock) {
     }
   })
 
-  app.on('open-url', function (event, url) {
-    event.preventDefault()
-    deeplinkingUrl = url
-    log("open-url# " + deeplinkingUrl)
-  })
   app.on('ready', function(){
     mainWindow = splashScreen.initSplashScreen(splashscreenConfig);
     mainWindow.setMenu(null);

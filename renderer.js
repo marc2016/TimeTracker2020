@@ -200,6 +200,17 @@ onload = function() {
   }
   
   openTimerList()
+
+  app.on('open-url', function (event, url) {
+    event.preventDefault()
+    decodedUrl = decodeURI(url)
+    var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
+    var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
+    var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
+    var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
+    openTimerList()
+    this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+  })
 };
 
 function syncLogin(){

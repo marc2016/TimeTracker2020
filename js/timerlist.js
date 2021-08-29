@@ -624,11 +624,26 @@ class TimerList extends BaseViewModel {
     
   }
 
-  async addNewItem(jobDescription){
+  async addNewItem(jobDescription, issueKey, issueSummery){
+
+    var ticketId = ""
+    if(issueKey) {
+      var issueKeyRegex = new RegExp(issueKey);
+      var tickets = await this.db_tickets.find({ name: issueKeyRegex })
+      if(tickets && tickets.length > 0) {
+        ticketId = tickets[0]._id
+      } else {
+        var newTicket = { name:issueKey+": "+issueSummery, active:true, score: 5, lastUse: moment().format('YYYY-MM-DD') }
+        var newTicket = await this.db_tickets.insert(newTicket)
+        ticketId = newTicket._id
+        this.projectList.push(newTicket)
+      }
+    }
+
     if(!jobDescription){
       jobDescription = ""
     }
-    var newEntry = {jobNote:"", projectId: "", ticketId: "",elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var newEntry = {jobNote:"", projectId: "", ticketId: ticketId,elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
