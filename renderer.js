@@ -203,15 +203,34 @@ onload = function() {
 
   app.on('open-url', function (event, url) {
     event.preventDefault()
-    decodedUrl = decodeURI(url)
-    var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
-    var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
-    var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
-    var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
+    handleUrl(url)
+  })
+}
+
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+  if (process.platform == 'win32') {
+    url = commandLine.slice(1)
+  }
+
+  handleUrl(url)
+
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) myWindow.restore()
+    mainWindow.focus()
+  }
+})
+
+function handleUrl(url) {
+  var decodedUrl = decodeURI(url)
+  var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
+  var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
+  var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
+  var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
+  if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
     openTimerList()
     this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
-  })
-};
+  }
+}
 
 function syncLogin(){
   var syncRestUrl = store.get('syncRestBaseUrl')

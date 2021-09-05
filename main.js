@@ -67,27 +67,6 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
-    if (process.platform == 'win32') {
-      deeplinkingUrl = commandLine.slice(1)
-    }
-
-    log.info("External protocol call: "+deeplinkingUrl)
-
-    var urlList = _.split(deeplinkingUrl,'/')
-    log.info("urlList: "+urlList)
-    if(_.includes(urlList,'newjob')){
-      log.info('External URL "newJob" found.')
-      var jobDescription = decodeURIComponent(urlList[urlList.length-1])
-      mainWindow.webContents.send('newJob', jobDescription)
-    }
-
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) myWindow.restore()
-      mainWindow.focus()
-    }
-  })
-
   app.on('ready', function(){
     mainWindow = splashScreen.initSplashScreen(splashscreenConfig);
     mainWindow.setMenu(null);
@@ -112,6 +91,19 @@ if (!gotTheLock) {
     if (mainWindow === null) {
       createWindow()
       
+    }
+  })
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) myWindow.restore()
+      mainWindow.focus()
+    }
+  })
+  app.on('open-url', function (event, url) {
+    event.preventDefault()
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) myWindow.restore()
+      mainWindow.focus()
     }
   })
   app.on('ready', () => {
@@ -169,10 +161,4 @@ function createWindow() {
     minHeight: 450,
     icon: path.join(__dirname, 'icons/logo.ico'),
   })
-
-  if (process.platform == 'win32') {
-    deeplinkingUrl = process.argv.slice(1)
-  }
-  log.info("External protocol call: "+deeplinkingUrl)
-
 }
