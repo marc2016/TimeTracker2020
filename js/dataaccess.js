@@ -1,19 +1,25 @@
 const { Observable, Subject, ReplaySubject, from, of, range, timer, interval, never } = require('rxjs');
 var Datastore = require('nedb-promises')
-const remote = require('electron').remote;
-const app = remote.app;
+const { ipcRenderer } = require('electron')
+var log = require('electron-log')
+
+ipcRenderer.on('get-app-path-reply', (event, arg) => {
+    
+    var userDataPath = arg
+    instance.dbJobs = new Datastore({ filename: userDataPath+'/jobs.db', autoload: true });
+    instance.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
+    instance.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });
+    instance.dbAbsences = new Datastore({ filename: userDataPath+'/absences.db', autoload: true });
+    log.info('BLA'+instance.dbJobs)
+})
+
+ipcRenderer.sendSync('get-app-path')
 
 class DataAccess {
     constructor() {
         if (!DataAccess.instance) {
             DataAccess.instance = this;
         }
-
-        var userDataPath = app.getPath('userData')+'/userdata/'
-        this.dbJobs = new Datastore({ filename: userDataPath+'/jobs.db', autoload: true });
-        this.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
-        this.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });
-        this.dbAbsences = new Datastore({ filename: userDataPath+'/absences.db', autoload: true });
 
         this.projectsChanged = new Subject()
 
@@ -37,7 +43,5 @@ class DataAccess {
 }
 
 const instance = new DataAccess();
-
-Object.freeze(instance);
 
 module.exports = instance;

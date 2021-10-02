@@ -1,4 +1,3 @@
-var remote = require('electron').remote;
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
 const { clipboard } = require('electron')

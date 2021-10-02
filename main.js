@@ -2,6 +2,10 @@ const electron = require('electron')
 const app = electron.app
 const protocol = electron.protocol
 const os = require("os");
+const { ipcMain } = require('electron')
+
+const Store = require('electron-store');
+Store.initRenderer()
 
 const log = require('electron-log');
 const {autoUpdater} = require("electron-updater");
@@ -44,7 +48,14 @@ const mainOpts = {
   minHeight: 450,
   icon: path.join(__dirname, 'icons/logo.ico'),
   show: false,
-  frame: false
+  frame: false,
+  webPreferences: {
+    nodeIntegration: true,
+    nodeIntegrationInWorker: true,
+    contextIsolation: false,
+    enableRemoteModule: true, sandbox: false,
+    nativeWindowOpen: true
+  }
 }
 
 // configure the splashscreen
@@ -56,7 +67,14 @@ const splashscreenConfig = {
       width: 600,
       height: 600,
       transparent: true,
-      icon: path.join(__dirname, 'icons/logo.ico')
+      icon: path.join(__dirname, 'icons/logo.ico'),
+      webPreferences: {
+        nodeIntegration: true,
+        nodeIntegrationInWorker: true,
+        contextIsolation: false,
+        enableRemoteModule: true, sandbox: false,
+        nativeWindowOpen: true
+      }
   }
 };
 
@@ -74,12 +92,8 @@ if (!gotTheLock) {
     mainWindow.on('closed', function () {
       mainWindow = null
     })
-    mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'index.html'),
-      protocol: 'file:',
-      slashes: true
-    }))
-  
+    
+    mainWindow.loadFile('index.html')
     electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()});  
   })
   app.on('window-all-closed', function () {
@@ -94,6 +108,12 @@ if (!gotTheLock) {
     }
   })
   app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (process.platform == 'win32') {
+      url = commandLine.slice(1)
+    }
+  
+    handleUrl(url)
+
     if (mainWindow) {
       if (mainWindow.isMinimized()) myWindow.restore()
       mainWindow.focus()
@@ -101,18 +121,13 @@ if (!gotTheLock) {
   })
   app.on('open-url', function (event, url) {
     event.preventDefault()
+    handleUrl(url)
     if (mainWindow) {
       if (mainWindow.isMinimized()) myWindow.restore()
       mainWindow.focus()
     }
   })
-  app.on('ready', () => {
-    protocol.registerFileProtocol('tt', (request, callback) => {
-      const url = request.url.substr(7)
-    }, (error) => {
-      if (error) console.error('Failed to register protocol')
-    })
-    
+  app.on('ready', () => {    
     let trayIconPath = undefined
     if (process.platform == 'darwin') {
       trayIconPath = path.join(__dirname, 'icons/logo_tray@2x.png')
@@ -124,12 +139,6 @@ if (!gotTheLock) {
     tray = new Tray(trayIcon)
     tray.on('click', () => {
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-    })
-    mainWindow.on('show', () => {
-      tray.setHighlightMode('always')
-    })
-    mainWindow.on('hide', () => {
-      tray.setHighlightMode('never')
     })
 
     mainWindow.maximize();
@@ -148,6 +157,10 @@ if (!gotTheLock) {
       
     }
   })
+  app.on('browser-window-focus', function (event, win) {
+    mainWindow.webContents.send('browser-window-focus')
+    
+  })
 }
 
 function createWindow() {
@@ -160,5 +173,60 @@ function createWindow() {
     minWidth: 480,
     minHeight: 450,
     icon: path.join(__dirname, 'icons/logo.ico'),
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+      sandbox: false, nativeWindowOpen: true
+    }
   })
+  
 }
+
+ipcMain.on('get-app-path', (event, arg) => {
+  var userDataPath = app.getPath('userData')+'/userdata/'
+  event.reply('get-app-path-reply', userDataPath)
+})
+
+function handleUrl(url) {
+  var decodedUrl = decodeURI(url)
+  var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
+  var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
+  var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
+  var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
+  if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
+    openTimerList()
+    this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+  }
+}
+
+ipcMain.on('window-operations', (event, arg) => {
+  if(args == 'close') {
+    mainWindow.close()
+  } else if(args == 'minimize') {
+    mainWindow.minimize();
+  } else if(args == 'maximize') {
+    mainWindow.maximize();
+  }
+})
+
+autoUpdater.on('update-available', () => {
+  log.info("Update is available.")
+  mainWindow.webContents.send('app-update', true)
+})
+autoUpdater.on('update-not-available', () => {
+  log.info("Update is not available.")
+  mainWindow.webContents.send('app-update', false)
+})
+autoUpdater.on('update-downloaded', (ev, progressObj) => {
+  log.info("Update is downloaded.")
+  mainWindow.webContents.send('app-update', 'ready')
+})
+
+autoUpdater.on('download-progress', (info) => {
+  if(info) {
+    var progress = _.round(info.percent)
+    mainWindow.webContents.send('app-update-download-progress', progress)
+  }
+})

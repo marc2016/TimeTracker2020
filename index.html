@@ -151,50 +151,7 @@
   </div>
 
   <div id="modals"></div>
-  <div class="modal fade" id="modalLogin" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Login</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group mb-3">
-            <label for="inputLoginUsername">Benutzername</label>
-            <input id="inputLoginUsername" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
-              data-bind="value: syncUsername">
-          </div>
-          <div class="form-group mb-3">
-            <label for="inputLoginPassword">Passwort</label>
-            <input id="inputLoginPassword" type="password" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
-              data-bind="value: syncPassword">
-          </div>
-          <div class="container">
-            <div class="row">
-              <div class="form-check col-sm">
-                <input class="form-check-input" type="checkbox" id="checkSaveLogin" data-bind="checked: syncSaveLogin">
-                <label class="form-check-label" for="checkSaveLogin">
-                  Anmeldedaten speichern
-                </label>
-              </div>
-              <div class="form-check col-sm">
-                <input class="form-check-input" type="checkbox" value="" id="checkAutoLogin" data-bind="checked: syncAutoLogin">
-                <label class="form-check-label" for="checkAutoLogin">
-                  Automatisch anmelden
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
-          <button id="btnLogin" type="button" class="btn btn-primary" data-bind="click: loginClick" data-dismiss="modal">Anmelden</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  
   <div class="modal fade" id="modalAbout" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -259,27 +216,7 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="modalSetRestUrl" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Service URL konfigurieren...</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <input id="inputJobDuration" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
-            data-bind="value: syncRestUrl" placeholder="REST Basis URL um sich mit dem externen Dienst zu verbinden.">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
-          <button id="btnSaveDuration" type="button" class="btn btn-primary" data-bind="click: saveSyncRestUrl.bind($root)">Speichern</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 </body>
 
 </html>

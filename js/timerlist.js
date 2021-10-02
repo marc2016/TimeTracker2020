@@ -1,5 +1,4 @@
 const electron = require('electron')
-const app = require('electron').remote.app
 const { clipboard } = require('electron')
 
 const { Observable, Subject, ReplaySubject, from, of, range } = require('rxjs');
@@ -16,15 +15,12 @@ const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 
 var _ = require('lodash');
-var momentDurationFormatSetup = require("moment-duration-format");
-var remote = require('electron').remote;
-var vars = remote.getGlobal('vars');
-var Client = require('node-rest-client').Client;
+
 const Store = require('electron-store');
 const store = new Store();
-var format = require("string-template")
+
 var utils = require('./utils.js')
-var log = require('electron-log');
+
 var sync = require('./sync.js')
 sync.baseUrl = store.get('syncRestBaseUrl')
 
@@ -145,7 +141,8 @@ class TimerList extends BaseViewModel {
       footer.onLoad(this.currentDate(), this.db, jobtimer)
       footer.leftFooterAction = this.goToToday
 
-      app.on('browser-window-focus', function (event, win) {
+      
+      electron.ipcRenderer.on('browser-window-focus', function(event, arg){
         this.today(new moment())
       }.bind(this))
 
@@ -708,7 +705,7 @@ class TimerList extends BaseViewModel {
     this.currentEntryId = undefined
     footer.refreshStatusBarEntry()
     this.currentJob(undefined)
-    remote.getCurrentWindow().setOverlayIcon(null, "TimeTracker")
+    // remote.getCurrentWindow().setOverlayIcon(null, "TimeTracker")
   }
 
   timerStart(currentData){
@@ -719,7 +716,7 @@ class TimerList extends BaseViewModel {
     this.currentEntryId = match._id();
     this.currentJob(match)
     var overlayPath = path.join(__dirname,"../icons/overlay.png")
-    remote.getCurrentWindow().setOverlayIcon(overlayPath, 'Aufgabe läuft...')
+    // remote.getCurrentWindow().setOverlayIcon(overlayPath, 'Aufgabe läuft...')
   }
 
   
@@ -784,9 +781,9 @@ class TimerList extends BaseViewModel {
   }
   
   refreshTray(elapsedTime){
-    var tray = remote.getGlobal('tray');
-    var timeSum = this.getTimeSum()
-    tray.setToolTip("Ʃ "+this.getTimeString(timeSum)+", Aufgabe: "+ this.getTimeString(elapsedTime))
+    // var tray = remote.getGlobal('tray');
+    // var timeSum = this.getTimeSum()
+    // tray.setToolTip("Ʃ "+this.getTimeString(timeSum)+", Aufgabe: "+ this.getTimeString(elapsedTime))
   }
   
   // trayContextMenu: remote.getGlobal('menu').buildFromTemplate([

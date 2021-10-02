@@ -1,7 +1,4 @@
-const electron = require('electron')
-const remote = require('electron').remote;
-const app = remote.app;
-var vars = remote.getGlobal('vars')
+const { ipcRenderer } = require('electron')
 var log = require('electron-log')
 
 var $ = require("jquery");
@@ -16,26 +13,19 @@ const { auditTime } = require('rxjs/operators');
 
 var pjson = require('./package.json')
 
-var format = require("string-template")
-
 const Store = require('electron-store');
 const store = new Store();
-var sync = require('./js/sync.js')
-sync.baseUrl = store.get('syncRestBaseUrl')
 
 const path = require('path')
 
-var autoUpdater = remote.getGlobal("autoUpdater")
-
 var gravatar = require('gravatar');
 
-var dataAccess = require('./js/dataaccess.js')
 var utils = require('./js/utils.js')
 var ko = require('knockout');
-var moment = require('moment');
+
 var _ = require('lodash');
-var momentDurationFormatSetup = require("moment-duration-format");
-var userDataPath = app.getPath('userData')+'/userdata/'
+
+
 var toastr = require('toastr');
 toastr.options = {
   "closeButton": false,
@@ -75,11 +65,11 @@ var windowsToaster = new WindowsToaster({
   appID: "TimeTracker",
   wait: true
 });
-windowsToaster.on('click', function (notifierObject, options) {
-  var window = require('electron').remote.getCurrentWindow()
-    window.show()
-    window.focus()
-});
+// windowsToaster.on('click', function (notifierObject, options) {
+//   var window = require('electron').remote.getCurrentWindow()
+//     window.show()
+//     window.focus()
+// });
 
 onload = function() {
   log.info("App started.")
@@ -95,28 +85,16 @@ onload = function() {
   }, this);
 
   this.updateAvailable = ko.observable(false)
-  autoUpdater.on('update-available', () => {
-    log.info("Update is available.")
-    this.updateAvailable(true)
-  })
-  autoUpdater.on('update-not-available', () => {
-    log.info("Update is not available.")
-    this.updateAvailable(false)
-  })
-  autoUpdater.on('update-downloaded', (ev, progressObj) => {
-    log.info("Update is downloaded.")
-    this.updateAvailable('ready')
-  })
   this.downloadProgress = ko.observable()
-  autoUpdater.on('download-progress', (info) => {
-    if(info)
-      this.downloadProgress(_.round(info.percent))
+
+  ipcRenderer.on('app-update', (event, arg) => {
+    this.updateAvailable(arg)
   })
 
-  this.loginClick = loginClick
-  this.syncLogin = syncLogin
-  this.syncProjects = syncProjects
-  this.saveSyncRestUrl = saveSyncRestUrl
+  ipcRenderer.on('app-update-download-progress', (event, arg) => {
+    this.downloadProgress(arg)
+  })
+
   this.checkForUpdatesClick = checkForUpdatesClick
   this.closeApp = closeApp
   this.openTimerList = openTimerList
@@ -157,121 +135,34 @@ onload = function() {
   this.pagemenu = ko.observableArray()
   this.menuClick = menuClick
 
-  this.syncUsername = ko.pureComputed({
-      read: function () {
-          return store.get('syncUsername');
-      },
-      write: function (value) {
-          store.set('syncUsername', value)
-      },
-      owner: this
-  });
-
-  this.syncPassword = ko.observable(store.get('syncPassword'))
-
-  this.syncSaveLogin = ko.pureComputed({
-      read: function () {
-          return store.get('syncSaveLogin');
-      },
-      write: function (value) {
-          store.set('syncSaveLogin', value)
-      },
-      owner: this
-  });
-  this.syncAutoLogin = ko.pureComputed({
-    read: function () {
-        return store.get('syncAutoLogin');
-    },
-    write: function (value) {
-        store.set('syncAutoLogin', value)
-    },
-    owner: this
-  });
-
-  this.syncRestUrl = ko.observable()
-
   ko.applyBindings(this, document.getElementById('mainNavbar'))
-  ko.applyBindings(this, document.getElementById('modalLogin'))
   ko.applyBindings(this, document.getElementById('modalAbout'))
-  ko.applyBindings(this, document.getElementById('modalSetRestUrl'))
-
-  if(store.get('syncAutoLogin') && store.get('syncPassword')){
-    loginClick()
-  }
   
   openTimerList()
 
-  app.on('open-url', function (event, url) {
-    event.preventDefault()
-    handleUrl(url)
-  })
-}
-
-app.on('second-instance', (event, commandLine, workingDirectory) => {
-  if (process.platform == 'win32') {
-    url = commandLine.slice(1)
-  }
-
-  handleUrl(url)
-
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) myWindow.restore()
-    mainWindow.focus()
-  }
-})
-
-function handleUrl(url) {
-  var decodedUrl = decodeURI(url)
-  var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
-  var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
-  var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
-  var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
-  if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
-    openTimerList()
-    this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
-  }
-}
-
-function syncLogin(){
-  var syncRestUrl = store.get('syncRestBaseUrl')
-  if(!syncRestUrl){
-    $('#modalSetRestUrl').modal('show')
-  } else {
-    $('#modalLogin').modal('show')
-  }
-}
-
-function saveSyncRestUrl(that){
-  store.set('syncRestBaseUrl',that.syncRestUrl())
-  sync.baseUrl = that.syncRestUrl()
-  $('#modalSetRestUrl').modal('hide')
-  $('#modalLogin').modal('show')
 }
 
 function closeWindow(){
-  const window = remote.getCurrentWindow();
-  window.close();
+  ipcRenderer.send('window-operations', 'close')
 }
 
 function minimizeWindow(){
-  const window = remote.getCurrentWindow();
-  window.minimize();
+  ipcRenderer.send('window-operations', 'minimize')
 }
 
 function maximizeWindow(){
-  const window = remote.getCurrentWindow();
-  window.maximize();
+  ipcRenderer.send('window-operations', 'maximize')
 }
 
 async function closeApp(){
   log.info("App is closed for Update.")
-  autoUpdater.quitAndInstall()
+  // autoUpdater.quitAndInstall()
 }
 
 function checkForUpdatesClick(){
   this.updateAvailable('checking')
   this.downloadProgress(0)
-  autoUpdater.checkForUpdates();
+  // autoUpdater.checkForUpdates();
 }
 
 function timerUpdateNotifier(updateValue){
@@ -337,23 +228,3 @@ function changeView(newViewModel){
   }
   this.currentViewModel = newViewModel
 }
-
-function loginClick(){
-  if(this.syncSaveLogin()){
-    store.set('syncPassword', this.syncPassword())
-  } else {
-    store.delete('syncPassword')
-  }
-  sync.login(this.syncPassword(),this.accountName, this.userEmail)
-}
-
-async function syncProjects(){
-  try {
-    await sync.syncProjects()
-  } catch(error){
-    toastr.error("Beim Synchronisieren der Projekte ist ein Fehler aufgetreten.")
-  }
-  
-}
-
-
