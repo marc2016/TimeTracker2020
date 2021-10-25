@@ -9,9 +9,10 @@ var BaseViewModel = require('./base.js')
 var ko = require('knockout');
 ko.mapping = require('knockout-mapping')
 
-const Moment = require('moment');
-const MomentRange = require('moment-range');
+var footer = require('./footer.js')
 
+var Moment = require('moment-business-days');
+const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 
 var _ = require('lodash');
@@ -45,13 +46,29 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
 
-var footer = require('./footer.js')
+var dayStarted = moment()
+var isDayStartedString = store.get('isDayStarted')
+if(isDayStartedString) {
+  dayStarted = moment(isDayStartedString, 'DD.MM.YYYY-HH:mm:ss')
+} else {
+  isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
+  store.set('isDayStarted', isDayStartedString)
+}
+
+if(!dayStarted.isSame(moment(), 'day')) {
+  dayStarted = moment()
+  isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
+  store.set('isDayStarted', isDayStartedString)
+}
+
+footer.refreshDayStarted(dayStarted)
 
 class TimerList extends BaseViewModel {
 
   constructor(views, jobtimer){
     super(views)
     this.jobtimer = jobtimer
+    
 
     dataAccess.projectsChanged.subscribe(value => this.refreshProjectList())
   
@@ -135,7 +152,7 @@ class TimerList extends BaseViewModel {
               this.currentAbsencePeriod(moment.range(date[0],date[1]))
           }
       }.bind(this)
-    })
+      })
 
     
       footer.onLoad(this.currentDate(), this.db, jobtimer)
@@ -143,7 +160,21 @@ class TimerList extends BaseViewModel {
 
       
       electron.ipcRenderer.on('browser-window-focus', function(event, arg){
+        if(this.today() && this.today().isSame(new moment(), 'day'))
+        {
+          return
+        }
         this.today(new moment())
+        $('#textCurrentDate').datepicker({
+          language: 'de',
+          autoClose:true,
+          todayButton: new Date(),
+          maxDate: new Date(),
+          onSelect:function onSelect(fd, date) {
+            this.currentDate(moment(date))
+          }.bind(this)
+        })
+        
       }.bind(this))
 
       this.jobtimer.timeSignal.subscribe(this.timerStep.bind(this))
@@ -151,6 +182,8 @@ class TimerList extends BaseViewModel {
       this.jobtimer.startSignal.subscribe(this.timerStart.bind(this))
 
       this.handleModalChangeJobDuration()
+
+      this.timerSumSubject = new Subject()
 
       this.loaded = true
       if(this.callAfterLoad)
@@ -160,6 +193,8 @@ class TimerList extends BaseViewModel {
     electron.ipcRenderer.on('newJob', function(event, jobDescription){
       this.addNewItem(jobDescription)
     }.bind(this))
+
+    
     
   }
 
@@ -248,7 +283,7 @@ class TimerList extends BaseViewModel {
         this.absenceToday(true)
       }
       var docs = await this.db_absences.find({date: day.format('YYYY-MM-DD')})
-      if(!docs) {
+      if(!docs || !day.isBusinessDay()) {
         continue
       }
       var newAbsence = {date:day.format('YYYY-MM-DD')}
@@ -755,8 +790,9 @@ class TimerList extends BaseViewModel {
   
   refreshTimeSum(){
     var timeSum = this.getTimeSum()
-  
-    $.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
+
+    this.timerSumSubject.next(timeSum)
+    // $.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }
   
   getTimeSum(){

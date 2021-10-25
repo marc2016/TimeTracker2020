@@ -2,6 +2,7 @@ var moment = require('moment');
 var _ = require('lodash');
 var momentDurationFormatSetup = require("moment-duration-format");
 var ko = require('knockout');
+const { timer } = require('rxjs');
 
 var Datastore = require('nedb')
 
@@ -9,6 +10,7 @@ var self = module.exports = {
     leftJobDescription: ko.observable('keine laufende Aufgabe'),
     leftJobDuration: ko.observable(''),
     rightTimeSum: ko.observable('00:00:00/0.00'),
+    dayStarted: ko.observable('-'),
     monthChart: undefined,
     utils: undefined,
     leftFooterAction: undefined,
@@ -30,6 +32,8 @@ var self = module.exports = {
         $('#sidebarButton').click(function() {$('#footerContainer').toggleClass('chart');
         $('#buttonSymbol').toggleClass('down');
         self.initChart(currentDate)})
+
+        $('#footerRightContent').click(function() {$('#timeInfoContainer').toggleClass('show')});
 
         self.jobtimer.timeSignal.subscribe(self.refreshStatusBarEntry)
         self.jobtimer.stopSignal.subscribe(self.timerStop)
@@ -56,6 +60,10 @@ var self = module.exports = {
         self.leftJobDescription(description)
         self.leftJobDuration(utils.getTimeString(duration))
         leftFooter.addEventListener('click', self.leftFooterAction)
+    },
+
+    refreshDayStarted: function (date) {
+        this.dayStarted(date.format('HH:mm:ss'))
     },
 
     initChart: async function(currentDate){
