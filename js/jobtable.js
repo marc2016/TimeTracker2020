@@ -4,7 +4,7 @@ const { clipboard } = require('electron')
 
 var _ = require('lodash');
 var toastr = require('toastr');
-//var moment = require('moment');
+
 var Moment = require('moment-business-days');
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
@@ -380,7 +380,7 @@ class JobTable extends BaseViewModel {
                     if(dateFromDb.isBusinessDay()) {
                         absenceDays += 1
                     }
-                    if(dateFromDb.isBetween(rangeUntilToday.start, rangeUntilToday.end)) {
+                    if(dateFromDb.isBetween(rangeUntilToday.start, rangeUntilToday.end, undefined, '[]')) {
                         daysUntilToday -= 1
                     }
                 })
