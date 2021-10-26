@@ -19,6 +19,12 @@ jobs:
         with:
           node-version: 14
 
+      - name: Compile CSS from SCSS files
+        uses: gha-utilities/sass-build@v0.4.7
+        with:
+          source: SCSS/combined.scss
+          destination: Styles/main.css
+
       - name: Electron Builder Action
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
