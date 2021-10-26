@@ -792,7 +792,7 @@ class TimerList extends BaseViewModel {
     var timeSum = this.getTimeSum()
 
     this.timerSumSubject.next(timeSum)
-    // $.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
+    $.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }
   
   getTimeSum(){
