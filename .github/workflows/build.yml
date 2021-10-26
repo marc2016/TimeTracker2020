@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: 14
 
+      - uses: bahmutov/npm-install@v1
+      
       - name: Compile CSS from SCSS files
         uses: gha-utilities/sass-build@v0.4.7
         with:
