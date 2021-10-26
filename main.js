@@ -1,7 +1,5 @@
 const electron = require('electron')
 const app = electron.app
-const protocol = electron.protocol
-const os = require("os");
 const { ipcMain } = require('electron')
 
 const Store = require('electron-store');
@@ -20,8 +18,6 @@ const _ = require('lodash')
 
 const nativeImage = require('electron').nativeImage
 
-var userDataPath = app.getPath('userData')+'/userdata/'
-
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'debug';
 log.info('App starting...');
@@ -37,7 +33,6 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
-let deeplinkingUrl
 let tray = null
 let mainWindow
 
@@ -94,7 +89,24 @@ if (!gotTheLock) {
     })
     
     mainWindow.loadFile('index.html')
-    electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()});  
+    electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()}); 
+    
+    let trayIconPath = undefined
+    if (process.platform == 'darwin') {
+      trayIconPath = path.join(__dirname, 'icons/logo_tray@2x.png')
+    } else {
+      trayIconPath = path.join(__dirname, 'icons/logo.ico')
+    }
+
+    const trayIcon = nativeImage.createFromPath(trayIconPath);
+    tray = new Tray(trayIcon)
+    tray.on('click', () => {
+      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+    })
+    
+    tray.setToolTip('TimeTracker')
+  
+    autoUpdater.checkForUpdatesAndNotify();
   })
   app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
@@ -127,36 +139,6 @@ if (!gotTheLock) {
       mainWindow.focus()
     }
   })
-  app.on('ready', () => {    
-    let trayIconPath = undefined
-    if (process.platform == 'darwin') {
-      trayIconPath = path.join(__dirname, 'icons/logo_tray@2x.png')
-    } else {
-      trayIconPath = path.join(__dirname, 'icons/logo.ico')
-    }
-
-    const trayIcon = nativeImage.createFromPath(trayIconPath);
-    tray = new Tray(trayIcon)
-    tray.on('click', () => {
-      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-    })
-
-    mainWindow.maximize();
-    
-    tray.setToolTip('TimeTracker')
-  
-    global.tray = tray
-  
-    global.menu = Menu
-  
-    global.autoUpdater = autoUpdater
-  
-    autoUpdater.checkForUpdatesAndNotify();
-    
-    global.vars = {
-      
-    }
-  })
   app.on('browser-window-focus', function (event, win) {
     mainWindow.webContents.send('browser-window-focus')
     
@@ -164,24 +146,8 @@ if (!gotTheLock) {
 }
 
 function createWindow() {
-  
   log.info("Create window.")
-
-  mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
-    minWidth: 480,
-    minHeight: 450,
-    icon: path.join(__dirname, 'icons/logo.ico'),
-    webPreferences: {
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      sandbox: false, nativeWindowOpen: true
-    }
-  })
-  
+  mainWindow = new BrowserWindow(mainOpts)
 }
 
 ipcMain.on('get-app-path', (event, arg) => {
@@ -202,11 +168,11 @@ function handleUrl(url) {
 }
 
 ipcMain.on('window-operations', (event, arg) => {
-  if(args == 'close') {
+  if(arg == 'close') {
     mainWindow.close()
-  } else if(args == 'minimize') {
+  } else if(arg == 'minimize') {
     mainWindow.minimize();
-  } else if(args == 'maximize') {
+  } else if(arg == 'maximize') {
     mainWindow.maximize();
   }
 })
@@ -228,5 +194,13 @@ autoUpdater.on('download-progress', (info) => {
   if(info) {
     var progress = _.round(info.percent)
     mainWindow.webContents.send('app-update-download-progress', progress)
+  }
+})
+
+ipcMain.on('updater', (event, arg) => {
+  if(arg == 'quitAndInstall') {
+    autoUpdater.quitAndInstall()
+  } else if(arg == 'check') {
+    autoUpdater.checkForUpdates();
   }
 })

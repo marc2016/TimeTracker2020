@@ -156,13 +156,13 @@ function maximizeWindow(){
 
 async function closeApp(){
   log.info("App is closed for Update.")
-  // autoUpdater.quitAndInstall()
+  ipcRenderer.send('updater', 'quitAndInstall')
 }
 
 function checkForUpdatesClick(){
   this.updateAvailable('checking')
   this.downloadProgress(0)
-  // autoUpdater.checkForUpdates();
+  ipcRenderer.send('updater', 'check')
 }
 
 function timerUpdateNotifier(updateValue){

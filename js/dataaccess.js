@@ -10,7 +10,6 @@ ipcRenderer.on('get-app-path-reply', (event, arg) => {
     instance.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
     instance.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });
     instance.dbAbsences = new Datastore({ filename: userDataPath+'/absences.db', autoload: true });
-    log.info('BLA'+instance.dbJobs)
 })
 
 ipcRenderer.sendSync('get-app-path')
