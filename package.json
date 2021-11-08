@@ -63,7 +63,7 @@
     "datatables.net-bs": "^1.10.19",
     "datatables.net-bs4": "^1.10.19",
     "datatables.net-dt": "^1.10.19",
-    "date-holidays": "^1.2.10",
+    "date-holidays": "^3.12.0",
     "duration-pattern": "^1.0.1",
     "easy-autocomplete": "^1.3.5",
     "electron-localshortcut": "^3.1.0",

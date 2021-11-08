@@ -1,6 +1,8 @@
 const electron = require('electron')
 const { clipboard } = require('electron')
 
+var _ = require('lodash');
+
 const { Observable, Subject, ReplaySubject, from, of, range } = require('rxjs');
 const { auditTime } = require('rxjs/operators');
 
@@ -11,14 +13,22 @@ ko.mapping = require('knockout-mapping')
 
 var footer = require('./footer.js')
 
+const Store = require('electron-store');
+const store = new Store();
+
 var Moment = require('moment-business-days');
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
+var Holidays = require('date-holidays')
 
-var _ = require('lodash');
-
-const Store = require('electron-store');
-const store = new Store();
+var country = store.get('selectedCountry','DE')
+var state = store.get('selectedState','NW')
+var hd = new Holidays(country,state, {types: ['public']})
+var holidays = _.map(hd.getHolidays(), function(value){ return value.date.split(" ")[0] })
+moment.updateLocale('de', {
+  holidays: holidays,
+  holidayFormat: 'YYYY-MM-DD'
+});
 
 var utils = require('./utils.js')
 

@@ -89,7 +89,7 @@ class JobTable extends BaseViewModel {
             this.store = new Store();
             var country = this.store.get('selectedCountry','DE')
             var state = this.store.get('selectedState','NW')
-            var hd = new Holidays(country,state)
+            var hd = new Holidays(country,state, {types: ['public']})
             var holidays = _.map(hd.getHolidays(), function(value){ return value.date.split(" ")[0] })
             moment.updateLocale('de', {
                 holidays: holidays,
