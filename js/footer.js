@@ -2,20 +2,25 @@ var moment = require('moment');
 var _ = require('lodash');
 var momentDurationFormatSetup = require("moment-duration-format");
 var ko = require('knockout');
-const { timer } = require('rxjs');
+const { Observable, Subject, ReplaySubject, from, of, range, timer, interval, combineLatest } = require('rxjs');
+const { map, switchMap } = require('rxjs/operators');
 
-var Datastore = require('nedb')
 
 var self = module.exports = {
     leftJobDescription: ko.observable('keine laufende Aufgabe'),
     leftJobDuration: ko.observable(''),
     rightTimeSum: ko.observable('00:00:00/0.00'),
+    todayTimeSum: ko.observable('00:00:00/0.00'),
     dayStarted: ko.observable('-'),
+    dayStartetMoment: undefined,
+    dayEnd: ko.observable('-'),
+    machineRunning: ko.observable('-'),
     monthChart: undefined,
     utils: undefined,
     leftFooterAction: undefined,
     db: undefined,
     jobtimer: undefined,
+    timerSumSubject: new Subject(),
 
     isBound: function() {
         return !!ko.dataFor(document.getElementById('footerContainer'));
@@ -63,7 +68,18 @@ var self = module.exports = {
     },
 
     refreshDayStarted: function (date) {
-        this.dayStarted(date.format('HH:mm:ss'))
+        this.dayStarted(date.format('HH:mm'))
+        this.dayStartetMoment = date
+    },
+
+    getTimeString: function (seconds){
+        if(!seconds)
+            return "00:00:00/0.00"
+        
+        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+        
+        return formated + "/" + decimal
     },
 
     initChart: async function(currentDate){
@@ -150,3 +166,56 @@ var self = module.exports = {
       
       }
 }
+
+var nowObservable = interval(1000).pipe(map((x, idx, obs) => moment()))
+
+var nowSubscription = nowObservable.subscribe(
+    function (x) {
+        var now = x.clone()
+        var duration = moment.duration(now.diff(self.dayStartetMoment))
+        var timeString = self.getTimeString(duration.asSeconds())
+        self.machineRunning(timeString)
+    },
+    function (err) {
+        console.log('Error: ' + err);
+    },
+    function () {
+        console.log('Completed');
+    }
+);
+
+var subscription = combineLatest([
+    nowObservable,
+    self.timerSumSubject]
+).pipe(map(x => ({
+    currentTime: x[0],
+    timeSumSeconds: x[1]
+})))
+
+subscription.subscribe(
+    function (x) {
+        var targetSeconds = 8*60*60
+        var diffSeconds = Math.ceil(targetSeconds-x.timeSumSeconds)
+        var now = x.currentTime.clone()
+        now.add(diffSeconds, 's')
+        self.dayEnd(now.format('HH:mm'))
+    },
+    function (err) {
+        console.log('Error: ' + err);
+    },
+    function () {
+        console.log('Completed');
+    }
+);
+    
+self.timerSumSubject.subscribe(
+    function (x) {
+        self.rightTimeSum(self.getTimeString(x))
+    },
+    function (err) {
+        console.log('Error: ' + err);
+    },
+    function () {
+        console.log('Completed');
+    }
+);

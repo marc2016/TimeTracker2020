@@ -193,8 +193,6 @@ class TimerList extends BaseViewModel {
 
       this.handleModalChangeJobDuration()
 
-      this.timerSumSubject = new Subject()
-
       this.loaded = true
       if(this.callAfterLoad)
         this.callAfterLoad()
@@ -801,8 +799,8 @@ class TimerList extends BaseViewModel {
   refreshTimeSum(){
     var timeSum = this.getTimeSum()
 
-    this.timerSumSubject.next(timeSum)
-    $.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
+    footer.timerSumSubject.next(timeSum)
+    //$.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }
   
   getTimeSum(){
