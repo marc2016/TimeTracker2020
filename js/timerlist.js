@@ -95,6 +95,7 @@ class TimerList extends BaseViewModel {
       this.itemToSync = ko.observable()
       this.currentAbsencePeriod = ko.observable()
       this.absenceToday = ko.observable(false)
+      this.sumToday = ko.observable()
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
@@ -227,6 +228,8 @@ class TimerList extends BaseViewModel {
 
     var docs = await this.db.find({date: this.currentDate().format('YYYY-MM-DD')})
     this.refreshJobTimerList(docs)
+    if(this.currentData().isSame(moment(), 'day'))
+      this.sumToday(this.getTimeSum())
     this.refreshTimeSum()
     var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
     if (absenceDocs.length > 0) {
@@ -798,7 +801,7 @@ class TimerList extends BaseViewModel {
   
   refreshTimeSum(){
     var timeSum = this.getTimeSum()
-
+    electron.ipcRenderer.send('window-progress', timeSum/(8*60*60))
     footer.timerSumSubject.next(timeSum)
     //$.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }

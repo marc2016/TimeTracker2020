@@ -31,7 +31,8 @@ const {
 const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
-const url = require('url')
+const url = require('url');
+const { id } = require('chartjs-plugin-annotation');
 
 let tray = null
 let mainWindow
@@ -175,6 +176,13 @@ ipcMain.on('window-operations', (event, arg) => {
   } else if(arg == 'maximize') {
     mainWindow.maximize();
   }
+})
+
+ipcMain.on('window-progress', (event, timeRatio) => {
+  if(timeRatio > 1) {
+    timeRatio = 1
+  }
+  mainWindow.setProgressBar(timeRatio)
 })
 
 autoUpdater.on('update-available', () => {
