@@ -107,7 +107,7 @@ if (!gotTheLock) {
     
     tray.setToolTip('TimeTracker')
   
-    autoUpdater.checkForUpdatesAndNotify();
+    //autoUpdater.checkForUpdatesAndNotify();
   })
   app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
