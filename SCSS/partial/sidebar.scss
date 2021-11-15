@@ -69,18 +69,20 @@
 }
 
 #timeInfoContainer {
+  white-space: nowrap;
   color: black;
   background-color: rgba(255, 255, 255, 0.75);
   position: absolute;
   bottom: 0;
   vertical-align: top;
-  width: 215px;
+  width: auto;
   margin-bottom: -75px;
   margin-right: 10px;
   right: 0;
   border-radius: 25px;
   transition: margin-bottom 1s;
   padding-left: 22px;
+  padding-right: 22px;
   padding-top: 15px;
   padding-bottom: 15px;
   border-color: $maincolor;
