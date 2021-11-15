@@ -56,23 +56,6 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
 
-var dayStarted = moment()
-var isDayStartedString = store.get('isDayStarted')
-if(isDayStartedString) {
-  dayStarted = moment(isDayStartedString, 'DD.MM.YYYY-HH:mm:ss')
-} else {
-  isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
-  store.set('isDayStarted', isDayStartedString)
-}
-
-if(!dayStarted.isSame(moment(), 'day')) {
-  dayStarted = moment()
-  isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
-  store.set('isDayStarted', isDayStartedString)
-}
-
-footer.refreshDayStarted(dayStarted)
-
 class TimerList extends BaseViewModel {
 
   constructor(views, jobtimer){
@@ -171,20 +154,36 @@ class TimerList extends BaseViewModel {
 
       
       electron.ipcRenderer.on('browser-window-focus', function(event, arg){
-        if(this.today() && this.today().isSame(new moment(), 'day'))
+        if(!(this.today() && this.today().isSame(new moment(), 'day')))
         {
-          return
+          this.today(new moment())
+          $('#textCurrentDate').datepicker({
+            language: 'de',
+            autoClose:true,
+            todayButton: new Date(),
+            maxDate: new Date(),
+            onSelect:function onSelect(fd, date) {
+              this.currentDate(moment(date))
+            }.bind(this)
+          })
         }
-        this.today(new moment())
-        $('#textCurrentDate').datepicker({
-          language: 'de',
-          autoClose:true,
-          todayButton: new Date(),
-          maxDate: new Date(),
-          onSelect:function onSelect(fd, date) {
-            this.currentDate(moment(date))
-          }.bind(this)
-        })
+
+        var dayStarted = moment()
+        var isDayStartedString = store.get('isDayStarted')
+        if(isDayStartedString) {
+          dayStarted = moment(isDayStartedString, 'DD.MM.YYYY-HH:mm:ss')
+        } else {
+          isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
+          store.set('isDayStarted', isDayStartedString)
+        }
+
+        if(!dayStarted.isSame(moment(), 'day')) {
+          dayStarted = moment()
+          isDayStartedString = dayStarted.format('DD.MM.YYYY-HH:mm:ss')
+          store.set('isDayStarted', isDayStartedString)
+        }
+
+        footer.refreshDayStarted(dayStarted)
         
       }.bind(this))
 
@@ -228,7 +227,7 @@ class TimerList extends BaseViewModel {
 
     var docs = await this.db.find({date: this.currentDate().format('YYYY-MM-DD')})
     this.refreshJobTimerList(docs)
-    if(this.currentData().isSame(moment(), 'day'))
+    if(this.currentDate().isSame(moment(), 'day'))
       this.sumToday(this.getTimeSum())
     this.refreshTimeSum()
     var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
