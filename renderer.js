@@ -205,15 +205,6 @@ function openAppSettings(){
   changeView(this.appSettingsViewModel)
 }
 
-function openProjectsSettings(){
-  changeView(undefined)
-  $('#mainContent').show()
-  $('#mainContent').load('pages/projectssettings.html', function(){
-    this.projectsSettingViewModel.onLoad()
-  }.bind(this))
-  $('#navProjectsSettings').addClass("selected");
-}
-
 function changeView(newViewModel){
   if(this.currentViewModel && this.currentViewModel == newViewModel)
     return;
