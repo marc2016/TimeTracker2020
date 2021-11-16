@@ -51,7 +51,6 @@ var jobtable = require('./js/jobtable.js')
 var TimerList = require('./js/timerlist.js')
 
 var jobtimer = require('./js/jobtimer.js')
-var footer = require('./js/footer.js')
 
 this.projectsSettingViewModel = undefined
 this.appSettingsViewModel = undefined
@@ -65,21 +64,10 @@ var windowsToaster = new WindowsToaster({
   appID: "TimeTracker",
   wait: true
 });
-// windowsToaster.on('click', function (notifierObject, options) {
-//   var window = require('electron').remote.getCurrentWindow()
-//     window.show()
-//     window.focus()
-// });
 
 onload = function() {
   log.info("App started.")
 
-  
-  this.userEmail = ko.observable()
-  this.avatar =  ko.computed(function() {
-    return gravatar.url(this.userEmail(), {protocol: 'http', s: '25', d: 'retro'});
-  }, this);
-  this.accountName = ko.observable('nicht angemeldet')
   this.appVersion = ko.computed(function() {
     return ' '+pjson.version
   }, this);
