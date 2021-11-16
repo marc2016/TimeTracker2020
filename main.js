@@ -79,17 +79,14 @@ app.setAsDefaultProtocolClient('tt')
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
+  log.warn('App already starting and is locked.');
   app.quit()
 } else {
   app.on('ready', function(){
+    log.debug('App is ready. Loading Splashscreen.');
     mainWindow = splashScreen.initSplashScreen(splashscreenConfig);
     mainWindow.setMenu(null);
-    
-    mainWindow.on('closed', function () {
-      mainWindow = null
-    })
-    
-    mainWindow.loadFile('index.html')
+
     electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()}); 
     
     let trayIconPath = undefined
@@ -104,10 +101,16 @@ if (!gotTheLock) {
     tray.on('click', () => {
       mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
     })
+
+    mainWindow.on('closed', function () {
+      mainWindow = null
+    })
     
     tray.setToolTip('TimeTracker')
   
-    //autoUpdater.checkForUpdatesAndNotify();
+    log.debug('Start loading index.html.');
+    mainWindow.loadFile('index.html')
+    log.debug('index.html loaded.');
   })
   app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
@@ -144,17 +147,62 @@ if (!gotTheLock) {
     mainWindow.webContents.send('browser-window-focus')
     
   })
+
+  ipcMain.on('get-app-path', (event, arg) => {
+    var userDataPath = app.getPath('userData')+'/userdata/'
+    event.reply('get-app-path-reply', userDataPath)
+  })
+
+  ipcMain.on('window-operations', (event, arg) => {
+    if(arg == 'close') {
+      mainWindow.close()
+    } else if(arg == 'minimize') {
+      mainWindow.minimize();
+    } else if(arg == 'maximize') {
+      mainWindow.maximize();
+    }
+  })
+  
+  ipcMain.on('window-progress', (event, timeRatio) => {
+    if(timeRatio > 1) {
+      timeRatio = 1
+    }
+    mainWindow.setProgressBar(timeRatio)
+  })
+
+  ipcMain.on('updater', (event, arg) => {
+    if(arg == 'quitAndInstall') {
+      autoUpdater.quitAndInstall()
+    } else if(arg == 'check') {
+      autoUpdater.checkForUpdates();
+    }
+  })
+  
+  autoUpdater.on('update-available', () => {
+    log.info("Update is available.")
+    mainWindow.webContents.send('app-update', true)
+  })
+  autoUpdater.on('update-not-available', () => {
+    log.info("Update is not available.")
+    mainWindow.webContents.send('app-update', false)
+  })
+  autoUpdater.on('update-downloaded', (ev, progressObj) => {
+    log.info("Update is downloaded.")
+    mainWindow.webContents.send('app-update', 'ready')
+  })
+  
+  autoUpdater.on('download-progress', (info) => {
+    if(info) {
+      var progress = _.round(info.percent)
+      mainWindow.webContents.send('app-update-download-progress', progress)
+    }
+  })
 }
 
 function createWindow() {
   log.info("Create window.")
   mainWindow = new BrowserWindow(mainOpts)
 }
-
-ipcMain.on('get-app-path', (event, arg) => {
-  var userDataPath = app.getPath('userData')+'/userdata/'
-  event.reply('get-app-path-reply', userDataPath)
-})
 
 function handleUrl(url) {
   var decodedUrl = decodeURI(url)
@@ -168,47 +216,4 @@ function handleUrl(url) {
   }
 }
 
-ipcMain.on('window-operations', (event, arg) => {
-  if(arg == 'close') {
-    mainWindow.close()
-  } else if(arg == 'minimize') {
-    mainWindow.minimize();
-  } else if(arg == 'maximize') {
-    mainWindow.maximize();
-  }
-})
 
-ipcMain.on('window-progress', (event, timeRatio) => {
-  if(timeRatio > 1) {
-    timeRatio = 1
-  }
-  mainWindow.setProgressBar(timeRatio)
-})
-
-autoUpdater.on('update-available', () => {
-  log.info("Update is available.")
-  mainWindow.webContents.send('app-update', true)
-})
-autoUpdater.on('update-not-available', () => {
-  log.info("Update is not available.")
-  mainWindow.webContents.send('app-update', false)
-})
-autoUpdater.on('update-downloaded', (ev, progressObj) => {
-  log.info("Update is downloaded.")
-  mainWindow.webContents.send('app-update', 'ready')
-})
-
-autoUpdater.on('download-progress', (info) => {
-  if(info) {
-    var progress = _.round(info.percent)
-    mainWindow.webContents.send('app-update-download-progress', progress)
-  }
-})
-
-ipcMain.on('updater', (event, arg) => {
-  if(arg == 'quitAndInstall') {
-    autoUpdater.quitAndInstall()
-  } else if(arg == 'check') {
-    autoUpdater.checkForUpdates();
-  }
-})
