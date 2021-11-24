@@ -11,6 +11,7 @@ var self = module.exports = {
     leftJobDuration: ko.observable(''),
     rightTimeSum: ko.observable('00:00:00/0.00'),
     todayTimeSum: ko.observable('00:00:00/0.00'),
+    overtime: ko.observable('00:00:00/0.00'),
     dayStarted: ko.observable('-'),
     dayStartetMoment: undefined,
     dayEnd: ko.observable('-'),

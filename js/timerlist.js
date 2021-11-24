@@ -12,6 +12,7 @@ var ko = require('knockout');
 ko.mapping = require('knockout-mapping')
 
 var footer = require('./footer.js')
+var timefunctions = require('./timefunctions.js')
 
 const Store = require('electron-store');
 const store = new Store();
@@ -69,6 +70,7 @@ class TimerList extends BaseViewModel {
       this.hide()
 
       this.currentDate = ko.observable(new moment())
+      this.currentMonth = ko.observable(moment().month())
       this.today = ko.observable(new moment())
       this.currentJob = ko.observable()
       this.currentJobForNote = ko.observable()
@@ -86,6 +88,7 @@ class TimerList extends BaseViewModel {
       this.db_absences = dataAccess.getDb('absences')
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
+      this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
 
@@ -123,6 +126,7 @@ class TimerList extends BaseViewModel {
       }.bind(this));
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
+      this.currentMonth.subscribe(this.currentMonthChanged.bind(this))
 
       $('#textCurrentDate').datepicker({
         language: 'de',
@@ -203,7 +207,6 @@ class TimerList extends BaseViewModel {
     }.bind(this))
 
     
-    
   }
 
   myPostProcessingLogic() {
@@ -225,8 +228,30 @@ class TimerList extends BaseViewModel {
     this.db.ensureIndex({ fieldName: '_id', unique: true }, function (err) {});
     this.db.ensureIndex({ fieldName: 'date' }, function (err) {});
 
-    var docs = await this.db.find({date: this.currentDate().format('YYYY-MM-DD')})
-    this.refreshJobTimerList(docs)
+    var currentMonthRange = moment.range(
+      moment().startOf('month'),
+      moment().endOf('month')
+    )
+    var days = Array.from(currentMonthRange.by('day'));
+    var dates = days.map(m => m.format('YYYY-MM-DD'))
+    var jobDocs = await this.db.find({date: { $in: dates}})
+
+    this.refreshJobTimerList(jobDocs)
+
+    var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
+    var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
+    daysUntilToday = daysUntilToday-absenceDays
+    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+
+    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    footer.overtime(overTimeString)
+
+    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
+      var docDate = moment(d.date())
+      return moment().isSame(docDate, 'day')
+    });
+    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+
     if(this.currentDate().isSame(moment(), 'day'))
       this.sumToday(this.getTimeSum())
     this.refreshTimeSum()
@@ -576,12 +601,52 @@ class TimerList extends BaseViewModel {
     });
   }
   
-  async currentDateChanged(value){
-    this.saveAll()
+  async currentMonthChanged(value){
+    await this.saveAll()
     var lastEntryId = this.currentEntryId
-    // $.find('#textCurrentDate')[0].value = this.currentDate().format('DD.MM.YYYY')
-    var docs = await this.db.find({date: value.format('YYYY-MM-DD')})
-    this.refreshJobTimerList(docs)
+    
+    var currentMonthRange = moment.range(
+      moment().month(value).startOf('month'),
+      moment().month(value).endOf('month')
+    )
+    var days = Array.from(currentMonthRange.by('day'));
+    var dates = days.map(m => m.format('YYYY-MM-DD'))
+    var jobDocs = await this.db.find({date: { $in: dates}})
+
+    this.refreshJobTimerList(jobDocs)
+    this.refreshTimeSum()
+
+    var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
+    var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
+    daysUntilToday = daysUntilToday-absenceDays
+    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+
+    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    footer.overtime(overTimeString)
+  }
+
+  async currentDateChanged(value){
+    await this.saveAll()
+
+    var month = value.month()
+    this.currentMonth(month)
+
+    this.currentJobTimerList.removeAll()
+    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
+      var docDate = moment(d.date())
+      return value.isSame(docDate, 'day')
+    });
+
+    _.forEach(currentJobs, function(item) {
+      var projectId = item.projectId()
+      item.projectIsSet = ko.observable(projectId);
+
+      var ticketId = item.ticketId()
+      item.ticketIsSet = ko.observable(ticketId);
+    })
+
+    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+
     this.refreshTimeSum()
     footer.initChart(value)
     var absenceDocs = await this.db_absences.find({date: value.format('YYYY-MM-DD')})
@@ -703,6 +768,7 @@ class TimerList extends BaseViewModel {
 
     // this.registerFocusEvents()
     await this.saveAll()
+    this.currentDateChanged(this.currentDate())
   }
 
   addNewAbsence() {
@@ -799,14 +865,22 @@ class TimerList extends BaseViewModel {
   }
   
   refreshTimeSum(){
-    var timeSum = this.getTimeSum()
+    var timeSum = this.getTimeSumToday()
     electron.ipcRenderer.send('window-progress', timeSum/(8*60*60))
     footer.timerSumSubject.next(timeSum)
     //$.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }
   
   getTimeSum(){
-    return _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+    return _.sumBy(this.currentJobTimerList(), function(o) { return o.elapsedSeconds(); });
+  }
+
+  getTimeSumToday(){
+    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
+      var docDate = moment(d.date())
+      return moment().isSame(docDate, 'day')
+    });
+    return _.sumBy(currentJobs, function(o) { return o.elapsedSeconds(); });
   }
 
   changeNoteClick(that,data){

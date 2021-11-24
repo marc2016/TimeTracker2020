@@ -134,18 +134,28 @@
       <canvas id="chart"></canvas>
     </div>
     <div id="timeInfoContainer" class="container-fluid">
-      <div class="form-row">
-        <div class="col-4 col-left">Start</div>
-        <div class="col col-right"><span data-bind="text:dayStarted">-</span> Uhr</div>
-      </div>
-      <div class="form-row">
-        <div class="col-4 col-left">Ende</div>
-        <div class="col col-right"><span data-bind="text:dayEnd">-</span> Uhr</div>
-      </div>
-      <div class="form-row">
-        <div class="col-4 col-left">Am PC</div>
-        <div class="col col-right"><span data-bind="text:machineRunning">-</span></div>
-      </div>
+      <table style="width:100%">
+        <tr>
+          <td class="col-left">Start</td>
+          <td class="col-space"></td>
+          <td class="col-right"><span data-bind="text:dayStarted">-</span> Uhr</td>
+        </tr>
+        <tr>
+          <td class="col-left">Ende</td>
+          <td class="col-space"></td>
+          <td class="col-right"><span data-bind="text:dayEnd">-</span> Uhr</td>
+        </tr>
+        <tr>
+          <td class="col-left">Am PC</td>
+          <td class="col-space"></td>
+          <td class="col-right"><span data-bind="text:machineRunning">-</span></td>
+        </tr>
+        <tr>
+          <td class="col-left">Überstd.</td>
+          <td class="col-space"></td>
+          <td class="col-right"><span data-bind="text:overtime">-</span></td>
+        </tr>
+      </table>
       
     </div>
     <div id="footer" class="navbar-forground">

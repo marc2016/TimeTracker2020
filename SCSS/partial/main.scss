@@ -99,12 +99,19 @@ body {
     font-size: 15px;
 }
 
+.col-space {
+    width: 20px;
+}
+
 .col-left {
     text-align: start;
+    padding: 0 !important;
+    margin-right: 5px;
 }
 
 .col-right {
     text-align: start;
+    padding: 0 !important;
 }
 
 .btn-default {
