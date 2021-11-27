@@ -88,7 +88,7 @@ class TimerList extends BaseViewModel {
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
 
-      this.myPostProcessingLogic = this.myPostProcessingLogic.bind(this)
+      this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
 
       if(this.koWatcher){
         this.koWatcher.dispose()
@@ -142,16 +142,14 @@ class TimerList extends BaseViewModel {
         todayButton: false,
         dateFormat: 'dd.mm.yy',
         onSelect:function onSelect(fd, date) {
-          if(date && date.length == 2){
-              this.currentAbsencePeriod(moment.range(date[0],date[1]))
-          }
-      }.bind(this)
+            if(date && date.length == 2){
+                this.currentAbsencePeriod(moment.range(date[0],date[1]))
+            }
+          }.bind(this)
       })
 
-    
       footer.onLoad(this.currentDate(), this.db, jobtimer)
       footer.leftFooterAction = this.goToToday
-
       
       electron.ipcRenderer.on('browser-window-focus', function(event, arg){
         if(!(this.today() && this.today().isSame(new moment(), 'day')))
@@ -187,6 +185,10 @@ class TimerList extends BaseViewModel {
         
       }.bind(this))
 
+      electron.ipcRenderer.on('newJob', function(event, jobDescription){
+        this.addNewItem(jobDescription)
+      }.bind(this))
+
       this.jobtimer.timeSignal.subscribe(this.timerStep.bind(this))
       this.jobtimer.stopSignal.subscribe(this.timerStop.bind(this))
       this.jobtimer.startSignal.subscribe(this.timerStart.bind(this))
@@ -197,15 +199,9 @@ class TimerList extends BaseViewModel {
       if(this.callAfterLoad)
         this.callAfterLoad()
     }.bind(this))
-
-    electron.ipcRenderer.on('newJob', function(event, jobDescription){
-      this.addNewItem(jobDescription)
-    }.bind(this))
-
-    
   }
 
-  myPostProcessingLogic() {
+  jobListLoadedPostAction() {
     this.applySelectize()
     this.registerFocusEvents()
   }
