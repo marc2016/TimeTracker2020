@@ -220,29 +220,21 @@ class TimerList extends BaseViewModel {
     this.db.ensureIndex({ fieldName: '_id', unique: true }, function (err) {});
     this.db.ensureIndex({ fieldName: 'date' }, function (err) {});
 
-    var currentMonthRange = moment.range(
-      moment().startOf('month'),
-      moment().endOf('month')
-    )
-    var days = Array.from(currentMonthRange.by('day'));
-    var dates = days.map(m => m.format('YYYY-MM-DD'))
-    var jobDocs = await this.db.find({date: { $in: dates}})
+    this.refreshJobLists(moment())
 
-    this.refreshJobTimerList(jobDocs)
+    // var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
+    // var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
+    // daysUntilToday = daysUntilToday-absenceDays
+    // var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
 
-    var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
-    var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
-    daysUntilToday = daysUntilToday-absenceDays
-    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+    // var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    // footer.overtime(overTimeString)
 
-    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
-    footer.overtime(overTimeString)
-
-    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
-      var docDate = moment(d.date())
-      return moment().isSame(docDate, 'day')
-    });
-    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+    // var currentJobs = _.filter(this.jobTimerList(), function(d) { 
+    //   var docDate = moment(d.date())
+    //   return moment().isSame(docDate, 'day')
+    // });
+    // ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     if(this.currentDate().isSame(moment(), 'day'))
       this.sumToday(this.getTimeSum())
@@ -508,6 +500,41 @@ class TimerList extends BaseViewModel {
     )
   }
 
+  async refreshJobLists(momentValue) {
+    var currentMonthRange = moment.range(
+      momentValue.clone().startOf('month'),
+      momentValue.clone().endOf('month')
+    )
+    await this.refreshJobTimerListForRange(currentMonthRange)
+    this.refreshSelectedJobTimerList(this.jobTimerList(),momentValue)
+  }
+
+  refreshSelectedJobTimerList(jobList, selectedDate) {
+    this.currentJobTimerList.removeAll()
+    var currentJobs = _.filter(jobList, function(d) { 
+      var docDate = moment(d.date())
+      return selectedDate.isSame(docDate, 'day')
+    });
+
+    _.forEach(currentJobs, function(item) {
+      var projectId = item.projectId()
+      item.projectIsSet = ko.observable(projectId);
+
+      var ticketId = item.ticketId()
+      item.ticketIsSet = ko.observable(ticketId);
+    })
+
+    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+  }
+
+  async refreshJobTimerListForRange(range) {
+    var days = Array.from(range.by('day'));
+    var dates = days.map(m => m.format('YYYY-MM-DD'))
+    var jobDocs = await this.db.find({date: { $in: dates}})
+
+    this.refreshJobTimerList(jobDocs)
+  }
+
   refreshJobTimerList(docs){
     docs.forEach(function(item, index){
       if(!item.projectId){
@@ -528,6 +555,7 @@ class TimerList extends BaseViewModel {
       }
       
     }.bind(this))
+
     this.jobTimerList.removeAll()
     var observableDocs = ko.mapping.fromJS(docs,this.jobTimerList);
 
@@ -588,11 +616,9 @@ class TimerList extends BaseViewModel {
       moment().month(value).startOf('month'),
       moment().month(value).endOf('month')
     )
-    var days = Array.from(currentMonthRange.by('day'));
-    var dates = days.map(m => m.format('YYYY-MM-DD'))
-    var jobDocs = await this.db.find({date: { $in: dates}})
+    
+    await this.refreshJobTimerListForRange(currentMonthRange)
 
-    this.refreshJobTimerList(jobDocs)
     this.refreshTimeSum()
 
     var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
@@ -610,21 +636,7 @@ class TimerList extends BaseViewModel {
     var month = value.month()
     this.currentMonth(month)
 
-    this.currentJobTimerList.removeAll()
-    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
-      var docDate = moment(d.date())
-      return value.isSame(docDate, 'day')
-    });
-
-    _.forEach(currentJobs, function(item) {
-      var projectId = item.projectId()
-      item.projectIsSet = ko.observable(projectId);
-
-      var ticketId = item.ticketId()
-      item.ticketIsSet = ko.observable(ticketId);
-    })
-
-    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+    this.refreshSelectedJobTimerList(this.jobTimerList(), value)
 
     this.refreshTimeSum()
     footer.initChart(value)
