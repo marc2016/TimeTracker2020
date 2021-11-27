@@ -3,9 +3,6 @@ const { clipboard } = require('electron')
 
 var _ = require('lodash');
 
-const { Observable, Subject, ReplaySubject, from, of, range } = require('rxjs');
-const { auditTime } = require('rxjs/operators');
-
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
@@ -62,7 +59,6 @@ class TimerList extends BaseViewModel {
   constructor(views, jobtimer){
     super(views)
     this.jobtimer = jobtimer
-    
 
     dataAccess.projectsChanged.subscribe(value => this.refreshProjectList())
   
@@ -291,14 +287,6 @@ class TimerList extends BaseViewModel {
     ]
   }
 
-  addNoneWorkingDayToday(){
-    this.addNoneWorkingDay(new moment(),new moment())
-  }
-
-  addNoneWorkingDay(start, end){
-
-  }
-
   saveJobDurationInput(data, that){
     if(event.keyCode === 13) {
       var jobId = $(data).attr('jobId')
@@ -440,7 +428,6 @@ class TimerList extends BaseViewModel {
 
   applySelectize() {
     var that = this
-    var jiraIssueRegex = "[A-Z]{2,}-\d+"
     $('select.projectSelect').selectize(
         {
           options: that.projectList(),
@@ -567,9 +554,6 @@ class TimerList extends BaseViewModel {
     }
 
     this.createAutoComplete()
-    // this.applySelectize()
-
-    // this.registerFocusEvents()
   }
 
   registerFocusEvents() {
@@ -603,8 +587,7 @@ class TimerList extends BaseViewModel {
   
   async currentMonthChanged(value){
     await this.saveAll()
-    var lastEntryId = this.currentEntryId
-    
+
     var currentMonthRange = moment.range(
       moment().month(value).startOf('month'),
       moment().month(value).endOf('month')
@@ -687,14 +670,6 @@ class TimerList extends BaseViewModel {
   
     return formated
   }
-
-  
-  async transferEntry(that,data){
-    var newDate = new moment()
-    var newEntry = {jobNote:data.jobNote(), ticketId: data.ticketId(), projectId: data.projectId(),elapsedSeconds:0, description:data.description(), date:newDate.format('YYYY-MM-DD'), billable:that.billable(), lastSync: ""}
-    await that.db.insert(newEntry)
-    that.currentDate(newDate)
-  }
   
   previousDay(){
     this.currentDate(this.currentDate().subtract(1,'days'))
@@ -764,9 +739,7 @@ class TimerList extends BaseViewModel {
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
-    // this.applySelectize()
 
-    // this.registerFocusEvents()
     await this.saveAll()
     this.currentDateChanged(this.currentDate())
   }
@@ -841,7 +814,6 @@ class TimerList extends BaseViewModel {
     }
     
     that.jobtimer.start(data._id(), data.elapsedSeconds(), data.description())
-    
   }
   
   goToToday(){
@@ -868,7 +840,6 @@ class TimerList extends BaseViewModel {
     var timeSum = this.getTimeSumToday()
     electron.ipcRenderer.send('window-progress', timeSum/(8*60*60))
     footer.timerSumSubject.next(timeSum)
-    //$.find('#textTimeSum')[0].textContent = this.getTimeString(timeSum)
   }
   
   getTimeSum(){

@@ -32,7 +32,6 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url');
-const { id } = require('chartjs-plugin-annotation');
 
 let tray = null
 let mainWindow
@@ -88,7 +87,7 @@ if (!gotTheLock) {
     log.debug('Start loading index.html.');
     mainWindow.loadFile('index.html')
     log.debug('index.html loaded.');
-    
+
     mainWindow.setMenu(null);
 
     electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()}); 
