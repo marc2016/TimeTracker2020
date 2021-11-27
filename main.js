@@ -85,6 +85,10 @@ if (!gotTheLock) {
   app.on('ready', function(){
     log.debug('App is ready. Loading Splashscreen.');
     mainWindow = splashScreen.initSplashScreen(splashscreenConfig);
+    log.debug('Start loading index.html.');
+    mainWindow.loadFile('index.html')
+    log.debug('index.html loaded.');
+    
     mainWindow.setMenu(null);
 
     electronLocalshortcut.register(mainWindow, 'F12', () => {mainWindow.webContents.toggleDevTools()}); 
@@ -107,10 +111,6 @@ if (!gotTheLock) {
     })
     
     tray.setToolTip('TimeTracker')
-  
-    log.debug('Start loading index.html.');
-    mainWindow.loadFile('index.html')
-    log.debug('index.html loaded.');
   })
   app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
