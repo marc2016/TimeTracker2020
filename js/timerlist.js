@@ -10,6 +10,7 @@ ko.mapping = require('knockout-mapping')
 
 var footer = require('./footer.js')
 var timefunctions = require('./timefunctions.js')
+var utils = require('./utils.js')
 
 const Store = require('electron-store');
 const store = new Store();
@@ -27,8 +28,6 @@ moment.updateLocale('de', {
   holidays: holidays,
   holidayFormat: 'YYYY-MM-DD'
 });
-
-var utils = require('./utils.js')
 
 var sync = require('./sync.js')
 sync.baseUrl = store.get('syncRestBaseUrl')
@@ -227,7 +226,7 @@ class TimerList extends BaseViewModel {
     // daysUntilToday = daysUntilToday-absenceDays
     // var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
 
-    // var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    // var overTimeString = utils.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
     // footer.overtime(overTimeString)
 
     // var currentJobs = _.filter(this.jobTimerList(), function(d) { 
@@ -626,7 +625,7 @@ class TimerList extends BaseViewModel {
     daysUntilToday = daysUntilToday-absenceDays
     var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
 
-    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    var overTimeString = utils.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
     footer.overtime(overTimeString)
   }
 
@@ -652,32 +651,7 @@ class TimerList extends BaseViewModel {
     this.currentDate(this.currentDate().add(1,'days'))
   }
   
-  getTimeString(seconds){
-    if(!seconds)
-      return "00:00:00/0.00"
   
-    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-    var decimal = moment.duration(seconds, "seconds").format("h", 2)
-  
-    return formated + "/" + decimal
-  }
-
-  getDecimalDuration(seconds){
-    if(!seconds)
-      return "0.00"
-    var decimal = moment.duration(seconds, "seconds").format("h", 2)
-  
-    return decimal
-  }
-
-  getFormatedDuration(seconds){
-    if(!seconds)
-      return "00:00:00"
-  
-    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-  
-    return formated
-  }
   
   previousDay(){
     this.currentDate(this.currentDate().subtract(1,'days'))
@@ -781,7 +755,7 @@ class TimerList extends BaseViewModel {
     result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
     result += `Tätigkeit: ${data.description() || "-"}\n`
     result += `Projekt: ${project ? project.name || "-" : "-"}\n`
-    result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
+    result += `Dauer: ${utils.getTimeString(data.elapsedSeconds())}\n`
     clipboard.writeText(result)
     toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
@@ -882,7 +856,7 @@ class TimerList extends BaseViewModel {
   refreshTray(elapsedTime){
     // var tray = remote.getGlobal('tray');
     // var timeSum = this.getTimeSum()
-    // tray.setToolTip("Ʃ "+this.getTimeString(timeSum)+", Aufgabe: "+ this.getTimeString(elapsedTime))
+    // tray.setToolTip("Ʃ "+utils.getTimeString(timeSum)+", Aufgabe: "+ utils.getTimeString(elapsedTime))
   }
   
   // trayContextMenu: remote.getGlobal('menu').buildFromTemplate([

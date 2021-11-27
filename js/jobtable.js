@@ -170,18 +170,9 @@ class JobTable extends BaseViewModel {
         result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
         result += `Tätigkeit: ${job.description() || "-"}\n`
         result += `Projekt: ${project ? project.name || "-" : "-"}\n`
-        result += `Dauer: ${that.getTimeString(job.elapsedSeconds())}\n`
+        result += `Dauer: ${utils.getTimeString(job.elapsedSeconds())}\n`
         clipboard.writeText(result)
     }
-    getTimeString(seconds){
-        if(!seconds)
-          return "00:00:00/0.00"
-      
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-        var decimal = moment.duration(seconds, "seconds").format("h", 2)
-      
-        return formated + "/" + decimal
-      }
 
     removeItemModal(that,data){
         $('#modalDelete').modal('show');

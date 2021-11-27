@@ -73,16 +73,6 @@ var self = module.exports = {
         this.dayStartetMoment = date
     },
 
-    getTimeString: function (seconds){
-        if(!seconds)
-            return "00:00:00/0.00"
-        
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-        var decimal = moment.duration(seconds, "seconds").format("h", 2)
-        
-        return formated + "/" + decimal
-    },
-
     initChart: async function(currentDate){
         var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
         var docs = await self.db.find({date: regex})
@@ -174,7 +164,7 @@ var nowSubscription = nowObservable.subscribe(
     function (x) {
         var now = x.clone()
         var duration = moment.duration(now.diff(self.dayStartetMoment))
-        var timeString = self.getTimeString(duration.asSeconds())
+        var timeString = utils.getTimeString(duration.asSeconds())
         self.machineRunning(timeString)
     },
     function (err) {
@@ -211,7 +201,7 @@ subscription.subscribe(
     
 self.timerSumSubject.subscribe(
     function (x) {
-        self.rightTimeSum(self.getTimeString(x))
+        self.rightTimeSum(self.utils.getTimeString(x))
     },
     function (err) {
         console.log('Error: ' + err);

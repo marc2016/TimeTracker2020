@@ -38,11 +38,11 @@
                 <div class="col-md-auto">
                   <div class="job-duration-button">
                     <a class="job-duration" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
-                    data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
+                    data-bind="attr: { jobId: _id(), duration: utils.getFormatedDuration(elapsedSeconds()) }">
                       <div class="row no-gutters" style="cursor: pointer;">
                         <div class="col-sm-auto" style="margin-right: 3px">Dauer: </div>
                         <div class="col-sm-auto">
-                          <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
+                          <span data-bind="text: utils.getTimeString(elapsedSeconds())" id="textTimer"></span>
                         </div>
                       </div>
                     </a>
