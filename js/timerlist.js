@@ -29,8 +29,6 @@ moment.updateLocale('de', {
   holidayFormat: 'YYYY-MM-DD'
 });
 
-var sync = require('./sync.js')
-sync.baseUrl = store.get('syncRestBaseUrl')
 
 const path = require('path')
 

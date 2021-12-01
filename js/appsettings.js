@@ -2,7 +2,6 @@ var ko = require('knockout');
 ko.mapping = require('knockout-mapping')
 var BaseViewModel = require('./base.js')
 var _ = require('lodash');
-var sync = require('./sync.js')
 var Holidays = require('date-holidays')
 
 class AppSettings extends BaseViewModel {
@@ -124,37 +123,6 @@ class AppSettings extends BaseViewModel {
                 },
                 write: function (value) {
                     this.store.set('timerNotificationsInterval', value*60000)
-                },
-                owner: this
-            });
-            
-            this.syncUsername = ko.pureComputed({
-                read: function () {
-                    return this.store.get('syncUsername');
-                },
-                write: function (value) {
-                    this.store.set('syncUsername', value)
-                },
-                owner: this
-            });
-
-            this.syncPassword = ko.pureComputed({
-                read: function () {
-                    return this.store.get('syncPassword');
-                },
-                write: function (value) {
-                    this.store.set('syncPassword', value)
-                },
-                owner: this
-            });
-            
-            this.syncRestBaseUrl = ko.pureComputed({
-                read: function () {
-                    return this.store.get('syncRestBaseUrl');
-                },
-                write: function (value) {
-                    this.store.set('syncRestBaseUrl', value)
-                    sync.baseUrl = value
                 },
                 owner: this
             });
