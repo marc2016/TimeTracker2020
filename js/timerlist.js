@@ -76,6 +76,8 @@ class TimerList extends BaseViewModel {
       this.db_projects = dataAccess.getDb('projects')
       this.db_tickets = dataAccess.getDb('tickets')
       this.db_absences = dataAccess.getDb('absences')
+
+      this.db.__original.persistence.compactDatafile()
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
       this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
@@ -115,7 +117,10 @@ class TimerList extends BaseViewModel {
           }
         }
         
-        this.saveAll()
+        if(parents != null && parents.length > 0){
+          this.saveItem(parents[0])
+        } 
+        
       }.bind(this));
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
@@ -598,8 +603,6 @@ class TimerList extends BaseViewModel {
   }
   
   async currentMonthChanged(value){
-    await this.saveAll()
-    
     await this.refreshJobTimerListForRange(value)
 
     this.refreshTimeSum()
@@ -619,8 +622,6 @@ class TimerList extends BaseViewModel {
   }
 
   async currentDateChanged(value){
-    await this.saveAll()
-
     var month = value.month()
     if(this.currentMonth() != month) {
       await this.currentMonthChanged(value)
@@ -680,6 +681,12 @@ class TimerList extends BaseViewModel {
     }.bind(this))
     
     this.db.__original.persistence.compactDatafile()
+
+    this.createAutoComplete()
+  }
+
+  async saveItem(element){
+    await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
 
     this.createAutoComplete()
   }
@@ -829,8 +836,6 @@ class TimerList extends BaseViewModel {
       match.elapsedSeconds(updateValue.duration)  
       this.jobtimer.currentJobDescription = match.description()
     }
-
-    this.saveAll()
     this.refreshTimeSum()
     this.refreshTray(updateValue.duration)
   }
