@@ -218,7 +218,7 @@ class TimerList extends BaseViewModel {
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
 
-    this.refreshJobLists(moment())
+    await this.refreshJobLists(moment())
 
     // var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
     // var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
@@ -237,6 +237,7 @@ class TimerList extends BaseViewModel {
     if(this.currentDate().isSame(moment(), 'day'))
       this.sumToday(this.getTimeSum())
     this.refreshTimeSum()
+    await this.refreshOvertime()
     var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
     if (absenceDocs.length > 0) {
       this.absenceToday(true)
@@ -320,6 +321,7 @@ class TimerList extends BaseViewModel {
     }
 
     that.refreshTimeSum()
+    that.refreshOvertime()
   }
 
   handleModalChangeJobDuration(){
@@ -611,14 +613,6 @@ class TimerList extends BaseViewModel {
       value.clone().startOf('month'),
       value.clone().endOf('month')
     )
-
-    var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
-    var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
-    daysUntilToday = daysUntilToday-absenceDays
-    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
-
-    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
-    footer.overtime(overTimeString)
   }
 
   async currentDateChanged(value){
@@ -631,6 +625,7 @@ class TimerList extends BaseViewModel {
     this.refreshSelectedJobTimerList(this.jobTimerList(), value)
 
     this.refreshTimeSum()
+    await this.refreshOvertime()
     footer.initChart(value)
     var absenceDocs = await this.db_absences.find({date: value.format('YYYY-MM-DD')})
     if (absenceDocs.length > 0) {
@@ -640,6 +635,17 @@ class TimerList extends BaseViewModel {
     }
   }
   
+  async refreshOvertime() {
+    var monthStart = moment().startOf('month')
+    var daysUntilToday = timefunctions.getDaysUntil(monthStart, moment())
+    var absenceDays = await timefunctions.getAbsenceDays(monthStart, moment())
+    daysUntilToday = daysUntilToday-absenceDays
+    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+
+    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    footer.overtime(overTimeString)
+  }
+
   nextDay(){
     this.currentDate(this.currentDate().add(1,'days'))
   }
@@ -837,6 +843,7 @@ class TimerList extends BaseViewModel {
       this.jobtimer.currentJobDescription = match.description()
     }
     this.refreshTimeSum()
+    this.refreshOvertime()
     this.refreshTray(updateValue.duration)
   }
   
