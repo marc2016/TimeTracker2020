@@ -45,14 +45,20 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
 
-var ProjectsSettings = require('./js/projectssettings.js')
+log.info("renderer.js started to load.")
+
 var AppSettings = require('./js/appsettings.js')
+log.info("AppSetting required successfully.")
+
 var jobtable = require('./js/jobtable.js')
+log.info("JobTable required successfully.")
+
 var TimerList = require('./js/timerlist.js')
+log.info("TimerList required successfully.")
 
 var jobtimer = require('./js/jobtimer.js')
+log.info("jobtimer required successfully.")
 
-this.projectsSettingViewModel = undefined
 this.appSettingsViewModel = undefined
 this.jobtableViewModel = undefined
 this.timerlistViewModel = undefined
@@ -64,6 +70,7 @@ var windowsToaster = new WindowsToaster({
   appID: "TimeTracker",
   wait: true
 });
+log.info("WindowsToaster required successfully.")
 
 onload = function() {
   log.info("App started.")
@@ -115,9 +122,8 @@ onload = function() {
   var btnAppSettings = document.getElementById('btnAppSettings')
   btnAppSettings.addEventListener("click", openAppSettings.bind(this) )
 
-  this.projectsSettingViewModel = new ProjectsSettings(['projectssettingsMainContent','modalAddNewProject'])
   this.appSettingsViewModel = new AppSettings(['appsettingsMainContent'], store)
-  this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote', 'modalAbsencePeriod','modalChangeJobDuration','modalDeleteEntry','modalUploadEntryAgain'], jobtimer)
+  this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote', 'modalAbsencePeriod','modalChangeJobDuration','modalDeleteEntry'], jobtimer)
   this.jobtableViewModel = new jobtable(['jobtableMainContent', 'modalDelete'])
 
   this.pagemenu = ko.observableArray()

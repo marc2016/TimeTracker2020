@@ -10,7 +10,6 @@ ko.mapping = require('knockout-mapping')
 
 var footer = require('./footer.js')
 var timefunctions = require('./timefunctions.js')
-var utils = require('./utils.js')
 
 const Store = require('electron-store');
 const store = new Store();
@@ -29,6 +28,7 @@ moment.updateLocale('de', {
   holidayFormat: 'YYYY-MM-DD'
 });
 
+var utils = require('./utils.js')
 
 const path = require('path')
 
@@ -56,8 +56,6 @@ class TimerList extends BaseViewModel {
   constructor(views, jobtimer){
     super(views)
     this.jobtimer = jobtimer
-
-    dataAccess.projectsChanged.subscribe(value => this.refreshProjectList())
   
     $('#timerList').load('pages/timerlist.html', function(){
       this.hide()
@@ -70,7 +68,6 @@ class TimerList extends BaseViewModel {
       this.currentJobForDuration = ko.observable()
       this.lastJobBeforeJobDurationChange = ko.observable()
       this.itemToDelete = ko.observable()
-      this.itemToSync = ko.observable()
       this.currentAbsencePeriod = ko.observable()
       this.absenceToday = ko.observable(false)
       this.sumToday = ko.observable()
@@ -92,34 +89,36 @@ class TimerList extends BaseViewModel {
       }
       var that = this
       this.koWatcher = ko.watch(this.jobTimerList, { depth: -1 }, function(parents, child, item) {
-        var isProject = _.find(parents, function(e) {
-          return e.projectId() == child()
-        })
-        if(isProject) {
-          that.updateProjectScore(child())
-        }
-        var isTicket = _.find(parents, function(e) {
-          return e.ticketId() == child()
-        })
-        if(isTicket) {
-          that.updateTicketScore(child())
-
-          var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
-          docs().then((jobs) => {
-            var job = _.find(jobs, function(o) { return o.projectId != undefined })
-            if (!job) return
-            
-            var element = $('#project-job_'+parents[0]._id())[0].selectize
-            element.addItem(job.projectId)
-            that.jobTimerList()[0].projectId(job.projectId)
-            parents[0].projectIsSet(true)
+        if(child()) {
+          var isProject = _.find(parents, function(e) {
+            return e.projectId() == child()
           })
+          if(isProject) {
+            that.updateProjectScore(child())
+          }
+          var isTicket = _.find(parents, function(e) {
+            return e.ticketId() == child()
+          })
+          if(isTicket) {
+            that.updateTicketScore(child())
+  
+            var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
+            docs().then((jobs) => {
+              var job = _.find(jobs, function(o) { return o.projectId != undefined })
+              if (!job) return
+              
+              var element = $('#project-job_'+parents[0]._id())[0].selectize
+              element.addItem(job.projectId)
+              that.jobTimerList()[0].projectId(job.projectId)
+              parents[0].projectIsSet(true)
+            })
+          }
         }
+        
         this.saveAll()
       }.bind(this));
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
-      this.currentMonth.subscribe(this.currentMonthChanged.bind(this))
 
       $('#textCurrentDate').datepicker({
         language: 'de',
@@ -213,9 +212,6 @@ class TimerList extends BaseViewModel {
     
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
-  
-    this.db.ensureIndex({ fieldName: '_id', unique: true }, function (err) {});
-    this.db.ensureIndex({ fieldName: 'date' }, function (err) {});
 
     this.refreshJobLists(moment())
 
@@ -224,7 +220,7 @@ class TimerList extends BaseViewModel {
     // daysUntilToday = daysUntilToday-absenceDays
     // var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
 
-    // var overTimeString = utils.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    // var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
     // footer.overtime(overTimeString)
 
     // var currentJobs = _.filter(this.jobTimerList(), function(d) { 
@@ -498,11 +494,7 @@ class TimerList extends BaseViewModel {
   }
 
   async refreshJobLists(momentValue) {
-    var currentMonthRange = moment.range(
-      momentValue.clone().startOf('month'),
-      momentValue.clone().endOf('month')
-    )
-    await this.refreshJobTimerListForRange(currentMonthRange)
+    await this.refreshJobTimerListForRange(momentValue)
     this.refreshSelectedJobTimerList(this.jobTimerList(),momentValue)
   }
 
@@ -524,10 +516,9 @@ class TimerList extends BaseViewModel {
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
   }
 
-  async refreshJobTimerListForRange(range) {
-    var days = Array.from(range.by('day'));
-    var dates = days.map(m => m.format('YYYY-MM-DD'))
-    var jobDocs = await this.db.find({date: { $in: dates}})
+  async refreshJobTimerListForRange(currentDate) {
+    var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
+    var jobDocs = await this.db.find({date: regex})
 
     this.refreshJobTimerList(jobDocs)
   }
@@ -608,22 +599,22 @@ class TimerList extends BaseViewModel {
   
   async currentMonthChanged(value){
     await this.saveAll()
-
-    var currentMonthRange = moment.range(
-      moment().month(value).startOf('month'),
-      moment().month(value).endOf('month')
-    )
     
-    await this.refreshJobTimerListForRange(currentMonthRange)
+    await this.refreshJobTimerListForRange(value)
 
     this.refreshTimeSum()
+
+    var currentMonthRange = moment.range(
+      value.clone().startOf('month'),
+      value.clone().endOf('month')
+    )
 
     var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
     var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
     daysUntilToday = daysUntilToday-absenceDays
     var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
 
-    var overTimeString = utils.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
+    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
     footer.overtime(overTimeString)
   }
 
@@ -631,6 +622,9 @@ class TimerList extends BaseViewModel {
     await this.saveAll()
 
     var month = value.month()
+    if(this.currentMonth() != month) {
+      await this.currentMonthChanged(value)
+    }
     this.currentMonth(month)
 
     this.refreshSelectedJobTimerList(this.jobTimerList(), value)
@@ -649,7 +643,32 @@ class TimerList extends BaseViewModel {
     this.currentDate(this.currentDate().add(1,'days'))
   }
   
+  getTimeString(seconds){
+    if(!seconds)
+      return "00:00:00/0.00"
   
+    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+    var decimal = moment.duration(seconds, "seconds").format("h", 2)
+  
+    return formated + "/" + decimal
+  }
+
+  getDecimalDuration(seconds){
+    if(!seconds)
+      return "0.00"
+    var decimal = moment.duration(seconds, "seconds").format("h", 2)
+  
+    return decimal
+  }
+
+  getFormatedDuration(seconds){
+    if(!seconds)
+      return "00:00:00"
+  
+    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+  
+    return formated
+  }
   
   previousDay(){
     this.currentDate(this.currentDate().subtract(1,'days'))
@@ -666,8 +685,8 @@ class TimerList extends BaseViewModel {
   }
   
   async createAutoComplete(entryId){
-    var docs = await this.db.find({})
-    var mappedDocs = _.map(docs,'description')
+    
+    var mappedDocs = _.map(this.jobTimerList(),'description')
     var uniqDocs = _.uniq(mappedDocs)
     this.autocompleteOptions = {
       data: uniqDocs,
@@ -753,7 +772,7 @@ class TimerList extends BaseViewModel {
     result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
     result += `Tätigkeit: ${data.description() || "-"}\n`
     result += `Projekt: ${project ? project.name || "-" : "-"}\n`
-    result += `Dauer: ${utils.getTimeString(data.elapsedSeconds())}\n`
+    result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
     clipboard.writeText(result)
     toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
@@ -854,7 +873,7 @@ class TimerList extends BaseViewModel {
   refreshTray(elapsedTime){
     // var tray = remote.getGlobal('tray');
     // var timeSum = this.getTimeSum()
-    // tray.setToolTip("Ʃ "+utils.getTimeString(timeSum)+", Aufgabe: "+ utils.getTimeString(elapsedTime))
+    // tray.setToolTip("Ʃ "+this.getTimeString(timeSum)+", Aufgabe: "+ this.getTimeString(elapsedTime))
   }
   
   // trayContextMenu: remote.getGlobal('menu').buildFromTemplate([

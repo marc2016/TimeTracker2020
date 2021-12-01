@@ -12,23 +12,6 @@ var self = module.exports = {
         return formated + "/" + decimal
     },
 
-    getDecimalDuration: function(seconds){
-        if(!seconds)
-            return "0.00"
-        var decimal = moment.duration(seconds, "seconds").format("h", 2)
-        
-        return decimal
-    },
-
-    getFormatedDuration: function(seconds){
-        if(!seconds)
-            return "00:00:00"
-        
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-        
-        return formated
-    },
-
     roundDuration(type,value){
         switch (type) {
             case 'round':

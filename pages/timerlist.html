@@ -38,11 +38,11 @@
                 <div class="col-md-auto">
                   <div class="job-duration-button">
                     <a class="job-duration" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
-                    data-bind="attr: { jobId: _id(), duration: utils.getFormatedDuration(elapsedSeconds()) }">
+                    data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
                       <div class="row no-gutters" style="cursor: pointer;">
                         <div class="col-sm-auto" style="margin-right: 3px">Dauer: </div>
                         <div class="col-sm-auto">
-                          <span data-bind="text: utils.getTimeString(elapsedSeconds())" id="textTimer"></span>
+                          <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
                         </div>
                       </div>
                     </a>
@@ -116,25 +116,6 @@
       <div class="modal-footer" data-bind="with: itemToDelete">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Nein</button>
         <button type="button" class="btn btn-primary" data-bind="click: $parent.removeItem.bind($data,$parent)">Ja</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="modalUploadEntryAgain" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Warnung</h5>
-      </div>
-      <div class="modal-body">
-        <p>Soll der Eintrag nochmal hochgeladen werden?
-          <br>Eintrag wurde bereits hochgeladen und befindet sich dann doppelt im externen System.</p>
-      </div>
-      <div class="modal-footer" data-bind="with: itemToSync">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Nein</button>
-        <button type="button" class="btn btn-primary" data-bind="click: $parent.syncEntry.bind($data,$parent)">Ja</button>
       </div>
     </div>
   </div>

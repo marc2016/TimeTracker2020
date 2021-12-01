@@ -1,3 +1,5 @@
+var log = require('electron-log');
+
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
 const { clipboard } = require('electron')
@@ -11,9 +13,8 @@ const moment = MomentRange.extendMoment(Moment);
 var Holidays = require('date-holidays')
 
 var utils = require('./utils')
-const Store = require('electron-store');
 
-var log = require('electron-log');
+const Store = require('electron-store');
 
 var dataAccess = require('./dataaccess.js')
 
@@ -170,9 +171,18 @@ class JobTable extends BaseViewModel {
         result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
         result += `Tätigkeit: ${job.description() || "-"}\n`
         result += `Projekt: ${project ? project.name || "-" : "-"}\n`
-        result += `Dauer: ${utils.getTimeString(job.elapsedSeconds())}\n`
+        result += `Dauer: ${that.getTimeString(job.elapsedSeconds())}\n`
         clipboard.writeText(result)
     }
+    getTimeString(seconds){
+        if(!seconds)
+          return "00:00:00/0.00"
+      
+        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+      
+        return formated + "/" + decimal
+      }
 
     removeItemModal(that,data){
         $('#modalDelete').modal('show');
