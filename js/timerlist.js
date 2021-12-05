@@ -659,8 +659,7 @@ class TimerList extends BaseViewModel {
 
     var monthTimeSum = _.sumBy(currentJobs, function(o) { return o.elapsedSeconds(); });
 
-    var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
-    footer.overtime(overTimeString)
+    footer.overtimeSubject.next(monthTimeSum-(daysUntilToday*8*60*60))
   }
 
   nextDay(){

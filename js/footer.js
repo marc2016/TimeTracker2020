@@ -85,6 +85,13 @@ var self = module.exports = {
         
         return formated + "/" + decimal
     },
+    getDecimalDuration(seconds){
+        if(!seconds)
+          return "0.00"
+        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+      
+        return decimal
+    },
 
     initChart: async function(currentDate){
         var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
@@ -211,5 +218,13 @@ self.selectedTimerSumSubject.subscribe(
         if(x)
             var timeString = self.getTimeString(x)
         self.selectedTimeSum(timeString)
+    }
+)
+
+self.overtimeSubject.subscribe(
+    function (x) {
+        if(x)
+            var timeString = self.getDecimalDuration(x)
+        self.overtime(timeString)
     }
 )
