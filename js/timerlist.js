@@ -791,6 +791,7 @@ class TimerList extends BaseViewModel {
   async removeItem(that,data){
     await that.db.remove({ _id: data._id() }, {})
     that.jobTimerList.remove(function (item) { return item._id() == data._id(); })
+    await that.refreshJobLists(that.currentDate())
     $('#modalDeleteEntry').modal('hide');
   }
 
