@@ -206,7 +206,27 @@ dayEndSubscription.subscribe(
         self.dayEnd(now.format('HH:mm'))
     }
 )
-    
+
+var dayEndPlusSubscription = combineLatest([
+    nowObservable,
+    self.timerSumSubject,
+    self.overtimeSubject]
+).pipe(map(x => ({
+    currentTime: x[0],
+    timeSumSeconds: x[1],
+    overtimeSeconds: x[2]
+})))
+
+dayEndPlusSubscription.subscribe(
+    function (x) {
+        var targetSeconds = 8*60*60
+        var diffSeconds = Math.ceil(targetSeconds-(x.timeSumSeconds+x.overtimeSeconds))
+        var now = x.currentTime.clone()
+        now.add(diffSeconds, 's')
+        self.dayEndPlus(now.format('HH:mm'))
+    }
+)
+
 self.timerSumSubject.subscribe(
     function (x) {
         self.rightTimeSum(self.getTimeString(x))
