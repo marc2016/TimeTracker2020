@@ -164,7 +164,7 @@
           laufende Aufgabe</span> <i class="fa fa-clock-o" aria-hidden="true"></i> <span id="currentTaskTime" data-bind="text:leftJobDuration"></span>
       </div>
       <div id="footerRightContent">
-        Ʃ <span id="textTimeSum" data-bind="text:rightTimeSum">00:00:00</span>
+        <span class="selectedTimeSumContainer" data-bind="visible: selectedTimeSum">Ʃ Auswahl <span id="selectedTimeSum" data-bind="text:selectedTimeSum">00:00:00</span> | </span> Ʃ <span id="textTimeSum" data-bind="text:rightTimeSum">00:00:00</span>
       </div>
     </div>
   </div>

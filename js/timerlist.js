@@ -235,9 +235,9 @@ class TimerList extends BaseViewModel {
     // ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     if(this.currentDate().isSame(moment(), 'day'))
-      this.sumToday(this.getTimeSum())
+      this.sumToday(this.getTimeSum(this.currentDate()))
     this.refreshTimeSum()
-    await this.refreshOvertime()
+    await this.refreshOvertime(moment())
     var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
     if (absenceDocs.length > 0) {
       this.absenceToday(true)
@@ -321,7 +321,7 @@ class TimerList extends BaseViewModel {
     }
 
     that.refreshTimeSum()
-    that.refreshOvertime()
+    that.refreshOvertime(moment(match.date()))
   }
 
   handleModalChangeJobDuration(){
@@ -524,7 +524,13 @@ class TimerList extends BaseViewModel {
   }
 
   async refreshJobTimerListForRange(currentDate) {
-    var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
+    if(this.currentJob()) {
+      var jobDate = this.currentJob().date()
+      var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)'+'|'+jobDate);
+    } else {
+      var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
+    }
+    
     var jobDocs = await this.db.find({date: regex})
 
     this.refreshJobTimerList(jobDocs)
@@ -625,7 +631,7 @@ class TimerList extends BaseViewModel {
     this.refreshSelectedJobTimerList(this.jobTimerList(), value)
 
     this.refreshTimeSum()
-    await this.refreshOvertime()
+    await this.refreshOvertime(value.clone())
     footer.initChart(value)
     var absenceDocs = await this.db_absences.find({date: value.format('YYYY-MM-DD')})
     if (absenceDocs.length > 0) {
@@ -635,12 +641,23 @@ class TimerList extends BaseViewModel {
     }
   }
   
-  async refreshOvertime() {
-    var monthStart = moment().startOf('month')
-    var daysUntilToday = timefunctions.getDaysUntil(monthStart, moment())
-    var absenceDays = await timefunctions.getAbsenceDays(monthStart, moment())
+  async refreshOvertime(momentValue) {
+    var monthStart = momentValue.clone().startOf('month')
+    var monthEnd = moment()
+    if(!momentValue.isSame(monthEnd, 'month')) {
+      monthEnd = momentValue.clone().endOf('month')
+    }
+
+    var daysUntilToday = timefunctions.getDaysUntil(monthStart, monthEnd)
+    var absenceDays = await timefunctions.getAbsenceDays(monthStart, monthEnd)
     daysUntilToday = daysUntilToday-absenceDays
-    var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
+
+    var currentJobs = _.filter(this.jobTimerList(), function(d) { 
+      var docDate = moment(d.date())
+      return momentValue.isSame(docDate, 'month')
+    });
+
+    var monthTimeSum = _.sumBy(currentJobs, function(o) { return o.elapsedSeconds(); });
 
     var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
     footer.overtime(overTimeString)
@@ -699,7 +716,7 @@ class TimerList extends BaseViewModel {
   
   async createAutoComplete(entryId){
     
-    var mappedDocs = _.map(this.jobTimerList(),'description')
+    var mappedDocs = _.map(this.jobTimerList(),(j) => { return j.description() })
     var uniqDocs = _.uniq(mappedDocs)
     this.autocompleteOptions = {
       data: uniqDocs,
@@ -843,24 +860,45 @@ class TimerList extends BaseViewModel {
       this.jobtimer.currentJobDescription = match.description()
     }
     this.refreshTimeSum()
-    this.refreshOvertime()
+    this.refreshOvertime(moment(match.date()))
     this.refreshTray(updateValue.duration)
   }
   
   refreshTimeSum(){
-    var timeSum = this.getTimeSumToday()
-    electron.ipcRenderer.send('window-progress', timeSum/(8*60*60))
-    footer.timerSumSubject.next(timeSum)
+    var timeSumSelected = this.getTimeSumSelected()
+    if(!this.jobtimer.isRunning()) {
+      footer.selectedTimeSum(undefined)
+      footer.timerSumSubject.next(timeSumSelected)
+      // footer.rightTimeSum(utils.getTimeString(timeSumSelected))
+    } else {
+      var currentJobDate = moment(this.currentJob().date(), 'YYYY-MM-DD')
+      var timeSumRunning = this.getTimeSum(currentJobDate)
+      if(this.currentDate().isSame(currentJobDate, 'day')) {
+        footer.selectedTimeSum(undefined)
+        footer.timerSumSubject.next(timeSumRunning)
+        // footer.rightTimeSum(utils.getTimeString(timeSumRunning))
+        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
+      } else {
+        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
+        footer.selectedTimeSum(utils.getTimeString(timeSumSelected))
+        footer.timerSumSubject.next(timeSumRunning)
+        // footer.rightTimeSum(utils.getTimeString(timeSumRunning))
+      }
+    }
+
+    // var timeSum = this.getTimeSumToday()
+    
+    // footer.timerSumSubject.next(timeSum)
   }
   
-  getTimeSum(){
+  getTimeSumSelected(){
     return _.sumBy(this.currentJobTimerList(), function(o) { return o.elapsedSeconds(); });
   }
 
-  getTimeSumToday(){
+  getTimeSum(momentValue){
     var currentJobs = _.filter(this.jobTimerList(), function(d) { 
       var docDate = moment(d.date())
-      return moment().isSame(docDate, 'day')
+      return momentValue.isSame(docDate, 'day')
     });
     return _.sumBy(currentJobs, function(o) { return o.elapsedSeconds(); });
   }
