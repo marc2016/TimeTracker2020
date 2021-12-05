@@ -244,7 +244,7 @@ self.selectedTimerSumSubject.subscribe(
 self.overtimeSubject.subscribe(
     function (x) {
         if(x)
-            var timeString = self.getDecimalDuration(x)
+            var timeString = self.getTimeString(x)
         self.overtime(timeString)
     }
 )
