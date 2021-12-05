@@ -2,8 +2,8 @@ var moment = require('moment');
 var _ = require('lodash');
 var momentDurationFormatSetup = require("moment-duration-format");
 var ko = require('knockout');
-const { Observable, Subject, ReplaySubject, from, of, range, timer, interval, combineLatest } = require('rxjs');
-const { map, switchMap } = require('rxjs/operators');
+const { Subject, interval, combineLatest } = require('rxjs');
+const { map } = require('rxjs/operators');
 
 
 var self = module.exports = {
@@ -15,6 +15,7 @@ var self = module.exports = {
     dayStarted: ko.observable('-'),
     dayStartetMoment: undefined,
     dayEnd: ko.observable('-'),
+    dayEndPlus: ko.observable('-'),
     machineRunning: ko.observable('-'),
     monthChart: undefined,
     utils: undefined,
@@ -22,6 +23,8 @@ var self = module.exports = {
     db: undefined,
     jobtimer: undefined,
     timerSumSubject: new Subject(),
+    selectedTimerSumSubject: new Subject(),
+    overtimeSubject: new Subject(),
 
     isBound: function() {
         return !!ko.dataFor(document.getElementById('footerContainer'));
@@ -176,16 +179,10 @@ var nowSubscription = nowObservable.subscribe(
         var duration = moment.duration(now.diff(self.dayStartetMoment))
         var timeString = self.getTimeString(duration.asSeconds())
         self.machineRunning(timeString)
-    },
-    function (err) {
-        console.log('Error: ' + err);
-    },
-    function () {
-        console.log('Completed');
     }
 );
 
-var subscription = combineLatest([
+var dayEndSubscription = combineLatest([
     nowObservable,
     self.timerSumSubject]
 ).pipe(map(x => ({
@@ -193,30 +190,26 @@ var subscription = combineLatest([
     timeSumSeconds: x[1]
 })))
 
-subscription.subscribe(
+dayEndSubscription.subscribe(
     function (x) {
         var targetSeconds = 8*60*60
         var diffSeconds = Math.ceil(targetSeconds-x.timeSumSeconds)
         var now = x.currentTime.clone()
         now.add(diffSeconds, 's')
         self.dayEnd(now.format('HH:mm'))
-    },
-    function (err) {
-        console.log('Error: ' + err);
-    },
-    function () {
-        console.log('Completed');
     }
-);
+)
     
 self.timerSumSubject.subscribe(
     function (x) {
         self.rightTimeSum(self.getTimeString(x))
-    },
-    function (err) {
-        console.log('Error: ' + err);
-    },
-    function () {
-        console.log('Completed');
     }
-);
+)
+
+self.selectedTimerSumSubject.subscribe(
+    function (x) {
+        if(x)
+            var timeString = self.getTimeString(x)
+        self.selectedTimeSum(timeString)
+    }
+)

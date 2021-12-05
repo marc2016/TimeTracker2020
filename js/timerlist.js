@@ -867,28 +867,21 @@ class TimerList extends BaseViewModel {
   refreshTimeSum(){
     var timeSumSelected = this.getTimeSumSelected()
     if(!this.jobtimer.isRunning()) {
-      footer.selectedTimeSum(undefined)
+      footer.selectedTimerSumSubject.next(undefined)
       footer.timerSumSubject.next(timeSumSelected)
-      // footer.rightTimeSum(utils.getTimeString(timeSumSelected))
     } else {
       var currentJobDate = moment(this.currentJob().date(), 'YYYY-MM-DD')
       var timeSumRunning = this.getTimeSum(currentJobDate)
       if(this.currentDate().isSame(currentJobDate, 'day')) {
-        footer.selectedTimeSum(undefined)
+        footer.selectedTimerSumSubject.next(undefined)
         footer.timerSumSubject.next(timeSumRunning)
-        // footer.rightTimeSum(utils.getTimeString(timeSumRunning))
         electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
       } else {
         electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
-        footer.selectedTimeSum(utils.getTimeString(timeSumSelected))
+        footer.selectedTimerSumSubject.next(timeSumSelected)
         footer.timerSumSubject.next(timeSumRunning)
-        // footer.rightTimeSum(utils.getTimeString(timeSumRunning))
       }
     }
-
-    // var timeSum = this.getTimeSumToday()
-    
-    // footer.timerSumSubject.next(timeSum)
   }
   
   getTimeSumSelected(){
