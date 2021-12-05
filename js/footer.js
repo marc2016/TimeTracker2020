@@ -222,7 +222,8 @@ dayEndPlusSubscription.subscribe(
         var targetSeconds = 8*60*60
         var diffSeconds = Math.ceil(targetSeconds-(x.timeSumSeconds+x.overtimeSeconds))
         var now = x.currentTime.clone()
-        now.add(diffSeconds, 's')
+        if(diffSeconds > 0)
+            now.add(diffSeconds, 's')
         self.dayEndPlus(now.format('HH:mm'))
     }
 )
