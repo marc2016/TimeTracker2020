@@ -162,11 +162,11 @@ if (!gotTheLock) {
     }
   })
   
-  ipcMain.on('window-progress', (event, timeRatio) => {
+  ipcMain.on('window-progress', (event, timeRatio, mode) => {
     if(timeRatio > 1) {
       timeRatio = 1
     }
-    mainWindow.setProgressBar(timeRatio)
+    mainWindow.setProgressBar(timeRatio, {mode: mode})
   })
 
   ipcMain.on('updater', (event, arg) => {

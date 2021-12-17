@@ -70,7 +70,7 @@ class TimerList extends BaseViewModel {
       this.itemToDelete = ko.observable()
       this.currentAbsencePeriod = ko.observable()
       this.absenceToday = ko.observable(false)
-      this.sumToday = ko.observable()
+      this.currentSum = ko.observable()
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
@@ -235,7 +235,7 @@ class TimerList extends BaseViewModel {
     // ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     if(this.currentDate().isSame(moment(), 'day'))
-      this.sumToday(this.getTimeSum(this.currentDate()))
+      this.currentSum(this.getTimeSum(this.currentDate()))
     this.refreshTimeSum()
     await this.refreshOvertime(moment())
     var absenceDocs = await this.db_absences.find({date: this.currentDate().format('YYYY-MM-DD')})
@@ -832,6 +832,7 @@ class TimerList extends BaseViewModel {
 
   pauseTimer(){
     this.jobtimer.stop()
+    this.refreshTimeSum()
   }
 
   timerStop(currentData){
@@ -892,21 +893,30 @@ class TimerList extends BaseViewModel {
     if(!this.jobtimer.isRunning()) {
       footer.selectedTimerSumSubject.next(undefined)
       footer.timerSumSubject.next(timeSumSelected)
+      electron.ipcRenderer.send('window-progress', this.currentSum()/(8*60*60), this.getProgressBarMode())
     } else {
       var currentJobDate = moment(this.currentJob().date(), 'YYYY-MM-DD')
       var timeSumRunning = this.getTimeSum(currentJobDate)
+      this.currentSum(timeSumRunning)
       if(this.currentDate().isSame(currentJobDate, 'day')) {
         footer.selectedTimerSumSubject.next(undefined)
         footer.timerSumSubject.next(timeSumRunning)
-        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
+        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60), this.getProgressBarMode())
       } else {
-        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60))
+        electron.ipcRenderer.send('window-progress', timeSumRunning/(8*60*60), this.getProgressBarMode())
         footer.selectedTimerSumSubject.next(timeSumSelected)
         footer.timerSumSubject.next(timeSumRunning)
       }
     }
   }
   
+  getProgressBarMode() {
+    if(this.jobtimer.isRunning()) {
+      return 'normal'
+    }
+    return 'paused'
+  }
+
   getTimeSumSelected(){
     return _.sumBy(this.currentJobTimerList(), function(o) { return o.elapsedSeconds(); });
   }
