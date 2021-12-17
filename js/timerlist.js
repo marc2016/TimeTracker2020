@@ -149,7 +149,7 @@ class TimerList extends BaseViewModel {
           }.bind(this)
       })
 
-      footer.onLoad(this.currentDate(), this.db, jobtimer)
+      footer.onLoad(this.currentDate(), this.db, this.db_absences, jobtimer)
       footer.leftFooterAction = this.goToToday
       
       electron.ipcRenderer.on('browser-window-focus', function(event, arg){

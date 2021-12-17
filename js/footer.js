@@ -30,10 +30,11 @@ var self = module.exports = {
         return !!ko.dataFor(document.getElementById('footerContainer'));
     },
 
-    onLoad: function(currentDate, database, jobtimer){
+    onLoad: function(currentDate, database, absenceDatabase, jobtimer){
         if(!self.isBound())
             ko.applyBindings(self, document.getElementById('footerContainer'))
         self.db = database
+        self.absenceDb = absenceDatabase
         self.jobtimer = jobtimer
         utils = require('./utils.js');
         $('#footerContainer').mouseenter(function() {$('#sidebarButton').toggleClass('show')})
@@ -96,6 +97,11 @@ var self = module.exports = {
     initChart: async function(currentDate){
         var regex =  new RegExp(currentDate.format('YYYY-MM') + '-(.*)');
         var docs = await self.db.find({date: regex})
+        var absenceDocs = await self.absenceDb.find({date: regex})
+        var absenceData =_.transform(absenceDocs, function(result, value) {
+            result[moment(value.date,'YYYY-MM-DD').format('D')-1] = 8;
+            return true;
+        }, []);
       
         var lastDayOfMonth = currentDate.clone().endOf('month').format('D')
         var data = []
@@ -120,10 +126,16 @@ var self = module.exports = {
         type: 'bar',
         data: {
             labels: daysArray,
-            datasets: [{
-                data: data,
-                backgroundColor: 'rgb(230, 92, 0)'
-            }]
+            datasets: [
+                {
+                    data: absenceData,
+                    backgroundColor: 'rgb(161, 161, 161)'
+                },
+                {
+                    data: data,
+                    backgroundColor: 'rgb(230, 92, 0)'
+                }
+        ]
         },
         options: {
             legend : {
@@ -133,22 +145,28 @@ var self = module.exports = {
             mode: 'nearest',
             callbacks: {
                 title: function(tooltipItem, data) {
-                var day = tooltipItem.xLabel
+                var day = tooltipItem[0].xLabel
                 var momentObj = currentDate.clone()
                 momentObj.date(day)
                 momentObj.locale('de')
                 return momentObj.format("dddd, DD.MM.YYYY");
                 },
                 label: function(tooltipItem, data) {
-                return tooltipItem.yLabel + ' Stunden'
+                    if (tooltipItem.datasetIndex == 0) {
+                        return tooltipItem.yLabel + ' Stunden abwesend'
+                    }
+                    return tooltipItem.yLabel + ' Stunden'
                 }
             }
             },
             responsive: true,
             maintainAspectRatio: false,
             scales: {
+                xAxes: [{
+                    stacked: true
+                }],
                 yAxes: [{
-    
+                    stacked: true,
                     ticks: {
                         suggestedMax: 12,
                         min: 0
@@ -219,12 +237,19 @@ var dayEndPlusSubscription = combineLatest([
 
 dayEndPlusSubscription.subscribe(
     function (x) {
-        var targetSeconds = 8*60*60
-        var diffSeconds = Math.ceil(targetSeconds-(x.timeSumSeconds+x.overtimeSeconds))
-        var now = x.currentTime.clone()
-        if(diffSeconds > 0)
-            now.add(diffSeconds, 's')
-        self.dayEndPlus(now.format('HH:mm'))
+        if(x.overtimeSeconds > 0) {
+            self.dayEndPlus('Jetzt')
+        } else {
+            var now = x.currentTime.clone()
+            now.add(Math.abs(x.overtimeSeconds), 's')
+            self.dayEndPlus(now.format('HH:mm')+ 'Uhr')
+        }
+        // var targetSeconds = 8*60*60
+        // var diffSeconds = Math.ceil(targetSeconds-(x.timeSumSeconds+x.overtimeSeconds))
+        
+        // if(diffSeconds > 0)
+        //     now.add(diffSeconds, 's')
+        // self.dayEndPlus(now.format('HH:mm'))
     }
 )
 
