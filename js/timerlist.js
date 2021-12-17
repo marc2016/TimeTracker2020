@@ -692,6 +692,15 @@ class TimerList extends BaseViewModel {
   
     return formated
   }
+
+  getFormatedDurationHHmm(seconds){
+    if(!seconds)
+      return "00:00"
+  
+    var formated = moment.duration(seconds, "seconds").format("hh:mm",{trim: false})
+  
+    return formated
+  }
   
   previousDay(){
     this.currentDate(this.currentDate().subtract(1,'days'))
@@ -798,12 +807,26 @@ class TimerList extends BaseViewModel {
   copyJob(that,data){
     var ticket = _.find(that.ticketList(), {_id: data.ticketId()})
     var project = _.find(that.projectList(), {_id: data.projectId()})
-    var result = ""
-    result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
-    result += `Tätigkeit: ${data.description() || "-"}\n`
-    result += `Projekt: ${project ? project.name || "-" : "-"}\n`
-    result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
-    clipboard.writeText(result)
+
+    var copyJobFormat = store.get('copyJobFormat')
+
+    if(copyJobFormat == 'copyJobFormatPlaintext') {
+      var result = ""
+      result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
+      result += `Tätigkeit: ${data.description() || "-"}\n`
+      result += `Projekt: ${project ? project.name || "-" : "-"}\n`
+      result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
+      clipboard.writeText(result)
+    } else {
+      var obj = {
+        date: data.date(),
+        description: data.description(),
+        ticket: ticket ? ticket.name || "-" : "-",
+        project: project ? project.name || "-" : "-",
+        duration: that.getFormatedDurationHHmm(data.elapsedSeconds())
+      }
+      clipboard.writeText(JSON.stringify(obj))
+    }
     toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
 

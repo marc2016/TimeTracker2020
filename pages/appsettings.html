@@ -40,7 +40,18 @@
                     </select> 
                 </div>
             </div>
-            
+        </div>
+
+        <div class="form-group">
+            <label>Job Kopier Format</label><br>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-primary" data-bind="css:{ active: copyJobFormat() == 'copyJobFormatPlaintext'}, click: copyJobFormatClick.bind($data,'copyJobFormatPlaintext')">
+                  <input type="radio" name="copyJobFormatOptions" value="copyJobFormatPlaintext" > Plaintext
+                </label>
+                <label class="btn btn-primary" data-bind="css:{ active: copyJobFormat() == 'copyJobFormatJson'}, click: copyJobFormatClick.bind($data,'copyJobFormatJson')">
+                  <input type="radio" name="copyJobFormatOptions" value="copyJobFormatJson" > JSON
+                </label>
+            </div>
         </div>
 
         <h3>Benachrichtigungen</h3>

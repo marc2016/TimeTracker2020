@@ -106,6 +106,16 @@ class AppSettings extends BaseViewModel {
                 },
                 owner: this
             });
+
+            this.copyJobFormat = ko.pureComputed({
+                read: function () {
+                    return this.store.get('copyJobFormat', 'copyJobFormatPlaintext');
+                },
+                write: function (value) {
+                    this.store.set('copyJobFormat', value)
+                },
+                owner: this
+            });
             
             this.timerNotificationsEnabled = ko.pureComputed({
                 read: function () {
@@ -146,6 +156,10 @@ class AppSettings extends BaseViewModel {
 
     roundDurationClick(value, data){
         this.roundDuration(value)
+    }
+
+    copyJobFormatClick(value, data){
+        this.copyJobFormat(value)
     }
 }
 
