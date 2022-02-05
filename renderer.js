@@ -9,7 +9,7 @@ require( 'datatables.net-bs4' )( window, $ );
 require( './libs/dataTables.cellEdit')
 
 const { Observable, Subject, ReplaySubject, from, of, range } = require('rxjs');
-const { auditTime } = require('rxjs/operators');
+const { auditTime, filter } = require('rxjs/operators');
 
 var pjson = require('./package.json')
 
@@ -97,7 +97,7 @@ onload = function() {
   this.minimizeWindow = minimizeWindow
   this.maximizeWindow = maximizeWindow
 
-  jobtimer.timeSignal.pipe(auditTime(store.get('timerNotificationsInterval'), 600000)).subscribe(timerUpdateNotifier)
+  jobtimer.timeSignal.pipe(filter((_) => store.get('timerNotificationsEnabled', false) == true), auditTime(store.get('timerNotificationsInterval', 600000), 600000)).subscribe(timerUpdateNotifier)
   
   $('#modals').load("pages/modals.html")
   
@@ -160,10 +160,6 @@ function checkForUpdatesClick(){
 }
 
 function timerUpdateNotifier(updateValue){
-  var enabled = store.get('timerNotificationsEnabled', false)
-  if(!enabled){
-    return
-  }
 
   var iconPath = path.join(__dirname, "icons/logonotification.png")
   var jobDescription = updateValue.jobDescription
