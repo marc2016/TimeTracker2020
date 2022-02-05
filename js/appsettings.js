@@ -28,7 +28,7 @@ class AppSettings extends BaseViewModel {
 
     loadBackgrounds(){
         this.backgrounds = ko.observableArray()
-        this.backgrounds.push({ src: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', id:0, selected: ko.observable(false)})
+        this.backgrounds.push({ src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNU0muuBwACoQFU1w38PAAAAABJRU5ErkJggg==', id:0, selected: ko.observable(false)})
         this.backgrounds.push({ src: './backgrounds/01.jpg', id:1, selected: ko.observable(false)})
         this.backgrounds.push({ src: './backgrounds/02.jpg', id:2, selected: ko.observable(false)})
         this.backgrounds.push({ src: './backgrounds/03.jpg', id:3, selected: ko.observable(false)})
