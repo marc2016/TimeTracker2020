@@ -1,4 +1,6 @@
 const electron = require('electron')
+const { shell } = require('electron');
+
 const { clipboard } = require('electron')
 
 var _ = require('lodash');
@@ -38,7 +40,7 @@ toastr.options = {
   "debug": false,
   "newestOnTop": false,
   "progressBar": false,
-  "positionClass": "toast-bottom-center",
+  "positionClass": "toast-bottom-left",
   "preventDuplicates": false,
   "onclick": null,
   "showDuration": "300",
@@ -103,7 +105,7 @@ class TimerList extends BaseViewModel {
           })
           if(isTicket) {
             that.updateTicketScore(child())
-  
+            parents[0].ticketIsSet(true)
             var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
             docs().then((jobs) => {
               var job = _.find(jobs, function(o) { return o.projectId != undefined })
@@ -517,7 +519,7 @@ class TimerList extends BaseViewModel {
       item.projectIsSet = ko.observable(projectId);
 
       var ticketId = item.ticketId()
-      item.ticketIsSet = ko.observable(ticketId);
+      item.ticketIsSet = ko.observable(ticketId ? true : false);
     })
 
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
@@ -565,7 +567,7 @@ class TimerList extends BaseViewModel {
       item.projectIsSet = ko.observable(projectId);
 
       var ticketId = item.ticketId()
-      item.ticketIsSet = ko.observable(ticketId);
+      item.ticketIsSet = ko.observable(ticketId ? true : false);
     })
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
@@ -590,12 +592,12 @@ class TimerList extends BaseViewModel {
     $('.ticketSelect').off('focusout')
 
     $('.text-input-job').on('focusin', function() {
-      $(this).parent().parent().find('label').addClass('active');
+      $(this).parent().find('label').addClass('active');
     });
     
     $('.text-input-job').on('focusout', function() {
       if (!this.value) {
-        $(this).parent().parent().find('label').removeClass('active');
+        $(this).parent().find('label').removeClass('active');
       }
     });
 
@@ -772,7 +774,7 @@ class TimerList extends BaseViewModel {
     dbEntry.projectIsSet = ko.observable(projectId);
 
     var ticketId = dbEntry.ticketId()
-    dbEntry.ticketIsSet = ko.observable(ticketId);
+    dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
@@ -946,6 +948,42 @@ class TimerList extends BaseViewModel {
     $('#modalChangeJobDuration').modal('show')
   }
   
+  getTicketNumber(that, ticketId) {
+    var ticket = _.find(that.ticketList(), {_id: ticketId})
+    var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
+    var match = regex.exec(ticket.name)
+    
+    if(!match) {
+      toastr["error"]("Keine Ticket Nummer gefunden.")
+      return
+    }
+    var issueNumber = match[1]
+    return issueNumber
+  }
+
+  openTicket(that,data) {
+    var issueNumber = that.getTicketNumber(that, data.ticketId())
+    if(!issueNumber)
+      return
+    var ticketSystemBaseUrl = store.get('ticketSystemBaseUrl')
+    shell.openExternal(ticketSystemBaseUrl+'/'+issueNumber)
+    toastr["info"]("Ticket wurde geöffnet.")
+  }
+
+  copyTicket(that,data) {
+    var ticket = _.find(that.ticketList(), {_id: data.ticketId()})
+    clipboard.writeText(ticket.name)
+    toastr["info"]("Ticket wurde kopiert.")
+  }
+
+  copyTicketNumber(that,data) {
+    var issueNumber = that.getTicketNumber(that,data.ticketId())
+    if(!issueNumber)
+      return
+    clipboard.writeText(issueNumber)
+    toastr["info"]("Ticket wurde kopiert.")
+  }
+
   refreshTray(elapsedTime){
     // var tray = remote.getGlobal('tray');
     // var timeSum = this.getTimeSum()

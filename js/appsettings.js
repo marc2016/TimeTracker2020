@@ -116,6 +116,16 @@ class AppSettings extends BaseViewModel {
                 },
                 owner: this
             });
+
+            this.ticketSystemBaseUrl = ko.pureComputed({
+                read: function () {
+                    return this.store.get('ticketSystemBaseUrl', '');
+                },
+                write: function (value) {
+                    this.store.set('ticketSystemBaseUrl', value)
+                },
+                owner: this
+            });
             
             this.timerNotificationsEnabled = ko.pureComputed({
                 read: function () {

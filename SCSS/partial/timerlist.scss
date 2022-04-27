@@ -20,6 +20,23 @@
 
 .timer-second-row {
   margin-top: 5px;
+  display: inline-block;
+}
+
+.ticket-button {
+  color: $maincolor;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.ticket-button:hover {
+  color: $highlightcolor;
+}
+
+.ticket-button-stack {
+  @extend .ticket-button;
+  font-size: 0.53em;
+  margin-top: -2px;
 }
 
 .job-duration-button:hover {
