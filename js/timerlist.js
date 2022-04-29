@@ -85,6 +85,7 @@ class TimerList extends BaseViewModel {
       this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
+      this.descriptionList = []
 
       this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
 
@@ -154,7 +155,7 @@ class TimerList extends BaseViewModel {
       footer.onLoad(this.currentDate(), this.db, this.db_absences, jobtimer)
       footer.leftFooterAction = this.goToToday
       
-      electron.ipcRenderer.on('browser-window-focus', function(event, arg){
+      electron.ipcRenderer.on('browser-window-focus', async function(event, arg){
         if(!(this.today() && this.today().isSame(new moment(), 'day')))
         {
           this.today(new moment())
@@ -167,6 +168,8 @@ class TimerList extends BaseViewModel {
               this.currentDate(moment(date))
             }.bind(this)
           })
+
+          await this.refreshDescriptionList()
         }
 
         var dayStarted = moment()
@@ -207,6 +210,7 @@ class TimerList extends BaseViewModel {
   jobListLoadedPostAction() {
     this.applySelectize()
     this.registerFocusEvents()
+    this.createAutoComplete()
   }
 
   async onLoad() {
@@ -215,7 +219,8 @@ class TimerList extends BaseViewModel {
     $('#background').css('background-image', 'url('+store.get('backgroundSrc')+')')
 
     await this.refreshProjectList()
-    await this.refreshTicketList()    
+    await this.refreshTicketList()
+    await this.refreshDescriptionList()
     
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
@@ -390,6 +395,16 @@ class TimerList extends BaseViewModel {
     ko.utils.arrayPushAll(this.ticketList, docs)
   }
 
+  async refreshDescriptionList() {
+    var today = new moment()
+    var past = moment().subtract(1, 'months');
+    var regex =  new RegExp('('+past.format('YYYY-MM')+'|'+today.format('YYYY-MM') + ')' + '-(.*)');
+    
+    var jobDocs = await this.db.find({date: regex})
+    var mappedDocs = _.map(jobDocs,(j) => { return j.description })
+    this.descriptionList = _.uniq(mappedDocs)
+  }
+
   async updateProjectScore(id) {
     if(!id) {
       return
@@ -505,6 +520,7 @@ class TimerList extends BaseViewModel {
   async refreshJobLists(momentValue) {
     await this.refreshJobTimerListForRange(momentValue)
     this.refreshSelectedJobTimerList(this.jobTimerList(),momentValue)
+    
   }
 
   refreshSelectedJobTimerList(jobList, selectedDate) {
@@ -579,8 +595,6 @@ class TimerList extends BaseViewModel {
         this.currentJob(newCurrentJob)
       }
     }
-
-    this.createAutoComplete()
   }
 
   registerFocusEvents() {
@@ -592,12 +606,12 @@ class TimerList extends BaseViewModel {
     $('.ticketSelect').off('focusout')
 
     $('.text-input-job').on('focusin', function() {
-      $(this).parent().find('label').addClass('active');
+      $(this).parent().parent().find('label').addClass('active');
     });
     
     $('.text-input-job').on('focusout', function() {
       if (!this.value) {
-        $(this).parent().find('label').removeClass('active');
+        $(this).parent().parent().find('label').removeClass('active');
       }
     });
 
@@ -715,21 +729,18 @@ class TimerList extends BaseViewModel {
     
     this.db.__original.persistence.compactDatafile()
 
-    this.createAutoComplete()
+    await this.createAutoComplete()
   }
 
   async saveItem(element){
     await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
 
-    this.createAutoComplete()
+    await this.createAutoComplete()
   }
   
   async createAutoComplete(entryId){
-    
-    var mappedDocs = _.map(this.jobTimerList(),(j) => { return j.description() })
-    var uniqDocs = _.uniq(mappedDocs)
-    this.autocompleteOptions = {
-      data: uniqDocs,
+    var autocompleteOptions = {
+      data: this.descriptionList,
       list: {
           match: {
               enabled: true
@@ -738,7 +749,7 @@ class TimerList extends BaseViewModel {
       theme: "bootstrap"
     }
     
-    $('.text-input-job').parent().not('.easy-autocomplete').children('.text-input-job').easyAutocomplete(this.autocompleteOptions).css("height",'31px')
+    $('.text-input-job').parent().not('.easy-autocomplete').children('.text-input-job').easyAutocomplete(autocompleteOptions).css("height",'31px').css('font-size', '0.875rem')
     $('.easy-autocomplete.eac-bootstrap').removeAttr( 'style' )
     if(entryId)
       $('#text-input-job_'+entryId).focus()
