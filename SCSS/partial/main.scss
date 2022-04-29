@@ -152,6 +152,10 @@ body {
     display: none !important;
 }
 
+.btn:hover {
+    background-color: $highlightcolor !important;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
