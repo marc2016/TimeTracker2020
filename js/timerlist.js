@@ -773,6 +773,28 @@ class TimerList extends BaseViewModel {
     
   }
 
+  async addNewJobTimer(ticketId, projetcId) {
+    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description:'', date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var dbEntry = await this.db.insert(newEntry)
+    dbEntry = ko.mapping.fromJS(dbEntry)
+    dbEntry.isRunning = ko.observable()
+    dbEntry.isRunning(false)
+
+    var projectId = dbEntry.projectId()
+    dbEntry.projectIsSet = ko.observable(projectId);
+
+    var ticketId = dbEntry.ticketId()
+    dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
+
+    this.jobTimerList.push(dbEntry)
+    this.createAutoComplete(dbEntry._id())
+
+    await this.saveAll()
+    this.currentDateChanged(this.currentDate())
+
+    return dbEntry
+  }
+
   async addNewItem(jobDescription, issueKey, issueSummery){
 
     var ticketId = ""
@@ -897,6 +919,12 @@ class TimerList extends BaseViewModel {
     }
     
     that.jobtimer.start(data._id(), data.elapsedSeconds(), data.description())
+  }
+
+  async startTicket(that,data){
+    var newItem = await that.addNewJobTimer(data._id(), data.projectId())
+
+    that.startTimer(that, newItem)
   }
   
   goToToday(){
