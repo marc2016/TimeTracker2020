@@ -83,17 +83,18 @@ class TimerList extends BaseViewModel {
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
       this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
+      this.currentToDoTicketList = ko.observableArray()
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
       this.descriptionList = []
 
       this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
 
-      if(this.koWatcher){
-        this.koWatcher.dispose()
+      if(this.koWatcherJobTimerList){
+        this.koWatcherJobTimerList.dispose()
       }
       var that = this
-      this.koWatcher = ko.watch(this.jobTimerList, { depth: -1 }, function(parents, child, item) {
+      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1 }, function(parents, child, item) {
         if(child()) {
           var isProject = _.find(parents, function(e) {
             return e.projectId() == child()
@@ -124,7 +125,12 @@ class TimerList extends BaseViewModel {
           this.saveItem(parents[0])
         } 
         
-      }.bind(this));
+      }.bind(this))
+
+      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1 }, function(parents, child, item) {
+        console.log("TEST");
+        
+      }.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
@@ -226,20 +232,6 @@ class TimerList extends BaseViewModel {
     // tray.setContextMenu(self.trayContextMenu)
 
     await this.refreshJobLists(moment())
-
-    // var daysUntilToday = timefunctions.getDaysUntil(currentMonthRange.start, moment())
-    // var absenceDays = await timefunctions.getAbsenceDays(currentMonthRange.start, moment())
-    // daysUntilToday = daysUntilToday-absenceDays
-    // var monthTimeSum = _.sumBy(this.jobTimerList(), function(o) { return o.elapsedSeconds(); });
-
-    // var overTimeString = this.getDecimalDuration(monthTimeSum-(daysUntilToday*8*60*60))
-    // footer.overtime(overTimeString)
-
-    // var currentJobs = _.filter(this.jobTimerList(), function(d) { 
-    //   var docDate = moment(d.date())
-    //   return moment().isSame(docDate, 'day')
-    // });
-    // ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     if(this.currentDate().isSame(moment(), 'day'))
       this.currentSum(this.getTimeSum(this.currentDate()))
@@ -377,6 +369,12 @@ class TimerList extends BaseViewModel {
     var newDate = new moment()
     var that = this
     await _.forEach(docs, async function(item, index){
+      if(!item.state){
+        item.state = 'todo'
+      }
+      if(!item.projectId){
+        item.projectId = ""
+      }
       if(!item.score){
         item.score = 0
       }
@@ -390,9 +388,13 @@ class TimerList extends BaseViewModel {
         }
       }
     }.bind(this))
-    docs = _.sortBy(docs, 'name')
     this.ticketList.removeAll()
-    ko.utils.arrayPushAll(this.ticketList, docs)
+    docs = _.sortBy(docs, 'name')
+    var observableDocs = ko.mapping.fromJS(docs)
+    _.forEach(observableDocs(), function(item) {
+      item['id'] = item._id()
+    })
+    ko.utils.arrayPushAll(this.ticketList, observableDocs())
   }
 
   async refreshDescriptionList() {
@@ -459,10 +461,10 @@ class TimerList extends BaseViewModel {
     )
     var renderItemFunc = function (item, escape) {
       var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.name)
+      var match = regex.exec(item.name())
       
       if(!match) {
-        return '<div class="item">'+item.name+'</div>';
+        return '<div class="item">'+item.name()+'</div>';
       }
       var issueNumber = match[1]
       var issueName = match[4]
@@ -474,10 +476,10 @@ class TimerList extends BaseViewModel {
   
     var renderOptionFunc = function (item, escape) {
       var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.name)
+      var match = regex.exec(item.name())
       
       if(!match) {
-        return '<div class="option">'+item.name+'</div>';
+        return '<div class="option">'+item.name()+'</div>';
       }
       var issueNumber = match[1]
       var issueName = match[4]
@@ -494,11 +496,13 @@ class TimerList extends BaseViewModel {
           var newDate = new moment()
           var newTicket = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
           that.db_tickets.insert(newTicket).then((dbEntry) => {
-            that.ticketList.push(dbEntry)
-            callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
-            $('select.ticketSelect').each(function(index, item) {
-              item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
-            })
+            var observableDbEntry = ko.mapping.fromJS(dbEntry)
+            observableDbEntry['id'] = observableDbEntry._id()
+            that.ticketList.push(observableDbEntry)
+            callback( observableDbEntry )
+            // $('select.ticketSelect').each(function(index, item) {
+            //   item.selectize.addOption(observableDbEntry)
+            // })
             
           })
         },
@@ -506,10 +510,10 @@ class TimerList extends BaseViewModel {
           item: renderItemFunc,
           option: renderOptionFunc
         },
-        labelField: "name",
-        sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
-        valueField: "_id",
-        searchField: ["name"],
+        labelField: "name()",
+        sortField: [{field: "score()", direction: "desc"},{field: "name()", direction: "asc"}],
+        valueField: "id",
+        searchField: ["name()"],
         placeholder: "",
         delimiter: "|",
         closeAfterSelect: true,
@@ -539,6 +543,19 @@ class TimerList extends BaseViewModel {
     })
 
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
+
+    this.currentToDoTicketList.removeAll()
+    var that = this
+    _.forEach(this.ticketList(), function(ticket) {
+      if(ticket.state() != 'todo')
+        return
+      const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
+        return job.ticketId() == ticket._id()
+      })
+      if(currentJobForTicket)
+        return
+      that.currentToDoTicketList.push(ticket)
+    })
   }
 
   async refreshJobTimerListForRange(currentDate) {
@@ -962,7 +979,7 @@ class TimerList extends BaseViewModel {
   getTicketNumber(that, ticketId) {
     var ticket = _.find(that.ticketList(), {_id: ticketId})
     var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-    var match = regex.exec(ticket.name)
+    var match = regex.exec(ticket.name())
     
     if(!match) {
       toastr["error"]("Keine Ticket Nummer gefunden.")
