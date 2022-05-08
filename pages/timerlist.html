@@ -28,6 +28,14 @@
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }, css: { 'currentEntry': isRunning }">
         <div class="container-fluid job-container">
           <div class="form-row">
+            <div class="cal-auto">
+              <div class="ticket-checkbox-container">
+                <input type="checkbox" class="_checkbox" data-bind="checked: ticket().done, attr: { id: 'checkbox_'+_id() }" />
+                <label class="ticket-checkbox-label" data-bind="attr: { for: 'checkbox_'+_id() }">
+                  <div class="tick_mark"></div>
+                </label>
+              </div>
+            </div>
             <div class="col input-group-sm">
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
@@ -105,13 +113,19 @@
         <div class="job-seperator">
         </div>
     </div>
-    <ul class="list-group" id="todoTicketList" data-bind="foreach: currentToDoTicketList">
+    <ul class="list-group" id="todoTicketList" data-bind="foreach: currentToDoTicketList, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
         <div class="container-fluid job-container">
           <div class="form-row">
-            <div class="col input-group-sm">
+            <div class="col-auto">
+              <div class="ticket-checkbox-container">
+                <input type="checkbox" class="_checkbox" data-bind="checked: done, attr: { id: 'checkbox_'+_id() }" />
+                <label class="ticket-checkbox-label" data-bind="attr: { for: 'checkbox_'+_id() }">
+                  <div class="tick_mark"></div>
+                </label>
+              </div>
             </div>
-            <div class="col-3 collapsedBySize">
+            <div class="col collapsedBySize">
               <div>
                 <input class="form-control text-input-todo-ticket" data-bind="value: name" type="text" readonly>
                 <label class="label-placeholder-static">Ticket</label>
@@ -136,6 +150,7 @@
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
+                <div style="float: right; width: 93px;"></div>
               </div>
 
             </div>

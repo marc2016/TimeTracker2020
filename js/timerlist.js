@@ -369,8 +369,8 @@ class TimerList extends BaseViewModel {
     var newDate = new moment()
     var that = this
     await _.forEach(docs, async function(item, index){
-      if(!item.state){
-        item.state = 'todo'
+      if(!item.done){
+        item.done = false
       }
       if(!item.projectId){
         item.projectId = ""
@@ -547,7 +547,7 @@ class TimerList extends BaseViewModel {
     this.currentToDoTicketList.removeAll()
     var that = this
     _.forEach(this.ticketList(), function(ticket) {
-      if(ticket.state() != 'todo')
+      if(ticket.done())
         return
       const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
         return job.ticketId() == ticket._id()
@@ -601,7 +601,13 @@ class TimerList extends BaseViewModel {
 
       var ticketId = item.ticketId()
       item.ticketIsSet = ko.observable(ticketId ? true : false);
-    })
+
+      var ticket = _.find(this.ticketList(), function(ticketItem) {
+        return ticketItem._id() == ticketId
+      })
+
+      item.ticket = ko.observable(ticket)
+    }.bind(this))
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
     if(this.currentJob && this.currentJob()){
