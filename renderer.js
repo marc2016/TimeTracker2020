@@ -123,7 +123,7 @@ onload = function() {
   btnAppSettings.addEventListener("click", openAppSettings.bind(this) )
 
   this.appSettingsViewModel = new AppSettings(['appsettingsMainContent'], store)
-  this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote', 'modalAbsencePeriod','modalChangeJobDuration','modalDeleteEntry'], jobtimer)
+  this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote', 'modalAbsencePeriod','modalChangeJobDuration','modalDeleteEntry', 'modalAddNewTicket'], jobtimer)
   this.jobtableViewModel = new jobtable(['jobtableMainContent', 'modalDelete'])
 
   this.pagemenu = ko.observableArray()

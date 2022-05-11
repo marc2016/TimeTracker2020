@@ -97,14 +97,14 @@
   height: 31px;
 }
 
-.absence-entry-container {
+.static-entry-container {
   margin-top: 8px;
   margin-left: 8px;
   margin-right: 8px;
   cursor: pointer;
 }
 
-.absence-entry {
+.static-entry {
   width: 100%;
   border-radius: 0.5rem !important;
   background-color: rgba(255,255,255,0.75) !important;
@@ -112,12 +112,16 @@
   padding: 10px;
 }
 
-.absence-entry-text {
+.static-entry-text {
   margin: 0px !important;
   font-weight: bold;
 }
 
-.absence-entry-overlay {
+.static-entry-icon {
+  margin-right: 10px;
+}
+
+.static-entry-overlay {
   position: absolute;
   width: calc(100% - 16px);
   border-radius: 0.5rem !important;
@@ -128,11 +132,11 @@
   color: $accentColor;
 }
 
-.absence-entry-overlay:hover {
+.static-entry-overlay:hover {
   display: block;
 }
 
-.absence-entry-container:hover > .absence-entry-overlay {
+.static-entry-container:hover > .static-entry-overlay {
   
   display: block;
 }

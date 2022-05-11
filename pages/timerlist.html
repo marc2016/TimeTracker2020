@@ -8,15 +8,15 @@
       <i class="fa fa-angle-double-right" title="Weiter"></i>
     </button>
   </div>
-  <div class="absence-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
-    <div class="absence-entry-overlay">
-      <h2 class="absence-entry-text">
-        <i class="fa fa-trash"></i> Zum Löschen, anklicken.
+  <div class="static-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
+    <div class="static-entry-overlay">
+      <h2 class="static-entry-text">
+        <i class="fa fa-trash static-entry-icon"></i> Zum Löschen, anklicken.
       </h2>
     </div>
-    <div class="absence-entry" >
-      <h2 class="absence-entry-text">
-        <i class="fa fa-umbrella-beach"></i> Abwesend
+    <div class="static-entry" >
+      <h2 class="static-entry-text">
+        <i class="fa fa-umbrella-beach static-entry-icon"></i> Abwesend
       </h2>
       
     </div>
@@ -24,6 +24,18 @@
   </div>
     
   <div>
+    <div class="static-entry-container" data-bind="visible: currentJobTimerList().length <= 0 && !(absenceToday()), click: function(data, event) { addNewItem() }">
+      <div class="static-entry-overlay">
+        <h2 class="static-entry-text">
+          <i class="fa fa-plus-circle static-entry-icon"></i> Zum Hinzufügen, anklicken.
+        </h2>
+      </div>
+      <div class="static-entry" >
+        <h2 class="static-entry-text">
+          <i class="fa fa-stopwatch static-entry-icon"></i> Keine laufenden Aufgaben
+        </h2>
+      </div>
+    </div>
     <ul class="list-group" id="list" data-bind="foreach: currentJobTimerList, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }, css: { 'currentEntry': isRunning }">
         <div class="container-fluid job-container">
@@ -117,6 +129,18 @@
         <div class="job-seperator">
         </div>
     </div>
+    <div class="static-entry-container" data-bind="visible: currentToDoTicketList().length <= 0, click: addNewTicketDialog">
+      <div class="static-entry-overlay">
+        <h2 class="static-entry-text">
+          <i class="fa fa-plus-circle static-entry-icon"></i> Zum Hinzufügen, anklicken.
+        </h2>
+      </div>
+      <div class="static-entry" >
+        <h2 class="static-entry-text">
+          <i class="fa fa-list static-entry-icon"></i> Keine offenen unbarabeiteten Aufgaben
+        </h2>
+      </div>
+    </div>
     <ul class="list-group" id="todoTicketList" data-bind="foreach: currentToDoTicketList, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
         <div class="container-fluid job-container">
@@ -169,6 +193,13 @@
         Erledigte Aufgaben
       </div>
       <div class="job-seperator">
+      </div>
+    </div>
+    <div class="static-entry-container" style="cursor: auto;" data-bind="visible: currentDoneTicketList().length <= 0">
+      <div class="static-entry" >
+        <h2 class="static-entry-text">
+          <i class="fa fa-list static-entry-icon"></i> Keine erledigten Aufgaben
+        </h2>
       </div>
     </div>
     <ul class="list-group" id="doneTicketList" data-bind="foreach: currentDoneTicketList, childrenComplete: jobListLoadedPostAction">
@@ -304,6 +335,31 @@
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
               <button id="btnSaveAbsencePeriod" type="button" class="btn btn-primary" data-bind="click: saveAbsencePeriodButton.bind($data,$element)">Speichern</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalAddNewTicket" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Neues Ticket einfügen...</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+                  </div>
+                  <input id="inputNewTicketName" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+                </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbruch</button>
+              <button id="btnSaveTicket" type="button" class="btn btn-primary" data-bind="click: saveNewTicketButton.bind($data,$element)">Hinzufügen</button>
           </div>
       </div>
   </div>

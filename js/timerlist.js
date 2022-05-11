@@ -278,6 +278,11 @@ class TimerList extends BaseViewModel {
         method: this.addNewItem.bind(this)
       },
       {
+        icon: 'fa fa-check-circle',
+        name: 'Neues Ticket',
+        method: this.addNewTicketDialog.bind(this)
+      },
+      {
         icon: 'fa fa-umbrella-beach',
         name: 'Neue Abwesenheit',
         method: this.addNewAbsence.bind(this)
@@ -505,17 +510,8 @@ class TimerList extends BaseViewModel {
       {
         options: that.ticketList(),
         create: function(input, callback) {
-          var newDate = new moment()
-          var newTicket = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
-          that.db_tickets.insert(newTicket).then((dbEntry) => {
-            var observableDbEntry = ko.mapping.fromJS(dbEntry)
-            observableDbEntry['id'] = observableDbEntry._id()
-            that.ticketList.push(observableDbEntry)
-            callback( observableDbEntry )
-            // $('select.ticketSelect').each(function(index, item) {
-            //   item.selectize.addOption(observableDbEntry)
-            // })
-            
+          that.addNewTicket(input).then((newTicket) => {
+            callback( newTicket )
           })
         },
         render: {
@@ -869,10 +865,32 @@ class TimerList extends BaseViewModel {
     this.currentDateChanged(this.currentDate())
   }
 
+  async addNewTicket(ticketName) {
+    var newDate = new moment()
+    var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD'), done: false, projectId: '' }
+    var dbEntry = await this.db_tickets.insert(newTicket)
+    var observableDbEntry = ko.mapping.fromJS(dbEntry)
+    observableDbEntry['id'] = observableDbEntry._id()
+    this.ticketList.push(observableDbEntry)
+    return observableDbEntry
+  }
+
   addNewAbsence() {
     this.currentAbsencePeriod(null)
     $('#textAbsencePeriod').val('')
     $('#modalAbsencePeriod').modal('show');
+  }
+
+  addNewTicketDialog() {
+    $('#inputTicketName').val('')
+    $('#modalAddNewTicket').modal('show');
+  }
+
+  async saveNewTicketButton(data, that) {
+    var newTicketName = $('#inputNewTicketName')[0].value
+    var newTicket = await that.addNewTicket(newTicketName)
+    that.currentToDoTicketList.push(newTicket)
+    $('#modalAddNewTicket').modal('hide');
   }
 
   async removeAbsence() {
