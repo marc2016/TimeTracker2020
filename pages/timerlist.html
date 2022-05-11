@@ -41,30 +41,36 @@
                 return item.name()}, options: $parent.ticketList(), optionsCaption: 'Projekt auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
               </select>
               <label class="label-placeholder" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticketIsSet() }">Ticket</label>
-              <div class="timer-second-row" data-bind="visible: ticketIsSet()">
-                <i class="fa fa-link ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
-                  <i class="fa fa-copy fa-stack-2x"></i>
-                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
-                </span>
+              <div class="timer-second-row">
+                <div data-bind="visible: ticket()" style="float: left;">
+                  <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
+                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
+                  <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                    <i class="fa fa-copy fa-stack-2x"></i>
+                    <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
+                  </span>
+                </div>
+                <div class="vertical-seperator" style="float: left;" data-bind="visible: ticket()"></div>
+                <div class="job-duration-button" style="float: left;">
+                  <a class="job-duration" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
+                  data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
+                    <div class="row no-gutters" style="cursor: pointer;">
+                      <div class="col-sm-auto" style="margin-right: 5px">
+                        <i class="fa fa-stopwatch ticket-icon duration-icon" title="Dauer"></i>
+                      </div>
+                      <div class="col-sm-auto">
+                        <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
               </div>
             </div>
             <div class="col-3 collapsedBySize">
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
               <label class="label-placeholder" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
-              <div class="job-duration-button timer-second-row">
-                <a class="job-duration" href="#" tabindex="0" data-toggle="modal" data-target="#modalChangeJobDuration"
-                data-bind="attr: { jobId: _id(), duration: $parent.getFormatedDuration(elapsedSeconds()) }">
-                  <div class="row no-gutters" style="cursor: pointer;">
-                    <div class="col-sm-auto" style="margin-right: 3px">Dauer: </div>
-                    <div class="col-sm-auto">
-                      <span data-bind="text: $parent.getTimeString(elapsedSeconds())" id="textTimer"></span>
-                    </div>
-                  </div>
-                </a>
-              </div>
+              
             </div>
             <div class="col-3 collapsedBySize">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
@@ -123,16 +129,16 @@
                 </label>
               </div>
             </div>
-            <div class="col collapsedBySize">
+            <div class="col">
               <div>
                 <input class="form-control text-input-todo-ticket" data-bind="value: name" type="text" readonly>
                 <label class="label-placeholder-static">Ticket</label>
               </div>
               
               <div class="timer-second-row">
-                <i class="fa fa-link ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
+                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
+                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
                   <i class="fa fa-copy fa-stack-2x"></i>
                   <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
                 </span>
@@ -148,7 +154,7 @@
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
-                <div style="float: right; width: 93px;"></div>
+                <div class="collapsedBySize" style="float: right; width: 93px;"></div>
               </div>
 
             </div>
