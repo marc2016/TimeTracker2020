@@ -84,6 +84,7 @@ class TimerList extends BaseViewModel {
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
       this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
       this.currentToDoTicketList = ko.observableArray()
+      this.currentDoneTicketList = ko.observableArray()
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
       this.descriptionList = []
@@ -94,32 +95,43 @@ class TimerList extends BaseViewModel {
         this.koWatcherJobTimerList.dispose()
       }
       var that = this
-      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1 }, function(parents, child, item) {
-        if(child()) {
-          var isProject = _.find(parents, function(e) {
-            return e.projectId() == child()
+      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, function(parents, child, item) {
+        if(child._fieldName == 'projectId') {
+          that.updateProjectScore(child())
+        }
+        
+        if(child._fieldName == 'ticketId') {
+          that.updateTicketScore(child())
+
+          var ticket = _.find(this.ticketList(), (item) => item._id() == child())
+          parents[0].ticket(ticket)
+
+          parents[0].ticketIsSet(true)
+          var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
+          docs().then((jobs) => {
+            var job = _.find(jobs, function(o) { return o.projectId != undefined })
+            if (!job) return
+            
+            var element = $('#project-job_'+parents[0]._id())[0].selectize
+            element.addItem(job.projectId)
+            that.jobTimerList()[0].projectId(job.projectId)
+            parents[0].projectIsSet(true)
           })
-          if(isProject) {
-            that.updateProjectScore(child())
-          }
-          var isTicket = _.find(parents, function(e) {
-            return e.ticketId() == child()
-          })
-          if(isTicket) {
-            that.updateTicketScore(child())
-            parents[0].ticketIsSet(true)
-            var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
-            docs().then((jobs) => {
-              var job = _.find(jobs, function(o) { return o.projectId != undefined })
-              if (!job) return
-              
-              var element = $('#project-job_'+parents[0]._id())[0].selectize
-              element.addItem(job.projectId)
-              that.jobTimerList()[0].projectId(job.projectId)
-              parents[0].projectIsSet(true)
+        }
+
+        if(child._fieldName == 'ticket') {
+          if(child())
+            this.currentToDoTicketList.remove(child())
+          var oldTicket = child.oldValues[0]
+          if(oldTicket) {
+            const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
+              return job.ticketId() == oldTicket._id()
             })
+            if(!currentJobForTicket)
+              this.currentToDoTicketList.push(oldTicket)
           }
         }
+        
         
         if(parents != null && parents.length > 0){
           this.saveItem(parents[0])
@@ -545,15 +557,17 @@ class TimerList extends BaseViewModel {
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     this.currentToDoTicketList.removeAll()
+    this.currentDoneTicketList.removeAll()
     var that = this
     _.forEach(this.ticketList(), function(ticket) {
-      if(ticket.done())
-        return
       const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
         return job.ticketId() == ticket._id()
       })
       if(currentJobForTicket)
         return
+      if(ticket.done())
+        that.currentDoneTicketList.push(ticket)
+      else
       that.currentToDoTicketList.push(ticket)
     })
   }
@@ -792,6 +806,14 @@ class TimerList extends BaseViewModel {
     var ticketId = dbEntry.ticketId()
     dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
 
+    var ticket = null
+    if(ticketId) {
+      ticket = _.find(this.ticketList(), (item) => {
+        return item._id() == ticketId
+      })
+    }
+    dbEntry.ticket = ko.observable(ticket)
+
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
 
@@ -831,6 +853,14 @@ class TimerList extends BaseViewModel {
 
     var ticketId = dbEntry.ticketId()
     dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
+
+    var ticket = null
+    if(ticketId) {
+      ticket = _.find(this.ticketList(), (item) => {
+        return item._id() == ticketId
+      })
+    }
+    dbEntry.ticket = ko.observable(ticket)
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())

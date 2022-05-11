@@ -30,13 +30,27 @@
           <div class="form-row">
             <div class="cal-auto">
               <div class="ticket-checkbox-container">
-                <input type="checkbox" class="_checkbox" data-bind="checked: ticket().done, attr: { id: 'checkbox_'+_id() }" />
-                <label class="ticket-checkbox-label" data-bind="attr: { for: 'checkbox_'+_id() }">
+                <input type="checkbox" class="_checkbox" data-bind="checked: (ticket != undefined && ticket() != undefined) ? ticket().done : false, enable: ticket, attr: { id: 'checkbox_'+_id() }" />
+                <label class="ticket-checkbox-label" data-bind="css: { 'disabled': !(ticket()) }, attr: { for: 'checkbox_'+_id() }">
                   <div class="tick_mark"></div>
                 </label>
               </div>
             </div>
             <div class="col input-group-sm">
+              <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
+                return item.name()}, options: $parent.ticketList(), optionsCaption: 'Projekt auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
+              </select>
+              <label class="label-placeholder" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticketIsSet() }">Ticket</label>
+              <div class="timer-second-row" data-bind="visible: ticketIsSet()">
+                <i class="fa fa-link ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
+                <i class="fa fa-copy ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
+                <span class="fa-stack ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                  <i class="fa fa-copy fa-stack-2x"></i>
+                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
+                </span>
+              </div>
+            </div>
+            <div class="col-3 collapsedBySize">
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
               <label class="label-placeholder" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
@@ -50,21 +64,6 @@
                     </div>
                   </div>
                 </a>
-              </div>
-                
-            </div>
-            <div class="col-3 collapsedBySize">
-              <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name()}, options: $parent.ticketList(), optionsCaption: 'Projekt auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
-              </select>
-              <label class="label-placeholder" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticketIsSet() }">Ticket</label>
-              <div class="timer-second-row" data-bind="visible: ticketIsSet()">
-                <i class="fa fa-link ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
-                  <i class="fa fa-copy fa-stack-2x"></i>
-                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
-                </span>
               </div>
             </div>
             <div class="col-3 collapsedBySize">
@@ -104,7 +103,6 @@
       </li>
     </ul>
     <div class="job-seperator-container">
-      
         <div class="job-seperator">
         </div>
         <div class="job-seperator-text">
@@ -114,6 +112,60 @@
         </div>
     </div>
     <ul class="list-group" id="todoTicketList" data-bind="foreach: currentToDoTicketList, childrenComplete: jobListLoadedPostAction">
+      <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
+        <div class="container-fluid job-container">
+          <div class="form-row">
+            <div class="col-auto">
+              <div class="ticket-checkbox-container">
+                <input type="checkbox" class="_checkbox" data-bind="checked: done, attr: { id: 'checkbox_'+_id() }" />
+                <label class="ticket-checkbox-label" data-bind="attr: { for: 'checkbox_'+_id() }">
+                  <div class="tick_mark"></div>
+                </label>
+              </div>
+            </div>
+            <div class="col collapsedBySize">
+              <div>
+                <input class="form-control text-input-todo-ticket" data-bind="value: name" type="text" readonly>
+                <label class="label-placeholder-static">Ticket</label>
+              </div>
+              
+              <div class="timer-second-row">
+                <i class="fa fa-link ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
+                <i class="fa fa-copy ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
+                <span class="fa-stack ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                  <i class="fa fa-copy fa-stack-2x"></i>
+                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
+                </span>
+              </div>
+            </div>
+            <div class="col-3 collapsedBySize">
+              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
+                return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
+              </select>
+              <label class="label-placeholder">Projekt</label>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
+                    <i class="fa fa-play timer-play-btn" title="Start"></i>
+                </a>
+                <div style="float: right; width: 93px;"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="job-seperator-container">
+      <div class="job-seperator">
+      </div>
+      <div class="job-seperator-text">
+        Erledigte Aufgaben
+      </div>
+      <div class="job-seperator">
+      </div>
+    </div>
+    <ul class="list-group" id="doneTicketList" data-bind="foreach: currentDoneTicketList, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
         <div class="container-fluid job-container">
           <div class="form-row">

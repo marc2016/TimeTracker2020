@@ -18,7 +18,7 @@
   height: 100%;
   margin: 0 auto;
   background-color: transparent;
-  border: #f72414;
+  border: $highlightcolor;
   border-style: solid;
   border-width: 4px;
   
@@ -28,6 +28,11 @@
   transition: 0.2s ease transform, 0.01s ease border-width;
   overflow: hidden;
   z-index: 1;
+}
+
+.ticket-checkbox-label.disabled {
+  border-color: gray;
+  cursor: not-allowed;
 }
 
 // #ticket-checkbox-label:before {
