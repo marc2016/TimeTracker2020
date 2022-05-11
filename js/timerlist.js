@@ -139,9 +139,29 @@ class TimerList extends BaseViewModel {
         
       }.bind(this))
 
-      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1 }, function(parents, child, item) {
-        console.log("TEST");
-        
+      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true }, function(parents, child, item) {
+        var ticket = parents[0]
+        if(!ticket)
+          return
+        var saveObj = {}
+        saveObj[child._fieldName] = child()
+        this.db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
+        if(child._fieldName == 'done') {
+          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
+            return job.ticketId() == ticket._id()
+          })
+          if(!currentJobForTicket) {
+            if(child()) {
+              this.currentToDoTicketList.remove(ticket)
+              this.currentDoneTicketList.unshift(ticket)
+            } else {
+              this.currentToDoTicketList.unshift(ticket)
+              this.currentDoneTicketList.remove(ticket)
+            }
+              
+          }
+            
+        }
       }.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
@@ -550,6 +570,8 @@ class TimerList extends BaseViewModel {
       item.ticketIsSet = ko.observable(ticketId ? true : false);
     })
 
+    currentJobs = _.sortBy(currentJobs, (job) => { return job.ticket() ? job.ticket().name() : '' })
+
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
     this.currentToDoTicketList.removeAll()
@@ -565,6 +587,15 @@ class TimerList extends BaseViewModel {
         that.currentDoneTicketList.push(ticket)
       else
       that.currentToDoTicketList.push(ticket)
+    })
+    this.currentToDoTicketList.sort((left, right) => {
+      var leftDate = moment(left.lastUse())
+      var rightDate = moment(right.lastUse())
+      if(leftDate.isSame(rightDate))
+        return 0
+      if(leftDate.isBefore(rightDate))
+        return 1
+      return -1
     })
   }
 
@@ -871,7 +902,7 @@ class TimerList extends BaseViewModel {
     var dbEntry = await this.db_tickets.insert(newTicket)
     var observableDbEntry = ko.mapping.fromJS(dbEntry)
     observableDbEntry['id'] = observableDbEntry._id()
-    this.ticketList.push(observableDbEntry)
+    this.ticketList.unshift(observableDbEntry)
     return observableDbEntry
   }
 
@@ -882,14 +913,15 @@ class TimerList extends BaseViewModel {
   }
 
   addNewTicketDialog() {
-    $('#inputTicketName').val('')
+    $('#inputNewTicketName').val('')
     $('#modalAddNewTicket').modal('show');
+    setTimeout(() => { $('#inputNewTicketName').trigger('focus') }, 500)
   }
 
   async saveNewTicketButton(data, that) {
     var newTicketName = $('#inputNewTicketName')[0].value
     var newTicket = await that.addNewTicket(newTicketName)
-    that.currentToDoTicketList.push(newTicket)
+    that.currentToDoTicketList.unshift(newTicket)
     $('#modalAddNewTicket').modal('hide');
   }
 
