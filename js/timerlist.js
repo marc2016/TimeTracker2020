@@ -249,6 +249,22 @@ class TimerList extends BaseViewModel {
     this.applySelectize()
     this.registerFocusEvents()
     this.createAutoComplete()
+
+    var that = this
+    $(window).on('scroll', function() {
+      if ($(this).scrollTop() + $(this).innerHeight() >= $("body").height()) {
+        _.forEach(that.ticketList(), (ticket) => {
+          if(!ticket.done())
+            return
+          var doneTicket = _.find(that.currentDoneTicketList(), (doneTicket) => {
+            return doneTicket._id() == ticket._id()
+          })
+          if(doneTicket)
+            return
+          that.currentDoneTicketList.push(ticket)
+        })
+      }
+    })
   }
 
   async onLoad() {
@@ -432,6 +448,15 @@ class TimerList extends BaseViewModel {
       item['id'] = item._id()
     })
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
+    this.ticketList.sort((left, right) => {
+      var leftDate = moment(left.lastUse())
+      var rightDate = moment(right.lastUse())
+      if(leftDate.isSame(rightDate))
+        return 0
+      if(leftDate.isBefore(rightDate))
+        return 1
+      return -1
+    })
   }
 
   async refreshDescriptionList() {
@@ -583,9 +608,9 @@ class TimerList extends BaseViewModel {
       })
       if(currentJobForTicket)
         return
-      if(ticket.done())
+      if(ticket.done() && that.currentDoneTicketList().length < 10)
         that.currentDoneTicketList.push(ticket)
-      else
+      else if(!ticket.done())
       that.currentToDoTicketList.push(ticket)
     })
     this.currentToDoTicketList.sort((left, right) => {
@@ -1125,6 +1150,8 @@ class TimerList extends BaseViewModel {
     clipboard.writeText(issueNumber)
     toastr["info"]("Ticket wurde kopiert.")
   }
+
+  
 
   refreshTray(elapsedTime){
     // var tray = remote.getGlobal('tray');
