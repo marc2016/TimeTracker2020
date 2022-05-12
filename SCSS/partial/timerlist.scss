@@ -5,6 +5,11 @@
     .visibleBySize {
       display: inline-block !important;
     }
+    .growBySize {
+      flex-basis: 0;
+      flex-grow: 1;
+      max-width: 100%;
+    }
 }
 
 .selectize-input {
