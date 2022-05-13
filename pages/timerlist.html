@@ -88,7 +88,7 @@
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
-              <label class="label-placeholder" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: projectIsSet() }">Projekt</label>
+              <label class="label-placeholder" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
             <div class="col-auto">
               <div class="btn-group btn-group-sm" role="group">
@@ -172,7 +172,7 @@
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
-              <label class="label-placeholder">Projekt</label>
+              <label class="label-placeholder" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
             <div class="col-auto">
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
@@ -233,7 +233,7 @@
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
-              <label class="label-placeholder">Projekt</label>
+              <label class="label-placeholder" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
             <div class="col-auto">
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">

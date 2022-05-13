@@ -98,6 +98,9 @@ class TimerList extends BaseViewModel {
       this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, function(parents, child, item) {
         if(child._fieldName == 'projectId') {
           that.updateProjectScore(child())
+
+          var project = _.find(this.projectList(), (item) => item._id() == child())
+          parents[0].project(project)
         }
         
         if(child._fieldName == 'ticketId') {
@@ -106,7 +109,6 @@ class TimerList extends BaseViewModel {
           var ticket = _.find(this.ticketList(), (item) => item._id() == child())
           parents[0].ticket(ticket)
 
-          parents[0].ticketIsSet(true)
           var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
           docs().then((jobs) => {
             var job = _.find(jobs, function(o) { return o.projectId != undefined })
@@ -413,8 +415,12 @@ class TimerList extends BaseViewModel {
       }
     }.bind(this))
     docs = _.sortBy(docs, 'name')
+    var observableDocs = ko.mapping.fromJS(docs)
+    _.forEach(observableDocs(), function(item) {
+      item['id'] = item._id()
+    })
     this.projectList.removeAll()
-    ko.utils.arrayPushAll(this.projectList, docs)
+    ko.utils.arrayPushAll(this.projectList, observableDocs())
   }
 
   async refreshTicketList(){
@@ -446,7 +452,13 @@ class TimerList extends BaseViewModel {
     var observableDocs = ko.mapping.fromJS(docs)
     _.forEach(observableDocs(), function(item) {
       item['id'] = item._id()
+      var projectId = item.projectId()
+      var project = _.find(that.projectList(), (projectItem) => {
+        return projectItem._id() == projectId
+      })
+      item.project = ko.observable(project)
     })
+
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
     this.ticketList.sort((left, right) => {
       var leftDate = moment(left.lastUse())
@@ -504,18 +516,16 @@ class TimerList extends BaseViewModel {
             var newDate = new moment()
             var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
             that.db_projects.insert(newProject).then((dbEntry) => {
-              that.projectList.push(dbEntry)
-              callback( { 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score } )
-              $('select.projectSelect').each(function(index, item) {
-                item.selectize.addOption({ 'name': dbEntry.name, '_id': dbEntry._id, 'score': dbEntry.score })
-              })
-              
+              var observableDbEntry = ko.mapping.fromJS(dbEntry)
+              observableDbEntry['id'] = observableDbEntry._id()
+              that.projectList.push(observableDbEntry)
+              callback( observableDbEntry )
             })
           },
-          labelField: "name",
-          sortField: [{field: "score", direction: "desc"},{field: "name", direction: "asc"}],
-          valueField: "_id",
-          searchField: ["name"],
+          labelField: "name()",
+          sortField: [{field: "score()", direction: "desc"},{field: "name()", direction: "asc"}],
+          valueField: "id",
+          searchField: ["name()"],
           placeholder: " ",
           delimiter: "|",
           closeAfterSelect: true,
@@ -587,14 +597,6 @@ class TimerList extends BaseViewModel {
       return selectedDate.isSame(docDate, 'day')
     });
 
-    _.forEach(currentJobs, function(item) {
-      var projectId = item.projectId()
-      item.projectIsSet = ko.observable(projectId);
-
-      var ticketId = item.ticketId()
-      item.ticketIsSet = ko.observable(ticketId ? true : false);
-    })
-
     currentJobs = _.sortBy(currentJobs, (job) => { return job.ticket() ? job.ticket().name() : '' })
 
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
@@ -663,15 +665,15 @@ class TimerList extends BaseViewModel {
 
     _.forEach(observableDocs(), function(item) {
       var projectId = item.projectId()
-      item.projectIsSet = ko.observable(projectId);
+      var project = _.find(this.projectList(), (projectItem) => {
+        return projectItem._id() == projectId
+      })
+      item.project = ko.observable(project)
 
       var ticketId = item.ticketId()
-      item.ticketIsSet = ko.observable(ticketId ? true : false);
-
       var ticket = _.find(this.ticketList(), function(ticketItem) {
         return ticketItem._id() == ticketId
       })
-
       item.ticket = ko.observable(ticket)
     }.bind(this))
 
@@ -853,11 +855,15 @@ class TimerList extends BaseViewModel {
     dbEntry.isRunning(false)
 
     var projectId = dbEntry.projectId()
-    dbEntry.projectIsSet = ko.observable(projectId);
+    var project = null
+    if(projectId) {
+      project = _.find(this.projectList(), (item) => {
+        return item._id() == projectId
+      })
+    }
+    dbEntry.project = ko.observable(project)
 
     var ticketId = dbEntry.ticketId()
-    dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
-
     var ticket = null
     if(ticketId) {
       ticket = _.find(this.ticketList(), (item) => {
@@ -901,11 +907,15 @@ class TimerList extends BaseViewModel {
     dbEntry.isRunning(false)
     
     var projectId = dbEntry.projectId()
-    dbEntry.projectIsSet = ko.observable(projectId);
+    var project = null
+    if(projectId) {
+      project = _.find(this.projectList(), (item) => {
+        return item._id() == projectId
+      })
+    }
+    dbEntry.project = ko.observable(project)
 
     var ticketId = dbEntry.ticketId()
-    dbEntry.ticketIsSet = ko.observable(ticketId ? true : false);
-
     var ticket = null
     if(ticketId) {
       ticket = _.find(this.ticketList(), (item) => {
