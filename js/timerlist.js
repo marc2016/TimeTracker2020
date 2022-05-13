@@ -1126,7 +1126,7 @@ class TimerList extends BaseViewModel {
   }
   
   getTicketNumber(that, ticketId) {
-    var ticket = _.find(that.ticketList(), {_id: ticketId})
+    var ticket = _.find(that.ticketList(), (item) =>{ return item._id() == ticketId})
     var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
     var match = regex.exec(ticket.name())
     
@@ -1148,8 +1148,8 @@ class TimerList extends BaseViewModel {
   }
 
   copyTicket(that,data) {
-    var ticket = _.find(that.ticketList(), {_id: data.ticketId()})
-    clipboard.writeText(ticket.name)
+    var ticket = _.find(that.ticketList(), (item) => { return item._id() == data.ticketId()})
+    clipboard.writeText(ticket.name())
     toastr["info"]("Ticket wurde kopiert.")
   }
 
