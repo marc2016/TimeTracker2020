@@ -8,22 +8,23 @@
       <i class="fa fa-angle-double-right" title="Weiter"></i>
     </button>
   </div>
-  <div class="static-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
-    <div class="static-entry-overlay">
-      <h2 class="static-entry-text">
-        <i class="fa fa-trash static-entry-icon"></i> Zum Löschen, anklicken.
-      </h2>
-    </div>
-    <div class="static-entry" >
-      <h2 class="static-entry-text">
-        <i class="fa fa-umbrella-beach static-entry-icon"></i> Abwesend
-      </h2>
+  <div class="timerListContent">
+    <div class="static-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
+      <div class="static-entry-overlay">
+        <h2 class="static-entry-text">
+          <i class="fa fa-trash static-entry-icon"></i> Zum Löschen, anklicken.
+        </h2>
+      </div>
+      <div class="static-entry" >
+        <h2 class="static-entry-text">
+          <i class="fa fa-umbrella-beach static-entry-icon"></i> Abwesend
+        </h2>
+        
+      </div>
       
     </div>
+      
     
-  </div>
-    
-  <div>
     <div class="static-entry-container" data-bind="visible: currentJobTimerList().length <= 0 && !(absenceToday()), click: function(data, event) { addNewItem() }">
       <div class="static-entry-overlay">
         <h2 class="static-entry-text">
