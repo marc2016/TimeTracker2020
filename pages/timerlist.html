@@ -48,7 +48,7 @@
                 </label>
               </div>
             </div>
-            <div class="col-5 input-group-sm growBySize">
+            <div class="col-10 col-md-5 input-group-sm">
               <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name()}, options: $parent.ticketList(), optionsCaption: 'Projekt auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
               </select>
@@ -78,13 +78,13 @@
                 </div>
               </div>
             </div>
-            <div class="col collapsedBySize">
+            <div class="col d-none d-md-inline d-lg-inline">
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
               <label class="label-placeholder" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
               
             </div>
-            <div class="col-2 collapsedBySize">
+            <div class="col-2 d-none d-lg-inline d-lg-none">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
@@ -97,13 +97,13 @@
                     <i class="fa fa-pause timer-pause-btn" title="Pause"></i>
                 </a>
                 
-                <a class="btn btn-default collapsedBySize timer-btn" id="btnAddNote" data-toggle="modal" data-target="#modalAddNote" data-bind="click: $parent.changeNoteClick.bind($data,$parent)">
+                <a class="btn btn-default timer-btn d-none d-md-inline d-lg-inline" id="btnAddNote" data-toggle="modal" data-target="#modalAddNote" data-bind="click: $parent.changeNoteClick.bind($data,$parent)">
                   <i class="fa fa-sticky-note" title="Notiz"></i>
                 </a>
-                <a class="btn btn-default collapsedBySize timer-btn" id="btnRemoveEntry" data-bind="click: $parent.removeItemModal.bind($data,$parent)">
+                <a class="btn btn-default timer-btn d-none d-md-inline d-lg-inline" id="btnRemoveEntry" data-bind="click: $parent.removeItemModal.bind($data,$parent)">
                   <i class="fa fa-trash" title="Löschen"></i>
                 </a>
-                <a class="btn btn-default collapsedBySize timer-btn" id="btnCopyEntry" data-bind="click: $parent.copyJob.bind($data,$parent)">
+                <a class="btn btn-default timer-btn d-none d-md-inline d-lg-inline" id="btnCopyEntry" data-bind="click: $parent.copyJob.bind($data,$parent)">
                   <i class="fa fa-copy" title="Kopieren"></i>
                 </a>
                 <!-- <div class="btn btn-default dropleft timer-btn visibleBySize" data-toggle="dropdown">
@@ -168,7 +168,7 @@
                 </span>
               </div>
             </div>
-            <div class="col-2 collapsedBySize">
+            <div class="col-2 d-none d-md-inline d-lg-inline">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
@@ -178,7 +178,7 @@
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
-                <div class="collapsedBySize" style="float: right; width: 93px;"></div>
+                <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 93px;"></div>
               </div>
 
             </div>
@@ -229,7 +229,7 @@
                 </span>
               </div>
             </div>
-            <div class="col-2 collapsedBySize">
+            <div class="col-2 d-none d-md-inline d-lg-inline">
               <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
                 return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
@@ -239,7 +239,7 @@
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
-                <div class="collapsedBySize" style="float: right; width: 93px;"></div>
+                <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 93px;"></div>
               </div>
 
             </div>

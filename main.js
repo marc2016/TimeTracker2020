@@ -39,7 +39,7 @@ let mainWindow
 const mainOpts = {
   width: 680,
   height: 820,
-  minWidth: 480,
+  minWidth: 580,
   minHeight: 450,
   icon: path.join(__dirname, 'icons/logo.ico'),
   show: false,
