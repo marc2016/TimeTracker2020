@@ -251,22 +251,6 @@ class TimerList extends BaseViewModel {
     this.applySelectize()
     this.registerFocusEvents()
     this.createAutoComplete()
-
-    var that = this
-    $(window).on('scroll', function() {
-      if ($(this).scrollTop() + $(this).innerHeight() >= $("body").height()) {
-        _.forEach(that.ticketList(), (ticket) => {
-          if(!ticket.done())
-            return
-          var doneTicket = _.find(that.currentDoneTicketList(), (doneTicket) => {
-            return doneTicket._id() == ticket._id()
-          })
-          if(doneTicket)
-            return
-          that.currentDoneTicketList.push(ticket)
-        })
-      }
-    })
   }
 
   async onLoad() {
@@ -293,6 +277,19 @@ class TimerList extends BaseViewModel {
     } else {
       this.absenceToday(false)
     }
+
+    var that = this
+    var bindedFunc = that.reloadDoneTickets.bind(that)
+    var debounced = _.debounce(() => { bindedFunc() }, 1000, {
+      'leading': true,
+      'trailing': false
+    })
+    $(window).on('scroll', function() {
+      if ($(this).scrollTop() + $(this).innerHeight() >= $("body").height()) {
+        
+        debounced()
+      }
+    })
   }
 
   show(){
@@ -1161,7 +1158,22 @@ class TimerList extends BaseViewModel {
     toastr["info"]("Ticket wurde kopiert.")
   }
 
-  
+  reloadDoneTickets() {
+    var count = 10
+    _.forEach(this.ticketList(), (ticket) => {
+      if(!ticket.done())
+        return
+      var doneTicket = _.find(this.currentDoneTicketList(), (doneTicket) => {
+        return doneTicket._id() == ticket._id()
+      })
+      if(doneTicket)
+        return
+      if(count-- > 0)
+        this.currentDoneTicketList.push(ticket)
+      else
+        return false
+    })
+  }
 
   refreshTray(elapsedTime){
     // var tray = remote.getGlobal('tray');
