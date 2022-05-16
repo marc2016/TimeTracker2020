@@ -5,6 +5,7 @@ const { clipboard } = require('electron')
 
 var _ = require('lodash');
 
+const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
@@ -1123,40 +1124,28 @@ class TimerList extends BaseViewModel {
     $('#modalChangeJobDuration').modal('show')
   }
   
-  getTicketNumber(that, ticketId) {
-    var ticket = _.find(that.ticketList(), (item) =>{ return item._id() == ticketId})
-    var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-    var match = regex.exec(ticket.name())
+  openTicketForJob(that,data) {
+    openTicket(that.ticketList, data.ticketId())
+  }
     
-    if(!match) {
-      toastr["error"]("Keine Ticket Nummer gefunden.")
-      return
+  copyTicketForJob(that,data) {
+    copyTicket(that.ticketList, data.ticketId())
     }
-    var issueNumber = match[1]
-    return issueNumber
+
+  copyTicketNumberForJob(that,data) {
+    copyTicketNumber(that.ticketList, data.ticketId())
   }
 
-  openTicket(that,data) {
-    var issueNumber = that.getTicketNumber(that, data.ticketId())
-    if(!issueNumber)
-      return
-    var ticketSystemBaseUrl = store.get('ticketSystemBaseUrl')
-    shell.openExternal(ticketSystemBaseUrl+'/'+issueNumber)
-    toastr["info"]("Ticket wurde geöffnet.")
+  openTicketForTicket(that,data) {
+    openTicket(that.ticketList, data._id())
   }
 
-  copyTicket(that,data) {
-    var ticket = _.find(that.ticketList(), (item) => { return item._id() == data.ticketId()})
-    clipboard.writeText(ticket.name())
-    toastr["info"]("Ticket wurde kopiert.")
+  copyTicketForTicket(that,data) {
+    copyTicket(that.ticketList, data._id())
   }
 
-  copyTicketNumber(that,data) {
-    var issueNumber = that.getTicketNumber(that,data.ticketId())
-    if(!issueNumber)
-      return
-    clipboard.writeText(issueNumber)
-    toastr["info"]("Ticket wurde kopiert.")
+  copyTicketNumberForTicket(that,data) {
+    copyTicketNumber(that.ticketList, data._id())
   }
 
   reloadDoneTickets() {

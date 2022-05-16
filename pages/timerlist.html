@@ -56,9 +56,9 @@
               <label class="label-placeholder" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticket() }">Ticket</label>
               <div class="timer-second-row">
                 <div data-bind="visible: ticket()" style="float: left;">
-                  <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                  <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                  <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForJob.bind($data,$parent)"></i>
+                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForJob.bind($data,$parent)"></i>
+                  <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForJob.bind($data,$parent)">
                     <i class="fa fa-copy fa-stack-2x"></i>
                     <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
                   </span>
@@ -161,9 +161,9 @@
               </div>
               
               <div class="timer-second-row">
-                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
+                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
+                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
                   <i class="fa fa-copy fa-stack-2x"></i>
                   <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
                 </span>
@@ -222,9 +222,9 @@
               </div>
               
               <div class="timer-second-row">
-                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumber.bind($data,$parent)">
+                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
+                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
+                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
                   <i class="fa fa-copy fa-stack-2x"></i>
                   <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
                 </span>
