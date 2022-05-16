@@ -933,6 +933,7 @@ class TimerList extends BaseViewModel {
     var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD'), done: false, projectId: '' }
     var dbEntry = await this.db_tickets.insert(newTicket)
     var observableDbEntry = ko.mapping.fromJS(dbEntry)
+    observableDbEntry.project = ko.observable()
     observableDbEntry['id'] = observableDbEntry._id()
     this.ticketList.unshift(observableDbEntry)
     return observableDbEntry
