@@ -1147,27 +1147,27 @@ class TimerList extends BaseViewModel {
   }
   
   openTicketForJob(that,data) {
-    openTicket(that.ticketList, data.ticketId())
+    openTicket(that.ticketList(), data.ticketId())
   }
 
   copyTicketForJob(that,data) {
-    copyTicket(that.ticketList, data.ticketId())
+    copyTicket(that.ticketList(), data.ticketId())
   }
 
   copyTicketNumberForJob(that,data) {
-    copyTicketNumber(that.ticketList, data.ticketId())
+    copyTicketNumber(that.ticketList(), data.ticketId())
   }
 
   openTicketForTicket(that,data) {
-    openTicket(that.ticketList, data._id())
+    openTicket(that.ticketList(), data._id())
   }
 
   copyTicketForTicket(that,data) {
-    copyTicket(that.ticketList, data._id())
+    copyTicket(that.ticketList(), data._id())
   }
 
   copyTicketNumberForTicket(that,data) {
-    copyTicketNumber(that.ticketList, data._id())
+    copyTicketNumber(that.ticketList(), data._id())
   }
 
   reloadDoneTickets() {

@@ -23,7 +23,7 @@ toastr.options = {
 }
 
 function getTicketNumber(ticketList, ticketId) {
-  var ticket = _.find(ticketList(), (item) =>{ return item._id() == ticketId})
+  var ticket = _.find(ticketList, (item) =>{ return item._id() == ticketId})
   var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
   var match = regex.exec(ticket.name())
   
