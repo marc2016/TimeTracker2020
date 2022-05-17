@@ -93,6 +93,10 @@
   display: inline-block;
 }
 
+.timer-btn-disabled {
+  background-color: $maincolorDisabled;
+}
+
 
 .text-input-job{
   box-shadow: none !important;

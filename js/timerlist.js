@@ -1,11 +1,12 @@
 const electron = require('electron')
-const { shell } = require('electron');
 
 const { clipboard } = require('electron')
 
 var _ = require('lodash');
 
 const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
+const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timertemplates.js')
+
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
 var ko = require('knockout');
@@ -88,6 +89,7 @@ class TimerList extends BaseViewModel {
       this.currentDoneTicketList = ko.observableArray()
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
+      this.timerTemplates = ko.observableArray()
       this.descriptionList = []
 
       this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
@@ -262,6 +264,9 @@ class TimerList extends BaseViewModel {
     await this.refreshProjectList()
     await this.refreshTicketList()
     await this.refreshDescriptionList()
+
+    var timerTemplatesList = await createTimerTemplateList()
+    ko.utils.arrayPushAll(this.timerTemplates, timerTemplatesList())
     
     // var tray = remote.getGlobal('tray');
     // tray.setContextMenu(self.trayContextMenu)
@@ -309,7 +314,7 @@ class TimerList extends BaseViewModel {
   getMenu(){
     return [
       {
-        icon: 'fa fa-plus-circle',
+        icon: 'fa fa-stopwatch',
         name: 'Neuer Eintrag',
         method: this.addNewItem.bind(this)
       },
@@ -845,8 +850,8 @@ class TimerList extends BaseViewModel {
     
   }
 
-  async addNewJobTimer(ticketId, projetcId) {
-    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description:'', date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+  async addNewJobTimer(description, ticketId, projetcId) {
+    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description:description, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
@@ -870,7 +875,7 @@ class TimerList extends BaseViewModel {
     }
     dbEntry.ticket = ko.observable(ticket)
 
-    this.jobTimerList.push(dbEntry)
+    this.jobTimerList.unshift(dbEntry)
     this.createAutoComplete(dbEntry._id())
 
     await this.saveAll()
@@ -1002,6 +1007,23 @@ class TimerList extends BaseViewModel {
     toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
 
+  async pinJob(that, data) {
+    const newEntry = await insertTimerTemplate(data.description(), data.projectId())
+    if (newEntry)
+      that.timerTemplates.unshift(newEntry)
+  }
+
+  async removeTimerTemplate(that, data) {
+    await deleteTimerTemplate(data._id())
+    that.timerTemplates.remove(data)
+  }
+
+  async addNewTimerFromTemplate(that, data) {
+    var newItem = await that.addNewJobTimer(data.description(), null, data.projectId())
+
+    that.startTimer(that, newItem)
+  }
+
   pauseTimer(){
     this.jobtimer.stop()
     this.refreshTimeSum()
@@ -1042,7 +1064,7 @@ class TimerList extends BaseViewModel {
   }
 
   async startTicket(that,data){
-    var newItem = await that.addNewJobTimer(data._id(), data.projectId())
+    var newItem = await that.addNewJobTimer(null, data._id(), data.projectId())
 
     that.startTimer(that, newItem)
   }
@@ -1127,10 +1149,10 @@ class TimerList extends BaseViewModel {
   openTicketForJob(that,data) {
     openTicket(that.ticketList, data.ticketId())
   }
-    
+
   copyTicketForJob(that,data) {
     copyTicket(that.ticketList, data.ticketId())
-    }
+  }
 
   copyTicketNumberForJob(that,data) {
     copyTicketNumber(that.ticketList, data.ticketId())

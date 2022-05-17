@@ -1,0 +1,50 @@
+.timer-template-button {
+  float: left;
+  background-color: $maincolor;
+  
+  border-radius: 25px;
+  margin-right: 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.timer-template-add {
+  float: inherit;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+// .timer-template-button:hover {
+//   width: 164px;
+// }
+
+.timer-template-button:hover>.timer-template-icon-delete {
+  margin-left: 0px;
+  margin-right: 8px;
+  opacity: 1;
+  transition: opacity 1s ease-out, margin-left 0.1s linear;
+}
+
+.timer-template-text {
+  color: white;
+}
+
+.timer-template-icon {
+  color: white;
+  margin-right: 5px;
+}
+
+.timer-template-icon-delete {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  
+  margin-left: -24px;
+  opacity: 0;
+  transition: opacity 0.1s ease-in, margin-left 0.5s linear;
+  background: white;
+  padding: 5px;
+  color: $maincolor;
+  border-radius: 25px;
+}
