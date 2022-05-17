@@ -982,24 +982,24 @@ class TimerList extends BaseViewModel {
   }
 
   copyJob(that,data){
-    var ticket = _.find(that.ticketList(), {_id: data.ticketId()})
-    var project = _.find(that.projectList(), {_id: data.projectId()})
+    var ticket = data.ticket()
+    var project = data.project()
 
     var copyJobFormat = store.get('copyJobFormat')
 
     if(copyJobFormat == 'copyJobFormatPlaintext') {
       var result = ""
-      result += `Ticket: ${ticket ? ticket.name || "-" : "-"}\n`
+      result += `Ticket: ${ticket ? ticket.name() || "-" : "-"}\n`
       result += `Tätigkeit: ${data.description() || "-"}\n`
-      result += `Projekt: ${project ? project.name || "-" : "-"}\n`
+      result += `Projekt: ${project ? project.name() || "-" : "-"}\n`
       result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
       clipboard.writeText(result)
     } else {
       var obj = {
         date: data.date(),
         description: data.description(),
-        ticket: ticket ? ticket.name || "-" : "-",
-        project: project ? project.name || "-" : "-",
+        ticket: ticket ? ticket.name() || "-" : "-",
+        project: project ? project.name() || "-" : "-",
         duration: that.getFormatedDurationHHmm(data.elapsedSeconds())
       }
       clipboard.writeText(JSON.stringify(obj))
