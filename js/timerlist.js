@@ -163,7 +163,14 @@ class TimerList extends BaseViewModel {
               this.currentToDoTicketList.unshift(ticket)
               this.currentDoneTicketList.remove(ticket)
             }
+          } else {
+            const index = _.findIndex(that.currentJobTimerList(), (j) => { return j.ticket() != ticket && j.ticket() && j.ticket().done() == child() })
               
+            that.currentJobTimerList.remove(currentJobForTicket)
+            if(index > 0)
+              that.currentJobTimerList.splice(index, 0, currentJobForTicket)
+            else
+              that.currentJobTimerList.push(currentJobForTicket)
           }
             
         }
