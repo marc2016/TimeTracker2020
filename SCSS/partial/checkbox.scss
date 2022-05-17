@@ -35,6 +35,10 @@
   cursor: not-allowed;
 }
 
+.ticket-checkbox-label:hover {
+  transform: scale(1.1);
+}
+
 // #ticket-checkbox-label:before {
 //   content: "";
 //   position: absolute;
