@@ -611,7 +611,13 @@ class TimerList extends BaseViewModel {
       return selectedDate.isSame(docDate, 'day')
     });
 
-    currentJobs = _.sortBy(currentJobs, (job) => { return job.ticket() ? job.ticket().name() : '' })
+    currentJobs = _.sortBy(currentJobs, (job) => {
+      var doneSortValue = 0
+      if(job.ticket()) {
+        doneSortValue = job.ticket().done() ? 2 : 1
+      }
+      return job.ticket() ? doneSortValue + job.ticket().name() : ''
+    })
 
     ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
 
