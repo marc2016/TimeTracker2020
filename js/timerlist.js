@@ -167,6 +167,10 @@ class TimerList extends BaseViewModel {
           }
             
         }
+        if(child._fieldName == 'projectId') {
+          var project = _.find(this.projectList(), (item) => item._id() == child())
+          parents[0].project(project)
+        }
       }.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
