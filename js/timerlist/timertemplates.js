@@ -15,6 +15,9 @@ async function insertTimerTemplate(description, projectId) {
   if(!description)
     return null
   const db_timertemplates = dataAccess.getDb('timertemplates')
+  var count = await db_timertemplates.count({ description: description })
+  if(count > 0)
+    return null
   const newEntry = { description: description, projectId: projectId ? projectId : null }
   const newDbEntry = await db_timertemplates.insert(newEntry)
   var observableDoc = ko.mapping.fromJS(newDbEntry)
