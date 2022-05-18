@@ -136,7 +136,7 @@ if (!gotTheLock) {
   })
   app.on('open-url', function (event, url) {
     event.preventDefault()
-    handleUrl(url)
+    mainWindow.webContents.send('open-url', url)
     if (mainWindow) {
       if (mainWindow.isMinimized()) myWindow.restore()
       mainWindow.focus()
@@ -202,17 +202,3 @@ function createWindow() {
   log.info("Create window.")
   mainWindow = new BrowserWindow(mainOpts)
 }
-
-function handleUrl(url) {
-  var decodedUrl = decodeURI(url)
-  var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
-  var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
-  var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
-  var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
-  if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
-    openTimerList()
-    this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
-  }
-}
-
-

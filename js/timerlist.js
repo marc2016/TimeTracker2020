@@ -913,7 +913,7 @@ class TimerList extends BaseViewModel {
         var newTicket = { name:issueKey+": "+issueSummery, active:true, score: 5, lastUse: moment().format('YYYY-MM-DD') }
         var newTicket = await this.db_tickets.insert(newTicket)
         ticketId = newTicket._id
-        this.projectList.push(newTicket)
+        this.ticketList.push(newTicket)
       }
     }
 
@@ -949,6 +949,22 @@ class TimerList extends BaseViewModel {
 
     await this.saveAll()
     this.currentDateChanged(this.currentDate())
+  }
+
+  async addNewTicketWithKey(ticketKey, ticketSummary) {
+    if(ticketKey) {
+      var existingTicket = _.find(this.ticketList(), (t) => { return t.name().includes(ticketKey) })
+      if(existingTicket) {
+        this.currentDoneTicketList.remove(existingTicket)
+        this.currentToDoTicketList.unshift(existingTicket)
+      } else {
+        var newTicket = await this.addNewTicket(ticketKey+": "+ticketSummary)
+        this.ticketList.unshift(newTicket)
+        this.currentToDoTicketList.unshift(newTicket)
+      }
+    }
+
+
   }
 
   async addNewTicket(ticketName) {

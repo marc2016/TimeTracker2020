@@ -90,6 +90,10 @@ onload = function() {
     this.downloadProgress(arg)
   })
 
+  ipcRenderer.on('open-url', (event, arg) => {
+    handleUrl(arg)
+  })
+
   this.checkForUpdatesClick = checkForUpdatesClick
   this.closeApp = closeApp
   this.openTimerList = openTimerList
@@ -208,4 +212,24 @@ function changeView(newViewModel){
       ko.utils.arrayPushAll(pagemenu, newViewModel.getMenu())
   }
   this.currentViewModel = newViewModel
+}
+
+function handleUrl(url) {
+  var decodedUrl = decodeURI(url)
+  var createTicketRegex = /(create\-ticket)/
+  var startTimerRegex = /(start\-timer)/
+  var jiraIssueKeyRegex = /(issuekey)\=([^&]+)/
+  var jiraIssueKeyMatch = jiraIssueKeyRegex.exec(decodedUrl)
+  var jiraIssueSummeryRegex =  /(issuesummery)\=([^&]+)/
+  var jiraIssueSummeryMatch = jiraIssueSummeryRegex.exec(decodedUrl)
+  if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
+    if(createTicketRegex.exec(decodedUrl)) {
+      openTimerList()
+      this.timerlistViewModel.addNewTicketWithKey("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+    } 
+    if(startTimerRegex.exec(decodedUrl)) {
+      openTimerList()
+      this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+    } 
+  }
 }
