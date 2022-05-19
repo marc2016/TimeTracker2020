@@ -135,13 +135,9 @@ if (!gotTheLock) {
     }
   })
   app.on('open-url', function (event, url) {
-    event.preventDefault()
     mainWindow.webContents.send('open-url', url)
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) myWindow.restore()
-      mainWindow.focus()
-    }
   })
+
   app.on('browser-window-focus', function (event, win) {
     mainWindow.webContents.send('browser-window-focus')
     
