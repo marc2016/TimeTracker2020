@@ -126,8 +126,7 @@ if (!gotTheLock) {
     if (process.platform == 'win32') {
       url = commandLine.slice(1)
     }
-  
-    handleUrl(url)
+    mainWindow.webContents.send('open-url', url)
 
     if (mainWindow) {
       if (mainWindow.isMinimized()) myWindow.restore()
