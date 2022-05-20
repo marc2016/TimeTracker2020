@@ -277,6 +277,7 @@ class TimerList extends BaseViewModel {
     await this.refreshDescriptionList()
 
     var timerTemplatesList = await createTimerTemplateList()
+    this.timerTemplates.removeAll()
     ko.utils.arrayPushAll(this.timerTemplates, timerTemplatesList())
     
     // var tray = remote.getGlobal('tray');
