@@ -156,20 +156,6 @@ class TimerList extends BaseViewModel {
             parents[0].projectIsSet(true)
           })
         }
-
-        if(child._fieldName == 'ticket') {
-          // if(child())
-          //   this.currentToDoTicketList.remove(child())
-          var oldTicket = child.oldValues[0]
-          if(oldTicket) {
-            const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
-              return job.ticketId() == oldTicket._id()
-            })
-            // if(!currentJobForTicket)
-            //   this.currentToDoTicketList.push(oldTicket)
-          }
-        }
-        
         
         if(parents != null && parents.length > 0){
           this.saveItem(parents[0])
@@ -190,15 +176,7 @@ class TimerList extends BaseViewModel {
           const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
             return job.ticketId() == ticket._id()
           })
-          if(!currentJobForTicket) {
-            // if(child()) {
-            //   this.currentToDoTicketList.remove(ticket)
-            //   this.currentDoneTicketList.unshift(ticket)
-            // } else {
-            //   this.currentToDoTicketList.unshift(ticket)
-            //   this.currentDoneTicketList.remove(ticket)
-            // }
-          } else {
+          if(currentJobForTicket) {
             const index = _.findIndex(that.currentJobTimerList(), (j) => { return j.ticket() != ticket && j.ticket() && j.ticket().done() == child() })
               
             that.currentJobTimerList.remove(currentJobForTicket)
