@@ -156,7 +156,7 @@
         </h2>
       </div>
     </div>
-    <ul class="list-group" id="todoTicketList" data-bind="foreach: currentToDoTicketList, childrenComplete: jobListLoadedPostAction">
+    <ul class="list-group" id="todoTicketList" data-bind="foreach: { data: currentToDoTicketList, beforeRemove: hideTicketElement, afterAdd: showTicketElement}, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
         <div class="container-fluid job-container">
           <div class="form-row">
@@ -217,7 +217,7 @@
         </h2>
       </div>
     </div>
-    <ul class="list-group" id="doneTicketList" data-bind="foreach: currentDoneTicketList, childrenComplete: jobListLoadedPostAction">
+    <ul class="list-group" id="doneTicketList" data-bind="foreach: { data: currentDoneTicketList, beforeRemove: hideTicketElement, afterAdd: showTicketElement}, childrenComplete: jobListLoadedPostAction">
       <li class="list-group-item job-list-item" data-bind="attr: { id: _id }">
         <div class="container-fluid job-container">
           <div class="form-row">
