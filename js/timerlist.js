@@ -5,7 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
-const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timertemplates.js')
+const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
