@@ -137,15 +137,11 @@ class TimerList extends BaseViewModel {
       
       this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, function(parents, child, item) {
         if(child._fieldName == 'projectId') {
-          that.updateProjectScore(child())
-
           var project = _.find(this.projectList(), (item) => item._id() == child())
           parents[0].project(project)
         }
         
         if(child._fieldName == 'ticketId') {
-          that.updateTicketScore(child())
-
           var ticket = _.find(this.ticketList(), (item) => item._id() == child())
           parents[0].ticket(ticket)
 
@@ -185,6 +181,8 @@ class TimerList extends BaseViewModel {
         var ticket = parents[0]
         if(!ticket)
           return
+        var newDate = new moment()
+        ticket.lastUse(newDate.format('YYYY-MM-DD hh:mm:ss'))
         var saveObj = {}
         saveObj[child._fieldName] = child()
         this.db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
@@ -457,7 +455,7 @@ class TimerList extends BaseViewModel {
         item.score = 0
       }
       if(!item.lastUse){
-        item.lastUse = newDate.format('YYYY-MM-DD')
+        item.lastUse = newDate.format('YYYY-MM-DD hh:mm:ss')
       } else {
         var date = new moment(item.lastUse)
         var diff = (new moment()).diff(date, 'days')
@@ -490,7 +488,7 @@ class TimerList extends BaseViewModel {
         item.score = 0
       }
       if(!item.lastUse){
-        item.lastUse = newDate.format('YYYY-MM-DD')
+        item.lastUse = newDate.format('YYYY-MM-DD hh:mm:ss')
       } else {
         var date = new moment(item.lastUse)
         var diff = (new moment()).diff(date, 'days')
@@ -525,32 +523,6 @@ class TimerList extends BaseViewModel {
     this.descriptionList = _.uniq(mappedDocs)
   }
 
-  async updateProjectScore(id) {
-    if(!id) {
-      return
-    }
-    var doc = await this.db_projects.findOne({_id:id})
-    var oldScore = doc.score
-    if(!oldScore) {
-      oldScore = 0
-    }
-    var newScore = oldScore + 1
-    await this.db_projects.update({ _id:doc._id }, { $set: { score: newScore, lastUse: moment().format('YYYY-MM-DD') } },{ })
-  }
-
-  async updateTicketScore(id) {
-    if(!id) {
-      return
-    }
-    var doc = await this.db_tickets.findOne({_id:id})
-    var oldScore = doc.score
-    if(!oldScore) {
-      oldScore = 0
-    }
-    var newScore = oldScore + 1
-    await this.db_tickets.update({ _id:doc._id }, { $set: { score: newScore, lastUse: moment().format('YYYY-MM-DD') } },{ })
-  }
-
   applySelectize() {
     var that = this
     $('select.projectSelect').selectize(
@@ -558,7 +530,7 @@ class TimerList extends BaseViewModel {
           options: that.projectList(),
           create: function(input, callback) {
             var newDate = new moment()
-            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD') }
+            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss') }
             that.db_projects.insert(newProject).then((dbEntry) => {
               var observableDbEntry = ko.mapping.fromJS(dbEntry)
               observableDbEntry['id'] = observableDbEntry._id()
@@ -567,7 +539,7 @@ class TimerList extends BaseViewModel {
             })
           },
           labelField: "name()",
-          sortField: [{field: "score()", direction: "desc"},{field: "name()", direction: "asc"}],
+          sortField: [{field: "lastUse()", direction: "desc"},{field: "name()", direction: "asc"}],
           valueField: "id",
           searchField: ["name()"],
           placeholder: " ",
@@ -618,7 +590,7 @@ class TimerList extends BaseViewModel {
           option: renderOptionFunc
         },
         labelField: "name()",
-        sortField: [{field: "score()", direction: "desc"},{field: "name()", direction: "asc"}],
+        sortField: [{field: "lastUse()", direction: "desc"},{field: "name()", direction: "asc"}],
         valueField: "id",
         searchField: ["name()"],
         placeholder: "",
@@ -909,7 +881,7 @@ class TimerList extends BaseViewModel {
       if(tickets && tickets.length > 0) {
         ticketId = tickets[0]._id
       } else {
-        var newTicket = { name:issueKey+": "+issueSummery, active:true, score: 5, lastUse: moment().format('YYYY-MM-DD') }
+        var newTicket = { name:issueKey+": "+issueSummery, active:true, score: 5, lastUse: moment().format('YYYY-MM-DD hh:mm:ss') }
         var newTicket = await this.db_tickets.insert(newTicket)
         ticketId = newTicket._id
         this.ticketList.push(newTicket)
@@ -966,7 +938,7 @@ class TimerList extends BaseViewModel {
 
   async addNewTicket(ticketName) {
     var newDate = new moment()
-    var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD'), done: false, projectId: '' }
+    var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss'), done: false, projectId: '' }
     var dbEntry = await this.db_tickets.insert(newTicket)
     var observableDbEntry = ko.mapping.fromJS(dbEntry)
     observableDbEntry.project = ko.observable()
