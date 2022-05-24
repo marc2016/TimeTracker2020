@@ -84,7 +84,7 @@ class TimerList extends BaseViewModel {
       this.db.__original.persistence.compactDatafile()
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
-      this.currentJobTimerList = ko.observableArray().extend({ deferred: true })
+
       this.currentToDoTicketList = ko.observableArray()
       this.currentDoneTicketList = ko.observableArray()
       this.projectList = ko.observableArray()
@@ -92,12 +92,29 @@ class TimerList extends BaseViewModel {
       this.timerTemplates = ko.observableArray()
       this.descriptionList = []
 
+      var that = this
+
+      this.currentJobTimerList = ko.pureComputed(function() {
+        var selectedJobs = ko.utils.arrayFilter(this.jobTimerList(), function(jobTimer) {
+          var jobDate = moment(jobTimer.date())
+          return that.currentDate().isSame(jobDate, 'day')
+        })
+        var sortedJobs = _.sortBy(selectedJobs, (job) => {
+            var doneSortValue = 0
+            if(job.ticket()) {
+              doneSortValue = job.ticket().done() ? 2 : 1
+            }
+            return job.ticket() ? doneSortValue + job.ticket().name() : ''
+          })
+        return sortedJobs
+      }, this);
+
       this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
 
       if(this.koWatcherJobTimerList){
         this.koWatcherJobTimerList.dispose()
       }
-      var that = this
+      
       this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, function(parents, child, item) {
         if(child._fieldName == 'projectId') {
           that.updateProjectScore(child())
@@ -606,22 +623,6 @@ class TimerList extends BaseViewModel {
   }
 
   refreshSelectedJobTimerList(jobList, selectedDate) {
-    this.currentJobTimerList.removeAll()
-    var currentJobs = _.filter(jobList, function(d) { 
-      var docDate = moment(d.date())
-      return selectedDate.isSame(docDate, 'day')
-    });
-
-    currentJobs = _.sortBy(currentJobs, (job) => {
-      var doneSortValue = 0
-      if(job.ticket()) {
-        doneSortValue = job.ticket().done() ? 2 : 1
-      }
-      return job.ticket() ? doneSortValue + job.ticket().name() : ''
-    })
-
-    ko.utils.arrayPushAll(this.currentJobTimerList, currentJobs)
-
     this.currentToDoTicketList.removeAll()
     this.currentDoneTicketList.removeAll()
     var that = this
