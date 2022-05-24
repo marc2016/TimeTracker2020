@@ -5,6 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
+const { getJobTimerForTicket, sortTickets } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
 var dataAccess = require('./dataaccess.js')
@@ -94,39 +95,19 @@ class TimerList extends BaseViewModel {
 
       this.currentToDoTicketList = ko.pureComputed(function() {
         var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
-          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
-            return job.ticketId() == ticket._id()
-          })
+          const currentJobForTicket = getJobTimerForTicket(that.currentJobTimerList(), ticket)
           return !currentJobForTicket && ticket.done() == false
         });
-        var sortedTickets = filteredTickets.sort((left, right) => {
-            var leftDate = moment(left.lastUse())
-            var rightDate = moment(right.lastUse())
-            if(leftDate.isSame(rightDate))
-              return 0
-            if(leftDate.isBefore(rightDate))
-              return 1
-            return -1
-          })
+        var sortedTickets = filteredTickets.sort(sortTickets)
         return sortedTickets
       }, this);
 
       this.currentDoneTicketList = ko.pureComputed(function() {
         var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
-          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
-            return job.ticketId() == ticket._id()
-          })
+          const currentJobForTicket = getJobTimerForTicket(that.currentJobTimerList(), ticket)
           return !currentJobForTicket && ticket.done() == true
         });
-        var sortedTickets = filteredTickets.sort((left, right) => {
-            var leftDate = moment(left.lastUse())
-            var rightDate = moment(right.lastUse())
-            if(leftDate.isSame(rightDate))
-              return 0
-            if(leftDate.isBefore(rightDate))
-              return 1
-            return -1
-          })
+        var sortedTickets = filteredTickets.sort(sortTickets)
         return sortedTickets
       }, this);
 
@@ -531,15 +512,7 @@ class TimerList extends BaseViewModel {
     })
 
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
-    this.ticketList.sort((left, right) => {
-      var leftDate = moment(left.lastUse())
-      var rightDate = moment(right.lastUse())
-      if(leftDate.isSame(rightDate))
-        return 0
-      if(leftDate.isBefore(rightDate))
-        return 1
-      return -1
-    })
+    this.ticketList.sort(sortTickets)
   }
 
   async refreshDescriptionList() {
