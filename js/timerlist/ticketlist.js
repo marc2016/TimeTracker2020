@@ -5,6 +5,8 @@ var Moment = require('moment-business-days');
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 
+const dataAccess = require('../dataaccess.js')
+
 function getJobTimerForTicket(currentJobTimerList, ticket) {
   const currentJobForTicket = _.find(currentJobTimerList, function(job) {
     return job.ticketId() == ticket._id()
@@ -23,4 +25,21 @@ function sortTickets(left, right) {
   return -1
 }
 
-module.exports = { getJobTimerForTicket, sortTickets }
+function watchTicketList(parents, child, item) {
+  var ticket = parents[0]
+  if(!ticket)
+    return
+  var newDate = new moment()
+  ticket.lastUse(newDate.format('YYYY-MM-DD hh:mm:ss'))
+  var saveObj = {}
+  saveObj[child._fieldName] = child()
+  const db_tickets = dataAccess.getDb('tickets')
+  db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
+
+  if(child._fieldName == 'projectId') {
+    var project = _.find(this.projectList(), (item) => item._id() == child())
+    parents[0].project(project)
+  }
+}
+
+module.exports = { getJobTimerForTicket, sortTickets, watchTicketList }

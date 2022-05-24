@@ -5,7 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
-const { getJobTimerForTicket, sortTickets } = require('./timerlist/ticketlist.js')
+const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
 var dataAccess = require('./dataaccess.js')
@@ -163,21 +163,7 @@ class TimerList extends BaseViewModel {
         
       }.bind(this))
 
-      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true }, function(parents, child, item) {
-        var ticket = parents[0]
-        if(!ticket)
-          return
-        var newDate = new moment()
-        ticket.lastUse(newDate.format('YYYY-MM-DD hh:mm:ss'))
-        var saveObj = {}
-        saveObj[child._fieldName] = child()
-        this.db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
-
-        if(child._fieldName == 'projectId') {
-          var project = _.find(this.projectList(), (item) => item._id() == child())
-          parents[0].project(project)
-        }
-      }.bind(this))
+      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true }, watchTicketList.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
