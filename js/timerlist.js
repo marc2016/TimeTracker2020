@@ -172,21 +172,7 @@ class TimerList extends BaseViewModel {
         var saveObj = {}
         saveObj[child._fieldName] = child()
         this.db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
-        if(child._fieldName == 'done') {
-          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
-            return job.ticketId() == ticket._id()
-          })
-          if(currentJobForTicket) {
-            const index = _.findIndex(that.currentJobTimerList(), (j) => { return j.ticket() != ticket && j.ticket() && j.ticket().done() == child() })
-              
-            that.currentJobTimerList.remove(currentJobForTicket)
-            if(index > 0)
-              that.currentJobTimerList.splice(index, 0, currentJobForTicket)
-            else
-              that.currentJobTimerList.push(currentJobForTicket)
-          }
-            
-        }
+
         if(child._fieldName == 'projectId') {
           var project = _.find(this.projectList(), (item) => item._id() == child())
           parents[0].project(project)
@@ -580,19 +566,6 @@ class TimerList extends BaseViewModel {
 
   async refreshJobLists(momentValue) {
     await this.refreshJobTimerListForRange(momentValue)
-    this.refreshSelectedJobTimerList(this.jobTimerList(),momentValue)
-    
-  }
-
-  refreshSelectedJobTimerList(jobList, selectedDate) {
-    var that = this
-    _.forEach(this.ticketList(), function(ticket) {
-      const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
-        return job.ticketId() == ticket._id()
-      })
-      if(currentJobForTicket)
-        return
-    })
   }
 
   async refreshJobTimerListForRange(currentDate) {
@@ -703,8 +676,6 @@ class TimerList extends BaseViewModel {
       await this.currentMonthChanged(value)
     }
     this.currentMonth(month)
-
-    this.refreshSelectedJobTimerList(this.jobTimerList(), value)
 
     this.refreshTimeSum()
     await this.refreshOvertime(value.clone())
