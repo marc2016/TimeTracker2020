@@ -130,8 +130,8 @@ class TimerList extends BaseViewModel {
         return sortedTickets
       }, this);
 
-      this.showTicketElement = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown() }
-      this.hideTicketElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) }
+      this.showListElement = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown() }
+      this.hideListElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) }
 
       this.currentJobTimerList = ko.pureComputed(function() {
         var selectedJobs = ko.utils.arrayFilter(this.jobTimerList(), function(jobTimer) {
