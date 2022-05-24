@@ -85,14 +85,50 @@ class TimerList extends BaseViewModel {
       
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
 
-      this.currentToDoTicketList = ko.observableArray()
-      this.currentDoneTicketList = ko.observableArray()
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray()
       this.timerTemplates = ko.observableArray()
       this.descriptionList = []
 
       var that = this
+
+      this.currentToDoTicketList = ko.pureComputed(function() {
+        var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
+          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
+            return job.ticketId() == ticket._id()
+          })
+          return !currentJobForTicket && ticket.done() == false
+        });
+        var sortedTickets = filteredTickets.sort((left, right) => {
+            var leftDate = moment(left.lastUse())
+            var rightDate = moment(right.lastUse())
+            if(leftDate.isSame(rightDate))
+              return 0
+            if(leftDate.isBefore(rightDate))
+              return 1
+            return -1
+          })
+        return sortedTickets
+      }, this);
+
+      this.currentDoneTicketList = ko.pureComputed(function() {
+        var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
+          const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
+            return job.ticketId() == ticket._id()
+          })
+          return !currentJobForTicket && ticket.done() == true
+        });
+        var sortedTickets = filteredTickets.sort((left, right) => {
+            var leftDate = moment(left.lastUse())
+            var rightDate = moment(right.lastUse())
+            if(leftDate.isSame(rightDate))
+              return 0
+            if(leftDate.isBefore(rightDate))
+              return 1
+            return -1
+          })
+        return sortedTickets
+      }, this);
 
       this.currentJobTimerList = ko.pureComputed(function() {
         var selectedJobs = ko.utils.arrayFilter(this.jobTimerList(), function(jobTimer) {
@@ -142,15 +178,15 @@ class TimerList extends BaseViewModel {
         }
 
         if(child._fieldName == 'ticket') {
-          if(child())
-            this.currentToDoTicketList.remove(child())
+          // if(child())
+          //   this.currentToDoTicketList.remove(child())
           var oldTicket = child.oldValues[0]
           if(oldTicket) {
             const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
               return job.ticketId() == oldTicket._id()
             })
-            if(!currentJobForTicket)
-              this.currentToDoTicketList.push(oldTicket)
+            // if(!currentJobForTicket)
+            //   this.currentToDoTicketList.push(oldTicket)
           }
         }
         
@@ -173,13 +209,13 @@ class TimerList extends BaseViewModel {
             return job.ticketId() == ticket._id()
           })
           if(!currentJobForTicket) {
-            if(child()) {
-              this.currentToDoTicketList.remove(ticket)
-              this.currentDoneTicketList.unshift(ticket)
-            } else {
-              this.currentToDoTicketList.unshift(ticket)
-              this.currentDoneTicketList.remove(ticket)
-            }
+            // if(child()) {
+            //   this.currentToDoTicketList.remove(ticket)
+            //   this.currentDoneTicketList.unshift(ticket)
+            // } else {
+            //   this.currentToDoTicketList.unshift(ticket)
+            //   this.currentDoneTicketList.remove(ticket)
+            // }
           } else {
             const index = _.findIndex(that.currentJobTimerList(), (j) => { return j.ticket() != ticket && j.ticket() && j.ticket().done() == child() })
               
@@ -623,8 +659,6 @@ class TimerList extends BaseViewModel {
   }
 
   refreshSelectedJobTimerList(jobList, selectedDate) {
-    this.currentToDoTicketList.removeAll()
-    this.currentDoneTicketList.removeAll()
     var that = this
     _.forEach(this.ticketList(), function(ticket) {
       const currentJobForTicket = _.find(that.currentJobTimerList(), function(job) {
@@ -632,19 +666,6 @@ class TimerList extends BaseViewModel {
       })
       if(currentJobForTicket)
         return
-      if(ticket.done() && that.currentDoneTicketList().length < 10)
-        that.currentDoneTicketList.push(ticket)
-      else if(!ticket.done())
-      that.currentToDoTicketList.push(ticket)
-    })
-    this.currentToDoTicketList.sort((left, right) => {
-      var leftDate = moment(left.lastUse())
-      var rightDate = moment(right.lastUse())
-      if(leftDate.isSame(rightDate))
-        return 0
-      if(leftDate.isBefore(rightDate))
-        return 1
-      return -1
     })
   }
 
@@ -957,12 +978,10 @@ class TimerList extends BaseViewModel {
     if(ticketKey) {
       var existingTicket = _.find(this.ticketList(), (t) => { return t.name().includes(ticketKey) })
       if(existingTicket) {
-        this.currentDoneTicketList.remove(existingTicket)
-        this.currentToDoTicketList.unshift(existingTicket)
+        existingTicket.done(false)
       } else {
         var newTicket = await this.addNewTicket(ticketKey+": "+ticketSummary)
         this.ticketList.unshift(newTicket)
-        this.currentToDoTicketList.unshift(newTicket)
       }
     }
 
@@ -995,7 +1014,6 @@ class TimerList extends BaseViewModel {
   async saveNewTicketButton(data, that) {
     var newTicketName = $('#inputNewTicketName')[0].value
     var newTicket = await that.addNewTicket(newTicketName)
-    that.currentToDoTicketList.unshift(newTicket)
     $('#modalAddNewTicket').modal('hide');
   }
 
