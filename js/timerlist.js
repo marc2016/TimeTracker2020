@@ -4,6 +4,7 @@ const { clipboard } = require('electron')
 
 var _ = require('lodash');
 
+const { watchTimerList } = require('./timerlist/timerlist-operations.js')
 const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
 const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
@@ -135,33 +136,7 @@ class TimerList extends BaseViewModel {
         this.koWatcherJobTimerList.dispose()
       }
       
-      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, function(parents, child, item) {
-        if(child._fieldName == 'projectId') {
-          var project = _.find(this.projectList(), (item) => item._id() == child())
-          parents[0].project(project)
-        }
-        
-        if(child._fieldName == 'ticketId') {
-          var ticket = _.find(this.ticketList(), (item) => item._id() == child())
-          parents[0].ticket(ticket)
-
-          var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
-          docs().then((jobs) => {
-            var job = _.find(jobs, function(o) { return o.projectId != undefined })
-            if (!job) return
-            
-            var element = $('#project-job_'+parents[0]._id())[0].selectize
-            element.addItem(job.projectId)
-            that.jobTimerList()[0].projectId(job.projectId)
-            parents[0].projectIsSet(true)
-          })
-        }
-        
-        if(parents != null && parents.length > 0){
-          this.saveItem(parents[0])
-        } 
-        
-      }.bind(this))
+      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, watchTimerList.bind(this))
 
       this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true }, watchTicketList.bind(this))
 
