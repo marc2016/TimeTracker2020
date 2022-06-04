@@ -445,7 +445,8 @@ class TimerList extends BaseViewModel {
     
     var jobDocs = await this.db.find({date: regex})
     var mappedDocs = _.map(jobDocs,(j) => { return j.description })
-    this.descriptionList = _.uniq(mappedDocs)
+    var filteredDocs = _.filter(mappedDocs, (o) => { return o != null })
+    this.descriptionList = _.uniq(filteredDocs)
   }
 
   applySelectize() {
