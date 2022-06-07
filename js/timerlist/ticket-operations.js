@@ -3,6 +3,13 @@ const { clipboard, shell } = require('electron')
 const Store = require('electron-store');
 const store = new Store();
 
+var ko = require('knockout');
+ko.mapping = require('knockout-mapping')
+
+var Moment = require('moment-business-days');
+const MomentRange = require('moment-range');
+const moment = MomentRange.extendMoment(Moment);
+
 const toastr = require('toastr');
 toastr.options = {
   "closeButton": false,
@@ -21,6 +28,8 @@ toastr.options = {
   "showMethod": "fadeIn",
   "hideMethod": "fadeOut"
 }
+
+const dataAccess = require('../dataaccess.js')
 
 function getTicketNumber(ticketList, ticketId) {
   var ticket = _.find(ticketList, (item) =>{ return item._id() == ticketId})
@@ -58,4 +67,29 @@ function copyTicketNumber(ticketList, ticketId) {
   toastr["info"]("Ticket wurde kopiert.")
 }
 
-module.exports = { openTicket, copyTicket, copyTicketNumber }
+async function addNewTicketWithKeyInternal(ticketList, ticketKey, ticketSummary) {
+  if(ticketKey) {
+    var existingTicket = _.find(ticketList(), (t) => { return t.name && t.name().includes(ticketKey) })
+    if(existingTicket) {
+      existingTicket.done(false)
+    } else {
+      var newTicket = await addNewTicketInternal(ticketList, ticketKey+": "+ticketSummary)
+      ticketList.unshift(newTicket)
+    }
+  }
+}
+
+async function addNewTicketInternal(ticketList, ticketName) {
+  const db_tickets = dataAccess.getDb('tickets')
+
+  var newDate = new moment()
+  var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss'), done: false, projectId: '' }
+  var dbEntry = await db_tickets.insert(newTicket)
+  var observableDbEntry = ko.mapping.fromJS(dbEntry)
+  observableDbEntry.project = ko.observable()
+  observableDbEntry['id'] = observableDbEntry._id()
+  ticketList.unshift(observableDbEntry)
+  return observableDbEntry
+}
+
+module.exports = { openTicket, copyTicket, copyTicketNumber, addNewTicketWithKeyInternal, addNewTicketInternal }

@@ -5,7 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { watchTimerList } = require('./timerlist/timerlist-operations.js')
-const { copyTicket, copyTicketNumber, openTicket } = require('./timerlist/ticket-operations.js')
+const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal } = require('./timerlist/ticket-operations.js')
 const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
@@ -834,28 +834,11 @@ class TimerList extends BaseViewModel {
   }
 
   async addNewTicketWithKey(ticketKey, ticketSummary) {
-    if(ticketKey) {
-      var existingTicket = _.find(this.ticketList(), (t) => { return t.name().includes(ticketKey) })
-      if(existingTicket) {
-        existingTicket.done(false)
-      } else {
-        var newTicket = await this.addNewTicket(ticketKey+": "+ticketSummary)
-        this.ticketList.unshift(newTicket)
-      }
-    }
-
-
+    await addNewTicketWithKeyInternal(this.ticketList, ticketKey, ticketSummary)
   }
 
   async addNewTicket(ticketName) {
-    var newDate = new moment()
-    var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss'), done: false, projectId: '' }
-    var dbEntry = await this.db_tickets.insert(newTicket)
-    var observableDbEntry = ko.mapping.fromJS(dbEntry)
-    observableDbEntry.project = ko.observable()
-    observableDbEntry['id'] = observableDbEntry._id()
-    this.ticketList.unshift(observableDbEntry)
-    return observableDbEntry
+    return await addNewTicketInternal(this.ticketList, ticketName)
   }
 
   addNewAbsence() {
