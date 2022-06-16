@@ -225,7 +225,7 @@ function handleUrl(url) {
   if(jiraIssueKeyMatch && jiraIssueSummeryMatch) {
     if(createTicketRegex.exec(decodedUrl)) {
       openTimerList()
-      this.timerlistViewModel.addNewTicketWithKey("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+      this.timerlistViewModel.addNewTicketWithKey(jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
     } 
     if(startTimerRegex.exec(decodedUrl)) {
       openTimerList()
