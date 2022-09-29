@@ -74,7 +74,6 @@ async function addNewTicketWithKeyInternal(ticketList, ticketKey, ticketSummary)
       existingTicket.done(false)
     } else {
       var newTicket = await addNewTicketInternal(ticketList, ticketKey+": "+ticketSummary)
-      ticketList.unshift(newTicket)
     }
   }
 }

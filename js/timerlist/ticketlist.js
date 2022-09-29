@@ -16,6 +16,13 @@ function getJobTimerForTicket(currentJobTimerList, ticket) {
 }
 
 function sortTickets(left, right) {
+  if(!left.lastUse() && !right.lastUse())
+    return 0
+  if(!left.lastUse())
+    return -1
+  if(!right.lastUse())
+    return 1
+
   var leftDate = moment(left.lastUse())
   var rightDate = moment(right.lastUse())
   if(leftDate.isSame(rightDate))

@@ -38,7 +38,11 @@ var utils = require('./utils.js')
 
 const path = require('path')
 
+const AirDatepicker = require('air-datepicker');
+const localDe = require('air-datepicker/locale/de.js')
+
 var toastr = require('toastr');
+const { add } = require('lodash');
 toastr.options = {
   "closeButton": false,
   "debug": false,
@@ -77,6 +81,8 @@ class TimerList extends BaseViewModel {
       this.currentAbsencePeriod = ko.observable()
       this.absenceToday = ko.observable(false)
       this.currentSum = ko.observable()
+
+      this.loadedDoneTicketsCount = ko.observable(10)
       
       this.db = dataAccess.getDb('jobs')
       this.db_projects = dataAccess.getDb('projects')
@@ -109,6 +115,7 @@ class TimerList extends BaseViewModel {
           return !currentJobForTicket && ticket.done() == true
         });
         var sortedTickets = filteredTickets.sort(sortTickets)
+        sortedTickets = _.take(sortedTickets, this.loadedDoneTicketsCount())
         return sortedTickets
       }, this);
 
@@ -142,25 +149,37 @@ class TimerList extends BaseViewModel {
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
-      $('#textCurrentDate').datepicker({
-        language: 'de',
+      let toDayButton = {
+        content: 'Heute',
+        className: 'custom-button-classname',
+        onClick: (dp) => {
+            let date = new Date();
+            dp.selectDate(date);
+            dp.setViewDate(date);
+        }
+      }
+
+      this.textCurrentDate = new AirDatepicker('#textCurrentDate',{
+        locale: localDe.default,
         autoClose:true,
-        todayButton: new Date(),
+        buttons: [toDayButton],
+        selectedDates: [new Date()],
         maxDate: new Date(),
-        onSelect:function onSelect(fd, date) {
-          this.currentDate(moment(date))
+        onSelect:function onSelect(obj) {
+          this.currentDate(moment(obj.date))
         }.bind(this)
       })
 
-      $('#textAbsencePeriod').datepicker({
+      this.textAbsencePeriod = new AirDatepicker('#textAbsencePeriod',{
         range: true,
         toggleSelected: false,
-        language: 'de',
+        locale: localDe.default,
         autoClose: true,
-        todayButton: false,
+        buttons: [toDayButton],
+        selectedDates: [new Date()],
         dateFormat: 'dd.mm.yy',
-        onSelect:function onSelect(fd, date) {
-            if(date && date.length == 2){
+        onSelect:function onSelect(obj) {
+            if(obj.date && obj.date.length == 2){
                 this.currentAbsencePeriod(moment.range(date[0],date[1]))
             }
           }.bind(this)
@@ -257,14 +276,17 @@ class TimerList extends BaseViewModel {
     }
 
     var that = this
-    var bindedFunc = that.reloadDoneTickets.bind(that)
-    var debounced = _.debounce(() => { bindedFunc() }, 1000, {
+    //var bindedFunc = that.reloadDoneTickets.bind(that)
+    var debounced = _.throttle(() => {
+      var scrollTo = $("body").height() - 100
+      that.loadedDoneTicketsCount(that.loadedDoneTicketsCount()+10)
+      window.scrollTo(0, scrollTo)
+    }, 1000, {
       'leading': true,
       'trailing': false
     })
     $(window).on('scroll', function() {
-      if ($(this).scrollTop() + $(this).innerHeight() >= $("body").height()) {
-        
+      if ($(this).scrollTop() + $(this).innerHeight() >= $("body").height() - 50) {
         debounced()
       }
     })
@@ -351,6 +373,7 @@ class TimerList extends BaseViewModel {
 
     that.refreshTimeSum()
     that.refreshOvertime(moment(match.date()))
+    that.lastJobBeforeJobDurationChange(null)
   }
 
   handleModalChangeJobDuration(){
@@ -648,6 +671,8 @@ class TimerList extends BaseViewModel {
     } else {
       this.absenceToday(false)
     }
+
+    this.loadedDoneTicketsCount(10)
   }
   
   async refreshOvertime(momentValue) {
@@ -783,19 +808,21 @@ class TimerList extends BaseViewModel {
     return dbEntry
   }
 
+  async addNewItemAndStart(jobDescription, issueKey, issueSummery){
+    var newEntry = await this.addNewItem(jobDescription, issueKey, issueSummery)
+    this.startTimer(this, newEntry)
+  }
+
   async addNewItem(jobDescription, issueKey, issueSummery){
 
     var ticketId = ""
     if(issueKey) {
-      var issueKeyRegex = new RegExp(issueKey);
-      var tickets = await this.db_tickets.find({ name: issueKeyRegex })
-      if(tickets && tickets.length > 0) {
-        ticketId = tickets[0]._id
+      var existingTicket = _.find(this.ticketList(), (t) => { return t.name && t.name().includes(issueKey) })
+      if(existingTicket) {
+        ticketId = existingTicket._id()
       } else {
-        var newTicket = { name:issueKey+": "+issueSummery, active:true, score: 5, lastUse: moment().format('YYYY-MM-DD hh:mm:ss') }
-        var newTicket = await this.db_tickets.insert(newTicket)
-        ticketId = newTicket._id
-        this.ticketList.push(newTicket)
+        var newTicket = await addNewTicketInternal(this.ticketList, issueKey+": "+issueSummery)
+        ticketId = newTicket._id()
       }
     }
 
@@ -831,6 +858,8 @@ class TimerList extends BaseViewModel {
 
     await this.saveAll()
     this.currentDateChanged(this.currentDate())
+
+    return dbEntry
   }
 
   async addNewTicketWithKey(ticketKey, ticketSummary) {
@@ -925,13 +954,10 @@ class TimerList extends BaseViewModel {
   }
 
   timerStop(currentData){
-    var elementId = this.jobtimer.currentJobId
     this.currentJob().isRunning(false)
-    this.lastEntryId = elementId
     this.currentEntryId = undefined
     footer.refreshStatusBarEntry()
     this.currentJob(undefined)
-    // remote.getCurrentWindow().setOverlayIcon(null, "TimeTracker")
   }
 
   timerStart(currentData){
