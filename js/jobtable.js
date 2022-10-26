@@ -12,6 +12,9 @@ const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 var Holidays = require('date-holidays')
 
+const AirDatepicker = require('air-datepicker');
+const localDe = require('air-datepicker/locale/de.js')
+
 var utils = require('./utils')
 
 const Store = require('electron-store');
@@ -486,15 +489,14 @@ class JobTable extends BaseViewModel {
         super.onLoad()
 
         $.find('#textCurrentMonth')[0].value = this.currentRange().start.format('DD.MM.YY') + "-" + this.currentRange().end.format('DD.MM.YY')
-        $('#textCurrentMonth').datepicker({
+        new AirDatepicker('#textCurrentMonth', {
             range: true,
-            language: 'de',
+            locale: localDe.default,
             autoClose: true,
-            todayButton: false,
-            dateFormat: 'dd.mm.yy',
-            onSelect:function onSelect(fd, date) {
-                if(date && date.length == 2){
-                    this.currentRange(moment.range(date[0],date[1]))
+            buttons: [],
+            onSelect:function onSelect(obj) {
+                if(obj.date && obj.date.length == 2){
+                    this.currentRange(moment.range(obj.date[0],obj.date[1]))
                     this.definedRange("")
                 }
             }.bind(this)

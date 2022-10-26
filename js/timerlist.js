@@ -119,8 +119,8 @@ class TimerList extends BaseViewModel {
         return sortedTickets
       }, this);
 
-      this.showListElement = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown() }
-      this.hideListElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) }
+      this.showListElement = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown(600,'swing') }
+      this.hideListElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(600,'swing',function() { $(elem).remove(); }) }
 
       this.currentJobTimerList = ko.pureComputed(function() {
         var selectedJobs = ko.utils.arrayFilter(this.jobTimerList(), function(jobTimer) {
@@ -159,31 +159,35 @@ class TimerList extends BaseViewModel {
         }
       }
 
-      this.textCurrentDate = new AirDatepicker('#textCurrentDate',{
+      this.currentDateDatePickerOpts = {
         locale: localDe.default,
         autoClose:true,
         buttons: [toDayButton],
         selectedDates: [new Date()],
+        multipleDatesSeparator: ' - ',
         maxDate: new Date(),
         onSelect:function onSelect(obj) {
           this.currentDate(moment(obj.date))
         }.bind(this)
-      })
+      }
 
-      this.textAbsencePeriod = new AirDatepicker('#textAbsencePeriod',{
+      this.textCurrentDate = new AirDatepicker('#textCurrentDate', this.currentDateDatePickerOpts)
+      this.textCurrentDate.update(this.currentDateDatePickerOpts)
+      this.absencePeriodDatePicker = {
         range: true,
         toggleSelected: false,
         locale: localDe.default,
         autoClose: true,
         buttons: [toDayButton],
-        selectedDates: [new Date()],
-        dateFormat: 'dd.mm.yy',
+        multipleDatesSeparator: ' - ',
+        container: '#modalAbsencePeriod',
         onSelect:function onSelect(obj) {
             if(obj.date && obj.date.length == 2){
-                this.currentAbsencePeriod(moment.range(date[0],date[1]))
+                this.currentAbsencePeriod(moment.range(obj.date[0],obj.date[1]))
             }
           }.bind(this)
-      })
+      }
+      this.textAbsencePeriod = new AirDatepicker('#textAbsencePeriod', this.absencePeriodDatePicker)
 
       footer.onLoad(this.currentDate(), this.db, this.db_absences, jobtimer)
       footer.leftFooterAction = this.goToToday
@@ -192,15 +196,7 @@ class TimerList extends BaseViewModel {
         if(!(this.today() && this.today().isSame(new moment(), 'day')))
         {
           this.today(new moment())
-          $('#textCurrentDate').datepicker({
-            language: 'de',
-            autoClose:true,
-            todayButton: new Date(),
-            maxDate: new Date(),
-            onSelect:function onSelect(fd, date) {
-              this.currentDate(moment(date))
-            }.bind(this)
-          })
+          this.textCurrentDate.update(this.currentDateDatePickerOpts)
 
           await this.refreshDescriptionList()
         }

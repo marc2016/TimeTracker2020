@@ -138,6 +138,7 @@ onload = function() {
   
   openTimerList()
 
+  $('a').attr('draggable', 'false')
 }
 
 function closeWindow(){

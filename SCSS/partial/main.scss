@@ -1,6 +1,9 @@
 body {
     font-family: 'Open Sans';
     font-weight: 300;
+    user-select: none;
+    overflow-y: auto;
+    -webkit-app-region: drag;
 }
 
 ::selection {
