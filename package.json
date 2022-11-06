@@ -52,7 +52,7 @@
     "@electron/remote": "^2.0.1",
     "@fontsource/open-sans": "^4.5.2",
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "@selectize/selectize": "^0.13.5",
+    "@selectize/selectize": "^0.14.0",
     "@trodi/electron-splashscreen": "^1.0.2",
     "air-datepicker": "^3.3.0",
     "bootstrap": "^4.6.1",

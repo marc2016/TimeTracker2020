@@ -22,6 +22,11 @@
   padding-top: 3px !important;
 }
 
+.selectize-control.single .selectize-input.full input {
+  top: -5px;
+  margin-left: 2px !important;
+}
+
 .selectize-control {
   padding: 0px;
   height: 31px;
@@ -283,7 +288,7 @@
   max-height: 400px !important;
 }
 
-.selectize-input>* {
+.selectize-input .item {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

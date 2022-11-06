@@ -541,6 +541,7 @@ class TimerList extends BaseViewModel {
         placeholder: "",
         delimiter: "|",
         closeAfterSelect: true,
+        allowEmptyOption: true,
       }
     )
   }

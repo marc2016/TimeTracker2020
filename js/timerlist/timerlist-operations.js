@@ -8,6 +8,7 @@ function watchTimerList(parents, child, item) {
   if(child._fieldName == 'ticketId') {
     var ticket = _.find(this.ticketList(), (item) => item._id() == child())
     parents[0].ticket(ticket)
+    //$(`ticket-job_${parents[0]._id()}-selectized`).trigger('blur')
 
     var docs = async () => await this.db.find({ticketId: child()}).sort({date: -1})
     docs().then((jobs) => {
@@ -17,7 +18,6 @@ function watchTimerList(parents, child, item) {
       var element = $('#project-job_'+parents[0]._id())[0].selectize
       element.addItem(job.projectId)
       that.jobTimerList()[0].projectId(job.projectId)
-      parents[0].projectIsSet(true)
     })
   }
   
