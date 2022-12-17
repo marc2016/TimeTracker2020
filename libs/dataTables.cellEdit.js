@@ -20,7 +20,8 @@
  *
  * For details please refer to: http://www.datatables.net
  */
-
+const AirDatepicker = require('air-datepicker');
+const localDe = require('air-datepicker/locale/de.js')
 var _ = require('lodash');
 
 jQuery.fn.dataTable.Api.register('MakeCellsEditable()', function (settings) {
@@ -174,18 +175,19 @@ function getInputHtml(currentColumnIndex, settings, oldValue) {
             input.focus = true;
             break;
         case "datepicker": //Both datepicker options work best when confirming the values
-            
-	        input.html = "<input id='ejbeatycelledit' type='text' name='date' class='datepick " + inputCss + "'   value='" + oldValue + "'></input>";
+            var randomId = 'randomId'
+	        input.html = "<input id='"+randomId+"' type='text' name='date' class='datepick " + inputCss + "'   value='" + oldValue + "'></input>";
 	        setTimeout(function () { //Set timeout to allow the script to write the input.html before triggering the datepicker
-	            var datepickerObj = jQuery('.datepick').datepicker({
-                    language: 'de',
+
+	            var datepickerObj = new AirDatepicker('#'+randomId, {
+                    locale: localDe.default,
                     autoClose: true,
                     todayButton: false,
-                    dateFormat: 'yyyy-mm-dd',
-                    onSelect:function onSelect(fd, date,picker) {
-                        $(this).updateEditableCell(picker.el);
+                    dateFormat: 'dd.MM.yyyy',
+                    onSelect:function onSelect(picker) {
+                        $(this).updateEditableCell(picker.datepicker.$el, inputSetting.convertback);
                     }.bind(this)
-                }).data('datepicker')
+                })
                 datepickerObj.show()
 	        },100);
 	        break;
