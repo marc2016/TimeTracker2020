@@ -137,6 +137,8 @@ class TimerList extends BaseViewModel {
         return sortedJobs
       }, this);
 
+      this.currentJobTimerList.subscribe(this.refreshTimeSum.bind(this))
+
       this.jobListLoadedPostAction = this.jobListLoadedPostAction.bind(this)
 
       if(this.koWatcherJobTimerList){
@@ -659,7 +661,6 @@ class TimerList extends BaseViewModel {
     }
     this.currentMonth(month)
 
-    this.refreshTimeSum()
     await this.refreshOvertime(value.clone())
     footer.initChart(value)
     var absenceDocs = await this.db_absences.find({date: value.format('YYYY-MM-DD')})
