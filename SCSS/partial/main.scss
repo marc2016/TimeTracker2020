@@ -3,7 +3,6 @@ body {
     font-weight: 300;
     user-select: none;
     overflow-y: auto;
-    -webkit-app-region: drag;
 }
 
 ::selection {
@@ -190,14 +189,4 @@ h1, h2, h3, h4, h5, h6 {
 
 .dropdown-item:hover, .dropdown-item:focus {
     background-color: $maincolorAccent;
-}
-
-input[type="submit"],
-input[type="reset"],
-input[type="button"],
-input[type="text"],
-button,
-textarea,
-ul {
-	-webkit-app-region: no-drag;
 }
