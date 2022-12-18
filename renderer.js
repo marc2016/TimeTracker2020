@@ -228,9 +228,9 @@ function handleUrl(url) {
       openTimerList()
       this.timerlistViewModel.addNewTicketWithKey(jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
     } 
-    if(startTimerRegex.exec(decodedUrl)) {
+    else if(startTimerRegex.exec(decodedUrl)) {
       openTimerList()
-      this.timerlistViewModel.addNewItem("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
+      this.timerlistViewModel.addNewItemAndStart("", jiraIssueKeyMatch[2], jiraIssueSummeryMatch[2])
     } 
   }
 }
