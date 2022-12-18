@@ -455,6 +455,8 @@ class TimerList extends BaseViewModel {
         return projectItem._id() == projectId
       })
       item.project = ko.observable(project)
+      item.nameString = item.name()
+      item.lastUseString = item.lastUse()
     })
 
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
@@ -538,10 +540,10 @@ class TimerList extends BaseViewModel {
           item: renderItemFunc,
           option: renderOptionFunc
         },
-        labelField: "name()",
-        sortField: [{field: "lastUse()", direction: "desc"},{field: "name()", direction: "asc"}],
+        labelField: "nameString",
+        sortField: [{field: "lastUseString", direction: "asc"},{field: "nameString", direction: "asc"}],
         valueField: "id",
-        searchField: ["name()"],
+        searchField: ["nameString"],
         placeholder: "",
         delimiter: "|",
         closeAfterSelect: true,
