@@ -198,6 +198,8 @@ class TimerList extends BaseViewModel {
         if(!(this.today() && this.today().isSame(new moment(), 'day')))
         {
           this.today(new moment())
+          this.currentDateDatePickerOpts.maxDate = new Date()
+          this.currentDateDatePickerOpts.selectedDates = [new Date()]
           this.textCurrentDate.update(this.currentDateDatePickerOpts)
 
           await this.refreshDescriptionList()
