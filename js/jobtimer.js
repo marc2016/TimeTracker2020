@@ -18,11 +18,12 @@ var self = module.exports = {
     _startDate: undefined,
     _pauser: new Subject(),
 
-    start: function(jobId, seconds, jobDescription) {
+    start: function(jobId, seconds, jobDescription, ticketDescription) {
         if(self.isRunning())
             return false
         self.currentJobId = jobId
         self.currentJobDescription = jobDescription
+        self.currentTicketDescription = ticketDescription
         self._offsetSeconds = seconds
         self._startDate = moment()
         self._pauser.next(false)
@@ -47,7 +48,7 @@ var self = module.exports = {
     },
 
     _currentData: function(){
-        return { "duration": self._calculateDiff(), "jobId": self.currentJobId, "jobDescription": self.currentJobDescription }
+        return { "duration": self._calculateDiff(), "jobId": self.currentJobId, "jobDescription": self.currentJobDescription, "ticketDescription": self.currentTicketDescription }
     },
 
     stop: function() {

@@ -62,6 +62,9 @@ var self = module.exports = {
             return;
         var duration = updatevalue.duration
         var description = updatevalue.jobDescription
+        if(updatevalue.ticketDescription)
+            description = updatevalue.ticketDescription + ' - ' + updatevalue.jobDescription
+
         var leftFooter = document.getElementById('footerLeftContent')
         
         if(!description) {

@@ -983,7 +983,7 @@ class TimerList extends BaseViewModel {
       that.pauseTimer()
     }
     
-    that.jobtimer.start(data._id(), data.elapsedSeconds(), data.description())
+    that.jobtimer.start(data._id(), data.elapsedSeconds(), data.description(), data.ticket()?.nameString)
   }
 
   async startTicket(that,data){
