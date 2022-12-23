@@ -33,10 +33,15 @@ function sortTickets(left, right) {
 }
 
 function watchTicketList(parents, child, item) {
+  if(child && child.watchable === false)
+    return
   if(child._fieldName == 'lastUse')
     return
-  if(item?.status == 'added')
+  if(item?.status == 'added') {
+    item.value.nameString = item.value.name()
     this.refreshJobLists(this.currentDate())
+  }
+    
   var ticket = parents[0]
   if(!ticket)
     return

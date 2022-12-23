@@ -458,9 +458,10 @@ class TimerList extends BaseViewModel {
       item.nameString = item.name()
       item.lastUseString = item.lastUse()
     })
-
+    this.ticketList.watch(false)
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
     this.ticketList.sort(sortTickets)
+    this.ticketList.watch(true)
   }
 
   async refreshDescriptionList() {
