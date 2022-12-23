@@ -123,6 +123,12 @@ if (!gotTheLock) {
     }
   })
   app.on('second-instance', (event, commandLine, workingDirectory) => {
+    var urlParam = commandLine
+    if (process.platform == 'win32') {
+      urlParam = urlParam.slice(1)
+    }
+    mainWindow.webContents.send('open-url', urlParam)
+
     if (mainWindow) {
       if (mainWindow.isMinimized()) myWindow.restore()
       mainWindow.focus()
