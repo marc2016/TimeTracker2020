@@ -99,6 +99,16 @@ body {
     margin: 5px;
     float: left;
     font-size: 15px;
+    
+}
+
+#footerLeftTaskDescription {
+    max-width: 50vw;
+    float: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+    max-width: 35vw;
 }
 
 .col-space {

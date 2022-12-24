@@ -61,16 +61,18 @@ var self = module.exports = {
         if(!updatevalue)
             return;
         var duration = updatevalue.duration
-        var description = updatevalue.jobDescription
+        var description = []
         if(updatevalue.ticketDescription)
-            description = updatevalue.ticketDescription + ' - ' + updatevalue.jobDescription
+            description.push(updatevalue.ticketDescription)
 
         var leftFooter = document.getElementById('footerLeftContent')
         
-        if(!description) {
-            description = 'Unbenannte Aufgabe'
+        if(updatevalue.jobDescription) {
+            description.push(updatevalue.jobDescription)
+        } else {
+            description.push('Unbenannte Aufgabe')
         }
-        self.leftJobDescription(description)
+        self.leftJobDescription(description.join(' - '))
         self.leftJobDuration(utils.getTimeString(duration))
         leftFooter.addEventListener('click', self.leftFooterAction)
     },
