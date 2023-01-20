@@ -5,7 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { watchTimerList } = require('./timerlist/timerlist-operations.js')
-const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal } = require('./timerlist/ticket-operations.js')
+const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket } = require('./timerlist/ticket-operations.js')
 const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
@@ -100,10 +100,18 @@ class TimerList extends BaseViewModel {
 
       var that = this
 
+      this.activeTicketList = ko.pureComputed(function() {
+        var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
+          return ticket.active() == true
+        });
+        var sortedTickets = filteredTickets.sort(sortTickets)
+        return sortedTickets
+      }, this);
+
       this.currentToDoTicketList = ko.pureComputed(function() {
         var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
           const currentJobForTicket = getJobTimerForTicket(that.currentJobTimerList(), ticket)
-          return !currentJobForTicket && ticket.done() == false
+          return !currentJobForTicket && ticket.done() == false && ticket.active() == true
         });
         var sortedTickets = filteredTickets.sort(sortTickets)
         return sortedTickets
@@ -112,7 +120,7 @@ class TimerList extends BaseViewModel {
       this.currentDoneTicketList = ko.pureComputed(function() {
         var filteredTickets = ko.utils.arrayFilter(this.ticketList(), function(ticket) {
           const currentJobForTicket = getJobTimerForTicket(that.currentJobTimerList(), ticket)
-          return !currentJobForTicket && ticket.done() == true
+          return !currentJobForTicket && ticket.done() == true && ticket.active() == true
         });
         var sortedTickets = filteredTickets.sort(sortTickets)
         sortedTickets = _.take(sortedTickets, this.loadedDoneTicketsCount())
@@ -147,7 +155,7 @@ class TimerList extends BaseViewModel {
       
       this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, watchTimerList.bind(this))
 
-      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true }, watchTicketList.bind(this))
+      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true, oldValues: 1 }, watchTicketList.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
@@ -422,7 +430,7 @@ class TimerList extends BaseViewModel {
   }
 
   async refreshTicketList(){
-    var docs = await this.db_tickets.find({active:true})
+    var docs = await this.db_tickets.find()
     var newDate = new moment()
     var that = this
     await _.forEach(docs, async function(item, index){
@@ -457,6 +465,7 @@ class TimerList extends BaseViewModel {
       item.project = ko.observable(project)
       item.nameString = item.name()
       item.lastUseString = item.lastUse()
+      item.disabled = !item.active()
     })
     this.ticketList.watch(false)
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
@@ -501,10 +510,10 @@ class TimerList extends BaseViewModel {
     )
     var renderItemFunc = function (item, escape) {
       var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.name())
+      var match = regex.exec(item.nameString)
       
       if(!match) {
-        return '<div class="item">'+item.name()+'</div>';
+        return '<div class="item">'+item.nameString+'</div>';
       }
       var issueNumber = match[1]
       var issueName = match[4]
@@ -516,10 +525,10 @@ class TimerList extends BaseViewModel {
   
     var renderOptionFunc = function (item, escape) {
       var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.name())
+      var match = regex.exec(item.nameString)
       
       if(!match) {
-        return '<div class="option">'+item.name()+'</div>';
+        return '<div class="option">'+item.nameString+'</div>';
       }
       var issueNumber = match[1]
       var issueName = match[4]
@@ -529,28 +538,38 @@ class TimerList extends BaseViewModel {
       '</div>';
     }
 
-    $('select.ticketSelect').selectize(
-      {
-        options: that.ticketList(),
-        create: function(input, callback) {
-          that.addNewTicket(input).then((newTicket) => {
-            callback( newTicket )
-          })
-        },
-        render: {
-          item: renderItemFunc,
-          option: renderOptionFunc
-        },
-        labelField: "nameString",
-        sortField: [{field: "lastUseString", direction: "asc"},{field: "nameString", direction: "asc"}],
-        valueField: "id",
-        searchField: ["nameString"],
-        placeholder: "",
-        delimiter: "|",
-        closeAfterSelect: true,
-        allowEmptyOption: true,
-      }
-    )
+    var currentActiveTicketList = this.activeTicketList()
+    $('select.ticketSelect').each((index, element) => {
+      var jobForElement = _.find(that.currentJobTimerList(), i => i._id() == $(element).attr("jobid"))
+      if(jobForElement && jobForElement.ticket())
+        currentActiveTicketList.push(jobForElement.ticket())
+
+      $(element).selectize(
+        {
+          options: currentActiveTicketList,
+          create: function(input, callback) {
+            that.addNewTicket(input).then((newTicket) => {
+              callback( newTicket )
+            })
+          },
+          render: {
+            item: renderItemFunc,
+            option: renderOptionFunc
+          },
+          labelField: "nameString",
+          sortField: [{field: "lastUseString", direction: "asc"},{field: "nameString", direction: "asc"}],
+          valueField: "id",
+          searchField: ["nameString"],
+          placeholder: "",
+          delimiter: "|",
+          closeAfterSelect: true,
+          allowEmptyOption: true,
+          
+        }
+      )
+    })
+    
+    
   }
 
   async refreshJobLists(momentValue) {
@@ -1138,6 +1157,8 @@ class TimerList extends BaseViewModel {
 
 
 }
+
+TimerList.prototype.archiveTicket = archiveTicket
 
 module.exports = TimerList
 

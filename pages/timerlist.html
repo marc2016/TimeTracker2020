@@ -62,7 +62,7 @@
             </div>
             <div class="col-10 col-md-5 input-group-sm">
               <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name()}, options: $parent.ticketList(), optionsCaption: 'Ticket auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id() }">
+                return item.name()}, options: $parent.ticketList(), optionsCaption: 'Ticket auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id(), jobId: _id() }">
               </select>
               <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticket() }">Ticket</label>
               <div class="timer-second-row">
@@ -190,11 +190,16 @@
               <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
             <div class="col-auto">
+              <div class="btn-group btn-group-sm" role="group">
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
-                <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 93px;"></div>
+                <a class="btn btn-default timer-btn d-none d-md-inline d-lg-inline todo-btn" data-bind="click: $parent.archiveTicket.bind($data,$parent)">
+                  <i class="fa fa-archive" title="Archivieren"></i>
+                </a>
               </div>
+              <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 62px;"></div>
+            </div>
 
             </div>
           </div>
@@ -251,11 +256,16 @@
               <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
             <div class="col-auto">
+              <div class="btn-group btn-group-sm" role="group">
                 <a class="btn btn-default timer-btn timer-btn-start todo-btn" data-bind="click: $parent.startTicket.bind($data,$parent)">
                     <i class="fa fa-play timer-play-btn" title="Start"></i>
                 </a>
-                <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 93px;"></div>
+                <a class="btn btn-default timer-btn d-none d-md-inline d-lg-inline todo-btn" data-bind="click: $parent.archiveTicket.bind($data,$parent)">
+                  <i class="fa fa-archive" title="Archivieren"></i>
+                </a>
               </div>
+              <div class="d-none d-md-inline d-lg-inline" style="float: right; width: 62px;"></div>
+            </div>
 
             </div>
           </div>

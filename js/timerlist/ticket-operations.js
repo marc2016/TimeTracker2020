@@ -91,4 +91,9 @@ async function addNewTicketInternal(ticketList, ticketName) {
   return observableDbEntry
 }
 
-module.exports = { openTicket, copyTicket, copyTicketNumber, addNewTicketWithKeyInternal, addNewTicketInternal }
+function archiveTicket(that,data) {
+  data.active(false)
+  //ticketList.unshift(data)
+}
+
+module.exports = { openTicket, copyTicket, copyTicketNumber, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket }

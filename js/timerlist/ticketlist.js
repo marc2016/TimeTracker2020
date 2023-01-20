@@ -37,14 +37,18 @@ function watchTicketList(parents, child, item) {
     return
   if(child._fieldName == 'lastUse')
     return
+  if(child._fieldName == 'projectId' && child() === undefined && child.oldValues.length > 0 && child.oldValues[0] === '')
+    return
   if(item?.status == 'added') {
     item.value.nameString = item.value.name()
     this.refreshJobLists(this.currentDate())
   }
-    
+
   var ticket = parents[0]
   if(!ticket)
     return
+  if(child._fieldName == 'active')
+    ticket.disabled = !ticket.active()
   var newDate = new moment()
   ticket.lastUse(newDate.format('YYYY-MM-DD hh:mm:ss'))
   var saveObj = {}
