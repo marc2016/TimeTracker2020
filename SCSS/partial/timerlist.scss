@@ -57,6 +57,11 @@
   margin-top: -2px;
 }
 
+.ticket-button-used {
+  @extend .ticket-button;
+  background-color: green !important;
+}
+
 .duration-icon:hover {
   color: $highlightcolor;
 }

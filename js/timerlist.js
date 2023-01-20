@@ -142,6 +142,7 @@ class TimerList extends BaseViewModel {
             }
             return job.ticket() ? doneSortValue + job.ticket().name() : ''
           })
+        _.each(sortedJobs, j => {j.copied(false)})
         return sortedJobs
       }, this);
 
@@ -625,6 +626,7 @@ class TimerList extends BaseViewModel {
         return ticketItem._id() == ticketId
       })
       item.ticket = ko.observable(ticket)
+      item.copied = ko.observable(false)
     }.bind(this))
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
@@ -821,6 +823,8 @@ class TimerList extends BaseViewModel {
     }
     dbEntry.ticket = ko.observable(ticket)
 
+    dbEntry.copied = ko.observable(false)
+
     this.jobTimerList.unshift(dbEntry)
     this.createAutoComplete(dbEntry._id())
 
@@ -874,6 +878,8 @@ class TimerList extends BaseViewModel {
       })
     }
     dbEntry.ticket = ko.observable(ticket)
+
+    dbEntry.copied = ko.observable(false)
 
     this.jobTimerList.push(dbEntry)
     this.createAutoComplete(dbEntry._id())
@@ -950,6 +956,7 @@ class TimerList extends BaseViewModel {
       }
       clipboard.writeText(JSON.stringify(obj))
     }
+    data.copied(true)
     toastr["info"]("Eintrag in Zwischenablage kopiert.")
   }
 
