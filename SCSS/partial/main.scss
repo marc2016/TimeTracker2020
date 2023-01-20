@@ -141,6 +141,10 @@ body {
     border-color: #adadad;
 }
 
+.nav-item {
+    white-space:nowrap;
+}
+
 .nav-item.selected {
     background-color: $maincolor;
 }
@@ -158,6 +162,10 @@ body {
     margin-top: 3px;
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.navbar-window-icons {
+    flex-flow: nowrap;
 }
 
 .invisible{
