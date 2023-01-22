@@ -175,12 +175,18 @@
               </div>
               
               <div class="timer-second-row">
-                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
-                  <i class="fa fa-copy fa-stack-2x"></i>
-                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
-                </span>
+                <div style="float: left;">
+                  <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
+                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
+                  <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
+                    <i class="fa fa-copy fa-stack-2x"></i>
+                    <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
+                  </span>
+                </div>
+                <div class="vertical-seperator" style="float: left;"></div>
+                <div style="float: left;">
+                  <i class="fa fa-edit ticket-icon" title="Edit"></i> <span data-bind="text: $parent.getFormatedDateTime(lastUse())"></span>
+                </div>
               </div>
             </div>
             <div class="col-2 d-none d-md-inline d-lg-inline">
@@ -241,12 +247,18 @@
               </div>
               
               <div class="timer-second-row">
-                <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
-                <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
-                <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
-                  <i class="fa fa-copy fa-stack-2x"></i>
-                  <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
-                </span>
+                <div style="float: left;">
+                  <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForTicket.bind($data,$parent)"></i>
+                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForTicket.bind($data,$parent)"></i>
+                  <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForTicket.bind($data,$parent)">
+                    <i class="fa fa-copy fa-stack-2x"></i>
+                    <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
+                  </span>
+                </div>
+                <div class="vertical-seperator" style="float: left;"></div>
+                <div style="float: left;">
+                  <i class="fa fa-edit ticket-icon" title="Edit"></i> <span data-bind="text: $parent.getFormatedDateTime(lastUse())"></span>
+                </div>
               </div>
             </div>
             <div class="col-2 d-none d-md-inline d-lg-inline">

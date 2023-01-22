@@ -94,7 +94,7 @@ class TimerList extends BaseViewModel {
       this.jobTimerList = ko.observableArray().extend({ deferred: true })
 
       this.projectList = ko.observableArray()
-      this.ticketList = ko.observableArray()
+      this.ticketList = ko.observableArray().extend({ deferred: true, rateLimit: 50 })
       this.timerTemplates = ko.observableArray()
       this.descriptionList = []
 
@@ -155,8 +155,6 @@ class TimerList extends BaseViewModel {
       }
       
       this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, watchTimerList.bind(this))
-
-      this.koWatcherTicketList = ko.watch(this.ticketList, { depth: -1, tagFields: true, oldValues: 1 }, watchTicketList.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
@@ -262,6 +260,7 @@ class TimerList extends BaseViewModel {
 
     await this.refreshProjectList()
     await this.refreshTicketList()
+    this.koWatcherTicketList = ko.watch(this.ticketList, { depth: 1, tagFields: true, oldValues: 1 }, watchTicketList.bind(this))
     await this.refreshDescriptionList()
 
     var timerTemplatesList = await createTimerTemplateList()
@@ -454,7 +453,7 @@ class TimerList extends BaseViewModel {
         }
       }
     }.bind(this))
-    this.ticketList.removeAll()
+    
     docs = _.sortBy(docs, 'name')
     var observableDocs = ko.mapping.fromJS(docs)
     _.forEach(observableDocs(), function(item) {
@@ -468,10 +467,10 @@ class TimerList extends BaseViewModel {
       item.lastUseString = item.lastUse()
       item.disabled = !item.active()
     })
-    this.ticketList.watch(false)
+
+    this.ticketList.removeAll()
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
     this.ticketList.sort(sortTickets)
-    this.ticketList.watch(true)
   }
 
   async refreshDescriptionList() {
@@ -758,6 +757,10 @@ class TimerList extends BaseViewModel {
     var formated = moment.duration(seconds, "seconds").format("hh:mm",{trim: false})
   
     return formated
+  }
+
+  getFormatedDateTime(dateTimeString) {
+    return (new moment(dateTimeString)).format('DD.MM.YYYY HH:mm:ss')
   }
   
   previousDay(){
