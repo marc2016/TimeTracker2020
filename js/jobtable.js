@@ -493,6 +493,7 @@ class JobTable extends BaseViewModel {
             range: true,
             locale: localDe.default,
             autoClose: true,
+            position: 'left top',
             buttons: [],
             onSelect:function onSelect(obj) {
                 if(obj.date && obj.date.length == 2){
