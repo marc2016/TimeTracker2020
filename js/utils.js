@@ -6,10 +6,24 @@ var self = module.exports = {
         if(!seconds)
           return "00:00:00/0.00"
       
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
-        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+        var formated = this.getTimeFormated(seconds)
+        var decimal = this.getTimeDecimal(seconds)
       
         return formated + "/" + decimal
+    },
+
+    getTimeFormated: function(seconds){
+        if(!seconds)
+          return "00:00:00"
+        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        return formated
+    },
+
+    getTimeDecimal: function(seconds){
+        if(!seconds)
+          return "0.00"
+        var decimal = moment.duration(seconds, "seconds").format("h", 2)
+        return decimal
     },
 
     roundDuration(type,value){
