@@ -1,0 +1,27 @@
+<div id="ticketlistMainContent" >
+  <div class="container-fluid" style="margin-top: 50px;">
+    <div class="row justify-content">
+      <div class="col-md">
+        <div class="checkbox-container">
+          <input class="checkbox-checkmark" id="all" type="radio" name="state" value="all" data-bind="checked: definedState">
+          <label class="checkbox-label pseudo offset" for="all">Alle</label>
+        </div>
+        <div class="checkbox-container">
+          <input class="checkbox-checkmark" id="todoOnly" type="radio" name="state" value="todoOnly" data-bind="checked: definedState">
+          <label class="checkbox-label pseudo offset" for="todoOnly">Offene Aufgaben</label>
+        </div>
+        <div class="checkbox-container">
+          <input class="checkbox-checkmark" id="notArchived" type="radio" name="state" value="notArchived" data-bind="checked: definedState">
+          <label class="checkbox-label pseudo offset" for="notArchived">Nicht archivierte</label>
+        </div>
+      </div>
+    </div>
+    <div id="ticketTable" class="ticketTable">
+      <table id="tickets" class="table table-striped table-bordered"></table>
+    </div>
+  </div>
+  <div class="progress-view" data-bind="visible: inProgress()">
+    <i class="fas fa-spinner fa-pulse fa-3x progress-icon"></i>
+  </div>
+</div>
+<div class="background"></div>

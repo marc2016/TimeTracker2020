@@ -56,6 +56,9 @@ log.info("JobTable required successfully.")
 var TimerList = require('./js/timerlist.js')
 log.info("TimerList required successfully.")
 
+var TicketList = require('./js/ticketlist.js')
+log.info("TicketList required successfully.")
+
 var jobtimer = require('./js/jobtimer.js')
 log.info("jobtimer required successfully.")
 
@@ -97,6 +100,7 @@ onload = function() {
   this.checkForUpdatesClick = checkForUpdatesClick
   this.closeApp = closeApp
   this.openTimerList = openTimerList
+  this.openTicketList = openTicketList
   this.closeWindow = closeWindow
   this.minimizeWindow = minimizeWindow
   this.maximizeWindow = maximizeWindow
@@ -123,12 +127,16 @@ onload = function() {
   var btnJobTimer = document.getElementById('btnJobTimer')
   btnJobTimer.addEventListener("click", openTimerList.bind(this) )
 
+  var btnTicketList = document.getElementById('btnTickets')
+  btnTicketList.addEventListener("click", openTicketList.bind(this) )
+
   var btnAppSettings = document.getElementById('btnAppSettings')
   btnAppSettings.addEventListener("click", openAppSettings.bind(this) )
 
   this.appSettingsViewModel = new AppSettings(['appsettingsMainContent'], store)
   this.timerlistViewModel = new TimerList(['timerlistMainContent','modalAddNote', 'modalAbsencePeriod','modalChangeJobDuration','modalDeleteEntry', 'modalAddNewTicket'], jobtimer)
   this.jobtableViewModel = new jobtable(['jobtableMainContent', 'modalDelete'])
+  this.ticketlistViewModel = new TicketList(['ticketlistMainContent'])
 
   this.pagemenu = ko.observableArray()
   this.menuClick = menuClick
@@ -194,6 +202,10 @@ function openTimerList(){
 
 function openJobTable(){
   changeView(this.jobtableViewModel)
+}
+
+function openTicketList(){
+  changeView(this.ticketlistViewModel)
 }
 
 function openAppSettings(){
