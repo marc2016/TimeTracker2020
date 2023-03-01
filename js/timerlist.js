@@ -544,12 +544,14 @@ class TimerList extends BaseViewModel {
     var currentActiveTicketList = this.activeTicketList()
     $('select.ticketSelect').each((index, element) => {
       var jobForElement = _.find(that.currentJobTimerList(), i => i._id() == $(element).attr("jobid"))
+
+      var completeList = currentActiveTicketList
       if(jobForElement && jobForElement.ticket())
-        currentActiveTicketList.push(jobForElement.ticket())
+        _.concat(completeList, jobForElement.ticket())
 
       $(element).selectize(
         {
-          options: currentActiveTicketList,
+          options: completeList,
           create: function(input, callback) {
             that.addNewTicket(input).then((newTicket) => {
               callback( newTicket )
