@@ -134,8 +134,8 @@ class TicketList extends BaseViewModel {
   }
 
   async onLoad() {
-    super.onLoad()
-    this.refreshTable()
+    super.onLoad()    
+    this.refreshTable(this.definedState())
   }
 
   async refreshTable(state) {
