@@ -530,14 +530,27 @@ class TimerList extends BaseViewModel {
       var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
       var match = regex.exec(item.nameString)
       
+      var ticketName = ''
       if(!match) {
-        return '<div class="option">'+item.nameString+'</div>';
+        ticketName =  '<span>'+item.nameString+'</span>';
+      } else {
+        var issueNumber = match[1]
+        var issueName = match[4]  
+        ticketName = '<span class="issueNumber">'+issueNumber+'</span>'+
+          '<span class="issueName">: '+issueName+'</span>'
       }
-      var issueNumber = match[1]
-      var issueName = match[4]
-      return '<div class="option">'+
-      '<span class="issueNumber">'+issueNumber+'</span>'+
-      '<span class="issueName">: '+issueName+'</span>'+
+      
+      var ticketStateIcon = item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
+      return ''+
+      '<div class="option">'+
+        '<div>'+
+          ticketName +
+        '</div>'+
+        '<div>'+
+          `<span class="ticket-select-secound-line">${ticketStateIcon}</span>`+
+          '<span class="ticket-select-secound-line"> | </span>'+
+          `<span class="ticket-select-secound-line">Letztes Update: ${that.getFormatedDateTime(item.lastUse())}</span>`+
+        '</div>'+
       '</div>';
     }
 
