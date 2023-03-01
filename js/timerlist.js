@@ -560,7 +560,7 @@ class TimerList extends BaseViewModel {
             option: renderOptionFunc
           },
           labelField: "nameString",
-          sortField: [{field: "lastUseString", direction: "asc"},{field: "nameString", direction: "asc"}],
+          sortField: [{field: "lastUseString", direction: "desc"},{field: "nameString", direction: "asc"}],
           valueField: "id",
           searchField: ["nameString"],
           placeholder: "",
