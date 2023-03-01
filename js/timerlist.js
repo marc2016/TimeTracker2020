@@ -171,6 +171,7 @@ class TimerList extends BaseViewModel {
       this.currentDateDatePickerOpts = {
         locale: localDe.default,
         autoClose:true,
+        toggleSelected: false,
         buttons: [toDayButton],
         selectedDates: [new Date()],
         multipleDatesSeparator: ' - ',
