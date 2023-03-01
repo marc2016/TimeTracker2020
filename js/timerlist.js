@@ -261,6 +261,8 @@ class TimerList extends BaseViewModel {
 
     await this.refreshProjectList()
     await this.refreshTicketList()
+    if(this.koWatcherTicketList)
+      this.koWatcherTicketList.dispose()
     this.koWatcherTicketList = ko.watch(this.ticketList, { depth: 1, tagFields: true, oldValues: 1 }, watchTicketList.bind(this))
     await this.refreshDescriptionList()
 
