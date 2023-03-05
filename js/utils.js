@@ -26,6 +26,10 @@ var self = module.exports = {
         return decimal
     },
 
+    getFormatedDateTime(dateTimeString) {
+        return (new moment(dateTimeString)).format('DD.MM.YYYY HH:mm:ss')
+    },
+
     roundDuration(type,value){
         switch (type) {
             case 'round':
@@ -75,5 +79,9 @@ var self = module.exports = {
         }
 
         return time
+    },
+
+    getRndInteger: function(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
     }
 }

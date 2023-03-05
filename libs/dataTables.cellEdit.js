@@ -174,6 +174,24 @@ function getInputHtml(currentColumnIndex, settings, oldValue) {
             input.html = input.html + "</select>";
             input.focus = true;
             break;
+        case "selectize":
+            var randomId = utils.getRndInteger(1,10000)
+            input.html = "<select id='"+randomId+"' class='" + selectCss + "' onchange='$(this).updateEditableCell(this);' >";
+            $.each(inputSetting.settings.options, function (index, option) {
+                if (oldValue == option[inputSetting.settings.valueField]) {
+                   input.html = input.html + "<option value='" + option.id + "' selected>" + option.nameString + "</option>"
+                } else {
+                   input.html = input.html + "<option value='" + option.id + "' >" + option.nameString + "</option>"
+                }
+            });
+            input.html = input.html + "</select>";
+            setTimeout(function () { //Set timeout to allow the script to write the input.html before triggering the datepicker
+                var $select = $('#'+randomId).selectize(inputSetting.settings)
+                var selectize = $select[0].selectize;
+                selectize.focus()
+                selectize.on('blur', () => $(this).cancelEditableCell($select))
+	        },100);
+            break;
         case "datepicker": //Both datepicker options work best when confirming the values
             var randomId = 'randomId'
 	        input.html = "<input id='"+randomId+"' type='text' name='date' class='datepick " + inputCss + "'   value='" + oldValue + "'></input>";

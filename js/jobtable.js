@@ -440,15 +440,85 @@ class JobTable extends BaseViewModel {
         projectValues = _.sortBy(projectValues, ['display'])
         projectValues = [emptyElement].concat(projectValues)
 
-        var ticketValues = _.map(this.ticketDocs, function(value){
-            return {
-                "value": value._id,
-                "display": value.name
-            }
-        })
-        ticketValues = _.sortBy(ticketValues, ['display'])
-        ticketValues = [emptyElement].concat(ticketValues)
+        // var ticketValues = _.map(this.ticketDocs, function(value){
+        //     return {
+        //         "value": value._id,
+        //         "display": value.name
+        //     }
+        // })
+        // ticketValues = _.sortBy(ticketValues, ['display'])
+        // ticketValues = [emptyElement].concat(ticketValues)
 
+        var observableTickets = ko.mapping.fromJS(this.ticketDocs)
+        _.forEach(observableTickets(), function(item) {
+            item['id'] = item._id()
+            item.nameString = item.name()
+            item.lastUseString = item.lastUse()
+            item.disabled = !item.active()
+          })
+
+        var renderItemFunc = function (item, escape) {
+            var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
+            var match = regex.exec(item.nameString)
+            
+            if(!match) {
+              return '<div class="item">'+item.nameString+'</div>';
+            }
+            var issueNumber = match[1]
+            var issueName = match[4]
+            return '<div class="item">'+
+            '<span class="issueNumber">'+issueNumber+'</span>'+
+            '<span class="issueName">: '+issueName+'</span>'+
+            '</div>';
+          }
+        
+          var renderOptionFunc = function (item, escape) {
+            var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
+            var match = regex.exec(item.nameString)
+            
+            var ticketName = ''
+            if(!match) {
+              ticketName =  '<span>'+item.nameString+'</span>';
+            } else {
+              var issueNumber = match[1]
+              var issueName = match[4]  
+              ticketName = '<span class="issueNumber">'+issueNumber+'</span>'+
+                '<span class="issueName">: '+issueName+'</span>'
+            }
+            
+            var ticketStateIcon = item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
+            return ''+
+            '<div class="option">'+
+              '<div>'+
+                ticketName +
+              '</div>'+
+              '<div>'+
+                `<span class="ticket-select-secound-line">${ticketStateIcon}</span>`+
+                '<span class="ticket-select-secound-line"> | </span>'+
+                `<span class="ticket-select-secound-line">Letztes Update: ${utils.getFormatedDateTime(item.lastUse())}</span>`+
+              '</div>'+
+            '</div>';
+          }
+      
+
+            
+        var ticketSelectizeSettings = {
+            options: observableTickets(),
+            render: {
+                item: renderItemFunc,
+                option: renderOptionFunc
+            },
+            labelField: "nameString",
+            sortField: [{field: "lastUseString", direction: "desc"},{field: "nameString", direction: "asc"}],
+            valueField: "id",
+            searchField: ["nameString"],
+            placeholder: "",
+            delimiter: "|",
+            closeAfterSelect: true,
+            allowEmptyOption: true,
+            create: false,
+            showEmptyOptionInDropdown: true,
+        }
         this.jobTable.MakeCellsEditable({
             "columns": [0,1,2,3,4,5],
             "inputCss": "form-control table-input",
@@ -467,8 +537,8 @@ class JobTable extends BaseViewModel {
                 },
                 {
                     "column":2, 
-                    "type": "list",
-                    "options":ticketValues
+                    "type": "selectize",
+                    "settings":ticketSelectizeSettings
                 },
                 {
                     "column":3, 
