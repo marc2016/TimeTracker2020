@@ -189,7 +189,8 @@ class TicketList extends BaseViewModel {
     result += `Tätigkeiten:\n`
     _.forEach(timerForTicket, t => {
       var date = moment(t.date, 'YYYY-MM-DD').format('DD.MM.YYYY')
-      result += `${date}: ${t.description}\n`
+      var description = t.description!= null ? t.description.replaceAll(';','\n\t\t\t\t\t\t\t\t\t') : '-'
+      result += `${date}, ${utils.getTimeDecimal(t.elapsedSeconds)}h: ${description}\n`
     })
     
     clipboard.writeText(result)
