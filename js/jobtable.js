@@ -72,10 +72,7 @@ class JobTable extends BaseViewModel {
             }
         ]
 
-        this.db = dataAccess.getDb('jobs');
-        this.db_projects = dataAccess.getDb('projects')
-        this.db_tickets = dataAccess.getDb('tickets')
-        this.db_absences = dataAccess.getDb('absences')
+        
 
         this.jobList = ko.observableArray()
         this.currentRange = ko.observable(moment().startOf('month').range('month'))
@@ -89,6 +86,11 @@ class JobTable extends BaseViewModel {
 
         $('#jobtable').load('pages/jobtable.html', function(){
             this.hide()
+
+            this.db = dataAccess.getDb('jobs');
+            this.db_projects = dataAccess.getDb('projects')
+            this.db_tickets = dataAccess.getDb('tickets')
+            this.db_absences = dataAccess.getDb('absences')
 
             this.store = new Store();
             var country = this.store.get('selectedCountry','DE')
@@ -486,7 +488,7 @@ class JobTable extends BaseViewModel {
                 '<span class="issueName">: '+issueName+'</span>'
             }
             
-            var ticketStateIcon = item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
+            var ticketStateIcon = item.done && item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
             return ''+
             '<div class="option">'+
               '<div>'+
