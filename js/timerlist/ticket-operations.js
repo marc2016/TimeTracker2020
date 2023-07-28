@@ -67,6 +67,25 @@ function copyTicketNumber(ticketList, ticketId) {
   toastr["info"]("Ticket wurde kopiert.")
 }
 
+function formatTicketDescriptionAsHtml(description) {
+  var lines = description.split(';')
+  var formatedString = '<ul>'
+  lines.forEach((line) => {
+    formatedString += `<li>${line}</li>`
+  })
+  formatedString += '</ul>'
+  return formatedString
+}
+
+function formatTicketDescriptionAsList(description) {
+  var lines = description.split(';')
+  var formatedString = ''
+  lines.forEach((line) => {
+    formatedString += `- ${line}\n`
+  })
+  return formatedString
+}
+
 async function addNewTicketWithKeyInternal(ticketList, ticketKey, ticketSummary) {
   if(ticketKey) {
     var existingTicket = _.find(ticketList(), (t) => { return t.name && t.name().includes(ticketKey) })
@@ -96,4 +115,4 @@ function archiveTicket(that,data) {
   //ticketList.unshift(data)
 }
 
-module.exports = { openTicket, copyTicket, copyTicketNumber, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket }
+module.exports = { openTicket, copyTicket, copyTicketNumber, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket, formatTicketDescriptionAsHtml, formatTicketDescriptionAsList }

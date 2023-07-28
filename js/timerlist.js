@@ -5,7 +5,7 @@ const { clipboard } = require('electron')
 var _ = require('lodash');
 
 const { watchTimerList } = require('./timerlist/timerlist-operations.js')
-const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket } = require('./timerlist/ticket-operations.js')
+const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket, formatTicketDescriptionAsHtml, formatTicketDescriptionAsList } = require('./timerlist/ticket-operations.js')
 const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 
@@ -40,6 +40,8 @@ const path = require('path')
 
 const AirDatepicker = require('air-datepicker');
 const localDe = require('air-datepicker/locale/de.js')
+
+var tippy = require('tippy.js')
 
 var toastr = require('toastr');
 const { add } = require('lodash');
@@ -127,7 +129,22 @@ class TimerList extends BaseViewModel {
         return sortedTickets
       }, this);
 
-      this.showListElement = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown(600,'swing') }
+      this.showListElement = function(elem) {
+        if (elem.nodeType === 1) {
+          const id = $(elem).attr('id')
+          const jobDescription = $('#text-input-job_'+id).val()
+          if(!jobDescription)
+            return
+          $(elem).hide().slideDown(600,'swing')
+          
+          tippy.default('#text-input-job_'+id, {
+            content: formatTicketDescriptionAsHtml(jobDescription),
+            theme: 'light-border',
+            delay: [2000, 500],
+            allowHTML: true,
+          })
+        } 
+      }
       this.hideListElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(600,'swing',function() { $(elem).remove(); }) }
 
       this.currentJobTimerList = ko.pureComputed(function() {
@@ -970,7 +987,7 @@ class TimerList extends BaseViewModel {
     } else {
       var obj = {
         date: data.date(),
-        description: data.description(),
+        description: formatTicketDescriptionAsList(data.description()),
         ticket: ticket ? ticket.name() || "-" : "-",
         project: project ? project.name() || "-" : "-",
         duration: that.getFormatedDurationHHmm(data.elapsedSeconds())

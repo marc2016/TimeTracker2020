@@ -1,3 +1,6 @@
+var tippy = require('tippy.js')
+const { formatTicketDescriptionAsHtml } = require('./ticket-operations.js')
+
 function watchTimerList(parents, child, item) {
   var that = this
   if(child._fieldName == 'projectId') {
@@ -19,6 +22,12 @@ function watchTimerList(parents, child, item) {
       element.addItem(job.projectId)
       that.jobTimerList()[0].projectId(job.projectId)
     })
+  }
+
+  if(child._fieldName == 'description') {
+    const id = parents[0]._id()
+    const tippyInstance = $('#text-input-job_'+id)[0]._tippy
+    tippyInstance.setContent(formatTicketDescriptionAsHtml(child()))
   }
   
   if(parents != null && parents.length > 0){
