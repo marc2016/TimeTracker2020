@@ -755,7 +755,7 @@ class TimerList extends BaseViewModel {
   }
 
   nextDay(){
-    this.currentDate(this.currentDate().add(1,'days'))
+    this.textCurrentDate.selectDate(this.currentDate().add(1,'days'))
   }
   
   getTimeString(seconds){
@@ -799,7 +799,7 @@ class TimerList extends BaseViewModel {
   }
   
   previousDay(){
-    this.currentDate(this.currentDate().subtract(1,'days'))
+    this.textCurrentDate.selectDate(this.currentDate().subtract(1,'days'))
   }
   
   async saveAll(){

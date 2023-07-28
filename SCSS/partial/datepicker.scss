@@ -1,6 +1,7 @@
 .air-datepicker {
   --adp-accent-color: #{$maincolor};
   --adp-day-name-color: #{$maincolor};
+  --adp-color-current-date: #{$highlightcolor};
   --adp-cell-background-color-selected: #{$highlightcolor};
   --adp-cell-background-color-selected-hover: #{$highlightcolor};
 }
