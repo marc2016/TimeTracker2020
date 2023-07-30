@@ -133,16 +133,32 @@ class TimerList extends BaseViewModel {
         if (elem.nodeType === 1) {
           const id = $(elem).attr('id')
           const jobDescription = $('#text-input-job_'+id).val()
-          if(!jobDescription)
-            return
-          $(elem).hide().slideDown(600,'swing')
+          if(jobDescription) {
+            $(elem).hide().slideDown(600,'swing')
           
-          tippy.default('#text-input-job_'+id, {
-            content: formatTicketDescriptionAsHtml(jobDescription),
-            theme: 'light-border',
-            delay: [2000, 500],
-            allowHTML: true,
-          })
+            tippy.default('#text-input-job_'+id, {
+              content: formatTicketDescriptionAsHtml(jobDescription),
+              theme: 'light-border',
+              delay: [2000, 500],
+              allowHTML: true,
+            })
+          }
+
+          const jobForElement = _.find(that.currentJobTimerList(), i => i._id() == id)
+          if(jobForElement) {
+            const jobTimerDatePickerOpts = {
+              locale: localDe.default,
+              autoClose:true,
+              toggleSelected: false,
+              inline: false,
+              selectedDates: [jobForElement.date()],
+              onSelect:function onSelect(obj) {
+                jobForElement.date(moment(obj.date))
+              }.bind(this)
+            }
+  
+            jobForElement.datePicker = new AirDatepicker('#timer-change-date_'+id, jobTimerDatePickerOpts)
+          }
         } 
       }
       this.hideListElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(600,'swing',function() { $(elem).remove(); }) }
@@ -171,7 +187,7 @@ class TimerList extends BaseViewModel {
         this.koWatcherJobTimerList.dispose()
       }
       
-      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1 }, watchTimerList.bind(this))
+      this.koWatcherJobTimerList = ko.watch(this.jobTimerList, { depth: -1, tagFields: true, oldValues: 1, hideFieldNames: ['datePicker'] }, watchTimerList.bind(this))
 
       this.currentDate.subscribe(this.currentDateChanged.bind(this))
 
@@ -557,7 +573,9 @@ class TimerList extends BaseViewModel {
           '<span class="issueName">: '+issueName+'</span>'
       }
       
-      var ticketStateIcon = item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
+      if(!item.id)
+        return
+      var ticketStateIcon = item.done && item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
       return ''+
       '<div class="option">'+
         '<div>'+
@@ -578,7 +596,7 @@ class TimerList extends BaseViewModel {
       var completeList = currentActiveTicketList
       if(jobForElement && jobForElement.ticket())
         _.concat(completeList, jobForElement.ticket())
-
+        completeList = _.orderBy(completeList, ['lastUseString'], ['desc'])
       $(element).selectize(
         {
           options: completeList,
@@ -592,7 +610,7 @@ class TimerList extends BaseViewModel {
             option: renderOptionFunc
           },
           labelField: "nameString",
-          sortField: [{field: "lastUseString", direction: "desc"},{field: "nameString", direction: "asc"}],
+          
           valueField: "id",
           searchField: ["nameString"],
           placeholder: "",
@@ -1133,7 +1151,14 @@ class TimerList extends BaseViewModel {
     document.getElementById("inputJobDuration").focus();
     $('#modalChangeJobDuration').modal('show')
   }
-  
+
+  openDatePickerForJob(that,data) {
+    if(!data.datePicker.visible)
+      data.datePicker.show()
+    else
+      data.datePicker.hide()
+  }
+
   openTicketForJob(that,data) {
     openTicket(that.ticketList(), data.ticketId())
   }

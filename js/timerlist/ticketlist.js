@@ -50,7 +50,8 @@ function watchTicketList(parents, child, item) {
   if(child._fieldName == 'active')
     ticket.disabled = !ticket.active()
   var newDate = new moment()
-  ticket.lastUse(newDate.format('YYYY-MM-DD hh:mm:ss'))
+  ticket.lastUse(newDate.format('YYYY-MM-DD HH:mm:ss'))
+  ticket.lastUseString = ticket.lastUse()
   var saveObj = {}
   saveObj[child._fieldName] = child()
   saveObj['lastUse'] = ticket.lastUse()

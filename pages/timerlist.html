@@ -68,7 +68,7 @@
               <div class="timer-second-row">
                 <div data-bind="visible: ticket()" style="float: left;">
                   <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForJob.bind($data,$parent)"></i>
-                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForJob.bind($data,$parent)""></i>
+                  <i class="fa fa-copy ticket-icon ticket-button" title="Copy" data-bind="click: $parent.copyTicketForJob.bind($data,$parent)"></i>
                   <span class="fa-stack ticket-icon ticket-button-stack" data-bind="click: $parent.copyTicketNumberForJob.bind($data,$parent)">
                     <i class="fa fa-copy fa-stack-2x"></i>
                     <i class="fa fa-hashtag fa-stack-1x fa-inverse" style="margin-left: 2px;"></i>
@@ -87,6 +87,12 @@
                       </div>
                     </div>
                   </a>
+                </div>
+                <div style="float: left;">
+                  <div class="job-datepicker-grid">
+                    <i class="fa fa-calendar-alt ticket-icon ticket-button job-datepicker-grid-content" title="ChangeDate" data-bind="click: $parent.openDatePickerForJob.bind($data,$parent)"></i>
+                    <input class="job-datepicker job-datepicker-grid-content" data-bind="attr: { id: 'timer-change-date_'+_id() }">
+                  </div>
                 </div>
                 <div class="vertical-seperator d-inline d-md-none d-lg-none" style="float: left;"></div>
                 <div class="d-inline d-md-none d-lg-none" style="float: left;">

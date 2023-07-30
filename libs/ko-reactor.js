@@ -74,6 +74,7 @@ ko['watch'] = function (target, options, evaluatorCallback, context) {
     ///     { depth: -1 } -> Track all nested subscribables.<br/>
     ///     { hide: [...] } -> Property or array of properties to be ignored.<br/>
     ///     { hideArrays: true } -> Ignore all nested arrays.<br/>
+    ///     { hideFieldNames: [...] } -> Fieldnames to ignore.<br/>
     ///     { hideWrappedValues: true } -> Ignore observables wrapped under yet another parent observable.<br/>
     ///     { mutable: true } -> Dynamically adapt to changes made to the target structure through any subscribable.<br/>
     ///     { watchedOnly: true } -> Watch only subscribables tagged with .watch().<br/>
@@ -130,6 +131,10 @@ ko['watch'] = function (target, options, evaluatorCallback, context) {
                     if (ko.utils.arrayIndexOf(options.hide, child) > -1)
                         return;
 
+                if (options.hideFieldNames)
+                    if (ko.utils.arrayIndexOf(options.hideFieldNames, child._fieldName) > -1)
+                        return;
+
                 // Merge parents. Using a fresh array so it is not referenced in the next recursion if any.
                 var parents = [].concat(grandParents, parent && parent !== target ? parent : []);
 
@@ -180,12 +185,12 @@ ko['watch'] = function (target, options, evaluatorCallback, context) {
                                 if (options.unloop)
                                     sub._watcher = unwatch ? undefined : context;
 
-                                var hasChildren = watchChildren(sub, keepOffParentList ? null : child, parents, unwatch, null, property);
-
                                 if (options.tagFields && sub._fieldName === undefined)
                                     if (hasChildren
                                         || (options.tagFields !== 'parentsOnly' && typeof sub === 'function' || typeof sub === 'object'))
                                         sub._fieldName = property;
+
+                                var hasChildren = watchChildren(sub, keepOffParentList ? null : child, parents, unwatch, null, property);
                             }
                         });
                     } else { // '[object Array]'

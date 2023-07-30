@@ -343,6 +343,26 @@
   margin-right: 20px;
 }
 
+.job-datepicker,.job-datepicker:focus-visible {
+  width: 0;
+  height: 0;
+  background: transparent;
+  color: transparent;
+  border: transparent;
+  margin-left: -7px;
+  margin-top: 14px;
+}
+
+.job-datepicker-grid {
+  display: inline-grid;
+  margin-left: 6px;
+}
+
+.job-datepicker-grid-content {
+  grid-column: 1;
+  grid-row: 1;
+}
+
 .todo-btn {
   font-size: 14px;
   padding: 4px 8px;

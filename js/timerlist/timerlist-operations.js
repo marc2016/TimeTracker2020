@@ -29,7 +29,7 @@ function watchTimerList(parents, child, item) {
     const tippyInstance = $('#text-input-job_'+id)[0]._tippy
     tippyInstance.setContent(formatTicketDescriptionAsHtml(child()))
   }
-  
+
   if(parents != null && parents.length > 0){
     this.saveItem(parents[0])
   } 
