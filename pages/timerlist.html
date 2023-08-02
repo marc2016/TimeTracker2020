@@ -20,7 +20,7 @@
       </div>
     </div>
     <div style="clear: left;"></div>
-    <div class="static-entry-container" data-bind="visible: absenceToday, click: removeAbsence">
+    <div class="static-entry-container" data-bind="fadeVisible: absenceToday, click: removeAbsence">
       <div class="static-entry-overlay">
         <h2 class="static-entry-text">
           <i class="fa fa-trash static-entry-icon"></i> Zum Löschen, anklicken.
@@ -30,13 +30,12 @@
         <h2 class="static-entry-text">
           <i class="fa fa-umbrella-beach static-entry-icon"></i> Abwesend
         </h2>
-        
       </div>
       
     </div>
       
     
-    <div class="static-entry-container" data-bind="visible: currentJobTimerList().length <= 0 && !(absenceToday()), click: function(data, event) { addNewItem() }">
+    <div class="static-entry-container" data-bind="fadeVisible: currentJobTimerList().length <= 0 && !(absenceToday()), click: function(data, event) { addNewItem() }">
       <div class="static-entry-overlay">
         <h2 class="static-entry-text">
           <i class="fa fa-plus-circle static-entry-icon"></i> Zum Hinzufügen, anklicken.
@@ -231,7 +230,7 @@
       <div class="job-seperator">
       </div>
     </div>
-    <div class="static-entry-container" style="cursor: auto;" data-bind="visible: currentDoneTicketList().length <= 0">
+    <div class="static-entry-container" style="cursor: auto;" data-bind="fadeVisible: currentDoneTicketList().length <= 0">
       <div class="static-entry" >
         <h2 class="static-entry-text">
           <i class="fa fa-list static-entry-icon"></i> Keine erledigten Aufgaben

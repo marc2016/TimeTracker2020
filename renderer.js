@@ -141,6 +141,23 @@ onload = function() {
   this.pagemenu = ko.observableArray()
   this.menuClick = menuClick
 
+  ko.bindingHandlers.fadeVisible = {
+    init: function(element, valueAccessor) {
+        // Initially set the element to be instantly visible/hidden depending on the value
+        var value = valueAccessor()
+        $(element).toggle(ko.unwrap(value)) // Use "unwrapObservable" so we can handle values that may or may not be observable
+    },
+    update: function(element, valueAccessor) {
+        // Whenever the value subsequently changes, slowly fade the element in or out
+        var value = valueAccessor()
+        var unwrappedValue = ko.unwrap(value)
+        if(unwrappedValue == $(element).is(":visible"))
+          return
+
+        unwrappedValue ? $(element).hide().slideDown(600,'swing') : $(element).slideUp(600,'swing')
+    }
+}
+
   ko.applyBindings(this, document.getElementById('mainNavbar'))
   ko.applyBindings(this, document.getElementById('modalAbout'))
   

@@ -131,11 +131,10 @@ class TimerList extends BaseViewModel {
 
       this.showListElement = function(elem) {
         if (elem.nodeType === 1) {
+          $(elem).hide().slideDown(600,'swing')
           const id = $(elem).attr('id')
           const jobDescription = $('#text-input-job_'+id).val()
           if(jobDescription) {
-            $(elem).hide().slideDown(600,'swing')
-          
             tippy.default('#text-input-job_'+id, {
               content: formatTicketDescriptionAsHtml(jobDescription),
               theme: 'light-border',
