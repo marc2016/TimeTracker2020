@@ -35,8 +35,16 @@ function sortTickets(left, right) {
 function watchTicketList(parents, child, item) {
   if(child && child.watchable === false)
     return
-  if(child._fieldName == 'lastUse')
+  if(child._fieldName == 'lastUse') {
+    var ticket = parents[0]
+    ticket.lastUseString = ticket.lastUse()
+    var saveObj = {}
+    saveObj['lastUse'] = ticket.lastUse()
+    const db_tickets = dataAccess.getDb('tickets')
+    db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })
     return
+  }
+    
   if(child._fieldName == 'projectId' && child() === undefined && child.oldValues.length > 0 && child.oldValues[0] === '')
     return
   if(item?.status == 'added') {
@@ -51,7 +59,6 @@ function watchTicketList(parents, child, item) {
     ticket.disabled = !ticket.active()
   var newDate = new moment()
   ticket.lastUse(newDate.format('YYYY-MM-DD HH:mm:ss'))
-  ticket.lastUseString = ticket.lastUse()
   var saveObj = {}
   saveObj[child._fieldName] = child()
   saveObj['lastUse'] = ticket.lastUse()

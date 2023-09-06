@@ -183,7 +183,7 @@ class JobTable extends BaseViewModel {
         if(!seconds)
           return "00:00:00/0.00"
       
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        var formated = moment.duration(seconds, "seconds").format("HH:mm:ss",{trim: false})
         var decimal = moment.duration(seconds, "seconds").format("h", 2)
       
         return formated + "/" + decimal
@@ -249,7 +249,7 @@ class JobTable extends BaseViewModel {
         var jobDocs = await this.db.find({date: { $in: dates}})
             
         _.forEach(jobDocs, function(value){
-            // var formatted = moment.duration(value.elapsedSeconds, "seconds").format("hh:mm:ss",{trim: false})
+            // var formatted = moment.duration(value.elapsedSeconds, "seconds").format("HH:mm:ss",{trim: false})
             // value.formattedTime = formatted
             
             var decimal = moment.duration(value.elapsedSeconds, "seconds").format("h", 2)
@@ -336,7 +336,7 @@ class JobTable extends BaseViewModel {
                 {
                     targets: 4,
                     render: function(data){
-                        var formatted = moment.duration(data, "seconds").format("hh:mm:ss",{trim: false})
+                        var formatted = moment.duration(data, "seconds").format("HH:mm:ss",{trim: false})
                         return formatted
                     }
                 },
@@ -550,7 +550,7 @@ class JobTable extends BaseViewModel {
                 {
                     "column": 4,
                     "type": "duration",
-                    "convert": function(oldValue) { return moment.duration(oldValue, "seconds").format("hh:mm:ss",{trim: false})},
+                    "convert": function(oldValue) { return moment.duration(oldValue, "seconds").format("HH:mm:ss",{trim: false})},
                     "convertback": utils.durationConvertBack
                 }
             ]

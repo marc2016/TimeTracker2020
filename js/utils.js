@@ -15,7 +15,7 @@ var self = module.exports = {
     getTimeFormated: function(seconds){
         if(!seconds)
           return "00:00:00"
-        var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+        var formated = moment.duration(seconds, "seconds").format("HH:mm:ss",{trim: false})
         return formated
     },
 

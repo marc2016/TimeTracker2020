@@ -1,4 +1,7 @@
-var tippy = require('tippy.js')
+var Moment = require('moment-business-days');
+const MomentRange = require('moment-range');
+const moment = MomentRange.extendMoment(Moment);
+
 const { formatTicketDescriptionAsHtml } = require('./ticket-operations.js')
 
 function watchTimerList(parents, child, item) {
@@ -10,6 +13,10 @@ function watchTimerList(parents, child, item) {
   
   if(child._fieldName == 'ticketId') {
     var ticket = _.find(this.ticketList(), (item) => item._id() == child())
+    if(ticket) {
+      var newDate = new moment()
+      ticket.lastUse(newDate.format('YYYY-MM-DD HH:mm:ss'))
+    }
     parents[0].ticket(ticket)
     //$(`ticket-job_${parents[0]._id()}-selectized`).trigger('blur')
 
@@ -27,7 +34,8 @@ function watchTimerList(parents, child, item) {
   if(child._fieldName == 'description') {
     const id = parents[0]._id()
     const tippyInstance = $('#text-input-job_'+id)[0]._tippy
-    tippyInstance.setContent(formatTicketDescriptionAsHtml(child()))
+    if(tippyInstance)
+      tippyInstance.setContent(formatTicketDescriptionAsHtml(child(), 'Tätigkeit'))
   }
 
   if(parents != null && parents.length > 0){

@@ -67,9 +67,12 @@ function copyTicketNumber(ticketList, ticketId) {
   toastr["info"]("Ticket wurde kopiert.")
 }
 
-function formatTicketDescriptionAsHtml(description) {
+function formatTicketDescriptionAsHtml(description, title) {
   var lines = description.split(';')
-  var formatedString = '<ul>'
+  var formatedString = ''
+  if(title)
+    formatedString = `<b>${title}:</b><br>`
+  formatedString += '<ul>'
   lines.forEach((line) => {
     formatedString += `<li>${line}</li>`
   })
@@ -77,9 +80,11 @@ function formatTicketDescriptionAsHtml(description) {
   return formatedString
 }
 
-function formatTicketDescriptionAsList(description) {
+function formatTicketDescriptionAsList(description, title) {
   var lines = description.split(';')
   var formatedString = ''
+  if(title)
+    formatedString = `${title}\n`
   lines.forEach((line) => {
     formatedString += `- ${line}\n`
   })
@@ -101,7 +106,7 @@ async function addNewTicketInternal(ticketList, ticketName) {
   const db_tickets = dataAccess.getDb('tickets')
 
   var newDate = new moment()
-  var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss'), done: false, projectId: '' }
+  var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss'), done: false, projectId: '' }
   var dbEntry = await db_tickets.insert(newTicket)
   var observableDbEntry = ko.mapping.fromJS(dbEntry)
   observableDbEntry.project = ko.observable()

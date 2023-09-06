@@ -136,7 +136,7 @@ class TimerList extends BaseViewModel {
           const jobDescription = $('#text-input-job_'+id).val()
           if(jobDescription) {
             tippy.default('#text-input-job_'+id, {
-              content: formatTicketDescriptionAsHtml(jobDescription),
+              content: formatTicketDescriptionAsHtml(jobDescription, 'Tätigkeit'),
               theme: 'light-border',
               delay: [2000, 500],
               allowHTML: true,
@@ -446,7 +446,7 @@ class TimerList extends BaseViewModel {
         item.score = 0
       }
       if(!item.lastUse){
-        item.lastUse = newDate.format('YYYY-MM-DD hh:mm:ss')
+        item.lastUse = newDate.format('YYYY-MM-DD HH:mm:ss')
       } else {
         var date = new moment(item.lastUse)
         var diff = (new moment()).diff(date, 'days')
@@ -479,7 +479,7 @@ class TimerList extends BaseViewModel {
         item.score = 0
       }
       if(!item.lastUse){
-        item.lastUse = newDate.format('YYYY-MM-DD hh:mm:ss')
+        item.lastUse = newDate.format('YYYY-MM-DD HH:mm:ss')
       } else {
         var date = new moment(item.lastUse)
         var diff = (new moment()).diff(date, 'days')
@@ -526,7 +526,7 @@ class TimerList extends BaseViewModel {
           options: that.projectList(),
           create: function(input, callback) {
             var newDate = new moment()
-            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD hh:mm:ss') }
+            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss') }
             that.db_projects.insert(newProject).then((dbEntry) => {
               var observableDbEntry = ko.mapping.fromJS(dbEntry)
               observableDbEntry['id'] = observableDbEntry._id()
@@ -779,7 +779,7 @@ class TimerList extends BaseViewModel {
     if(!seconds)
       return "00:00:00/0.00"
   
-    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+    var formated = moment.duration(seconds, "seconds").format("HH:mm:ss",{trim: false})
     var decimal = moment.duration(seconds, "seconds").format("h", 2)
   
     return formated + "/" + decimal
@@ -797,7 +797,7 @@ class TimerList extends BaseViewModel {
     if(!seconds)
       return "00:00:00"
   
-    var formated = moment.duration(seconds, "seconds").format("hh:mm:ss",{trim: false})
+    var formated = moment.duration(seconds, "seconds").format("HH:mm:ss",{trim: false})
   
     return formated
   }
