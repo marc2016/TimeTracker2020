@@ -32,6 +32,7 @@ module.exports = instance;
 
 ipcRenderer.on('get-app-path-reply', (event, arg) => {
     var userDataPath = arg
+    log.info(`UserPath: ${userDataPath}`)
     instance.dbJobs = new Datastore({ filename: userDataPath+'/jobs.db', autoload: true });
     instance.dbProjects = new Datastore({ filename: userDataPath+'/projects.db', autoload: true });
     instance.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });

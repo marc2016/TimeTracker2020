@@ -8,6 +8,8 @@ const { watchTimerList } = require('./timerlist/timerlist-operations.js')
 const { copyTicket, copyTicketNumber, openTicket, addNewTicketWithKeyInternal, addNewTicketInternal, archiveTicket, formatTicketDescriptionAsHtml, formatTicketDescriptionAsList } = require('./timerlist/ticket-operations.js')
 const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerlist/ticketlist.js')
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
+const { applySelectize } = require('./bindings/selectize-binding.js')
+const { applyLabelBinding } = require('./bindings/label-binding.js')
 
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
@@ -274,15 +276,16 @@ class TimerList extends BaseViewModel {
 
       this.handleModalChangeJobDuration()
 
+      applySelectize()
+      applyLabelBinding()
+
       this.loaded = true
       if(this.callAfterLoad)
         this.callAfterLoad()
     }.bind(this))
   }
 
-  jobListLoadedPostAction() {
-    this.applySelectize()
-    this.registerFocusEvents()
+  jobListLoadedPostAction(nodes) {
     this.createAutoComplete()
   }
 
@@ -459,6 +462,7 @@ class TimerList extends BaseViewModel {
     var observableDocs = ko.mapping.fromJS(docs)
     _.forEach(observableDocs(), function(item) {
       item['id'] = item._id()
+      item.nameString = item.name()
     })
     this.projectList.removeAll()
     ko.utils.arrayPushAll(this.projectList, observableDocs())
@@ -517,111 +521,6 @@ class TimerList extends BaseViewModel {
     var mappedDocs = _.map(jobDocs,(j) => { return j.description })
     var filteredDocs = _.filter(mappedDocs, (o) => { return o != null })
     this.descriptionList = _.uniq(filteredDocs)
-  }
-
-  applySelectize() {
-    var that = this
-    $('select.projectSelect').selectize(
-        {
-          options: that.projectList(),
-          create: function(input, callback) {
-            var newDate = new moment()
-            var newProject = { name:input, active:true, score: 5, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss') }
-            that.db_projects.insert(newProject).then((dbEntry) => {
-              var observableDbEntry = ko.mapping.fromJS(dbEntry)
-              observableDbEntry['id'] = observableDbEntry._id()
-              that.projectList.push(observableDbEntry)
-              callback( observableDbEntry )
-            })
-          },
-          labelField: "name()",
-          sortField: [{field: "lastUse()", direction: "desc"},{field: "name()", direction: "asc"}],
-          valueField: "id",
-          searchField: ["name()"],
-          placeholder: " ",
-          delimiter: "|",
-          closeAfterSelect: true,
-        }
-    )
-    var renderItemFunc = function (item, escape) {
-      var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.nameString)
-      
-      if(!match) {
-        return '<div class="item">'+item.nameString+'</div>';
-      }
-      var issueNumber = match[1]
-      var issueName = match[4]
-      return '<div class="item">'+
-      '<span class="issueNumber">'+issueNumber+'</span>'+
-      '<span class="issueName">: '+issueName+'</span>'+
-      '</div>';
-    }
-  
-    var renderOptionFunc = function (item, escape) {
-      var regex = /(([A-Z]|\d){2,}-\d+)(:|-)?(.*)?/
-      var match = regex.exec(item.nameString)
-      
-      var ticketName = ''
-      if(!match) {
-        ticketName =  '<span>'+item.nameString+'</span>';
-      } else {
-        var issueNumber = match[1]
-        var issueName = match[4]  
-        ticketName = '<span class="issueNumber">'+issueNumber+'</span>'+
-          '<span class="issueName">: '+issueName+'</span>'
-      }
-      
-      if(!item.id)
-        return
-      var ticketStateIcon = item.done && item.done() ? '<i class="far fa-check-circle"></i>' : '<i class="far fa-circle"></i>'
-      return ''+
-      '<div class="option">'+
-        '<div>'+
-          ticketName +
-        '</div>'+
-        '<div>'+
-          `<span class="ticket-select-secound-line">${ticketStateIcon}</span>`+
-          '<span class="ticket-select-secound-line"> | </span>'+
-          `<span class="ticket-select-secound-line">Letztes Update: ${that.getFormatedDateTime(item.lastUse())}</span>`+
-        '</div>'+
-      '</div>';
-    }
-
-    var currentActiveTicketList = this.activeTicketList()
-    $('select.ticketSelect').each((index, element) => {
-      var jobForElement = _.find(that.currentJobTimerList(), i => i._id() == $(element).attr("jobid"))
-
-      var completeList = currentActiveTicketList
-      if(jobForElement && jobForElement.ticket())
-        _.concat(completeList, jobForElement.ticket())
-        completeList = _.orderBy(completeList, ['lastUseString'], ['desc'])
-      $(element).selectize(
-        {
-          options: completeList,
-          create: function(input, callback) {
-            that.addNewTicket(input).then((newTicket) => {
-              callback( newTicket )
-            })
-          },
-          render: {
-            item: renderItemFunc,
-            option: renderOptionFunc
-          },
-          labelField: "nameString",
-          
-          valueField: "id",
-          searchField: ["nameString"],
-          placeholder: "",
-          delimiter: "|",
-          closeAfterSelect: true,
-          allowEmptyOption: true,
-          
-        }
-      )
-    })
-    
-    
   }
 
   async refreshJobLists(momentValue) {
@@ -689,35 +588,6 @@ class TimerList extends BaseViewModel {
         this.currentJob(newCurrentJob)
       }
     }
-  }
-
-  registerFocusEvents() {
-    $('.text-input-job').off('focusin')
-    $('.projectSelect').off('focusin')
-    $('.ticketSelect').off('focusin')
-    $('.text-input-job').off('focusout')
-    $('.projectSelect').off('focusout')
-    $('.ticketSelect').off('focusout')
-
-    $('.text-input-job').on('focusin', function() {
-      $(this).parent().parent().find('label').addClass('active');
-    });
-    
-    $('.text-input-job').on('focusout', function() {
-      if (!this.value) {
-        $(this).parent().parent().find('label').removeClass('active');
-      }
-    });
-
-    $('.selectbox').on('focusin', function() {
-      $(this).parent().find('label').addClass('active');
-    });
-    
-    $('.selectbox').on('focusout', function() {
-      if ($(this).find('.item').length < 1) {
-        $(this).parent().find('label').removeClass('active');
-      }
-    });
   }
   
   async currentMonthChanged(value){

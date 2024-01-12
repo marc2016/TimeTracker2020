@@ -47,10 +47,6 @@ function watchTicketList(parents, child, item) {
     
   if(child._fieldName == 'projectId' && child() === undefined && child.oldValues.length > 0 && child.oldValues[0] === '')
     return
-  if(item?.status == 'added') {
-    item.value.nameString = item.value.name()
-    this.refreshJobLists(this.currentDate())
-  }
 
   var ticket = parents[0]
   if(!ticket)

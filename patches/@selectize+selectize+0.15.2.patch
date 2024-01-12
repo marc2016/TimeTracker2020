@@ -1,0 +1,13 @@
+diff --git a/node_modules/@selectize/selectize/dist/js/selectize.js b/node_modules/@selectize/selectize/dist/js/selectize.js
+index 8603a89..69f2fd4 100644
+--- a/node_modules/@selectize/selectize/dist/js/selectize.js
++++ b/node_modules/@selectize/selectize/dist/js/selectize.js
+@@ -1349,7 +1349,7 @@ $.extend(Selectize.prototype, {
+ 
+ 		$dropdown.on('mouseenter mousedown mouseup click', '[data-disabled]>[data-selectable]', function(e) { e.stopImmediatePropagation(); });
+ 		$dropdown.on('mouseenter', '[data-selectable]', function() { return self.onOptionHover.apply(self, arguments); });
+-		$dropdown.on('mouseup click', '[data-selectable]', function() { return self.onOptionSelect.apply(self, arguments); });
++		$dropdown.on('click', '[data-selectable]', function() { return self.onOptionSelect.apply(self, arguments); });
+ 		watchChildEvent($control, 'mouseup', '*:not(input)', function() { return self.onItemSelect.apply(self, arguments); });
+ 		autoGrow($control_input);
+ 

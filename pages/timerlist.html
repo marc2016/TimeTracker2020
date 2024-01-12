@@ -60,10 +60,9 @@
               </div>
             </div>
             <div class="col-10 col-md-5 input-group-sm">
-              <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name()}, options: $parent.activeTicketList(), optionsCaption: 'Ticket auswählen...', optionsValue: 'id', value: ticketId, attr: { id: 'ticket-job_'+_id(), jobId: _id() }">
+              <select class="selectpicker form-control-sm selectbox ticketSelect" style="width: 100%" data-bind="selectizeTicket: ticketId, attr: { id: 'ticket-job_'+_id(), jobId: _id() }">
               </select>
-              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'ticket-job_'+_id() }, css: { active: ticket() }">Ticket</label>
+              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'ticket-job_'+_id() }, labelState: ticket() ">Ticket</label>
               <div class="timer-second-row">
                 <div data-bind="visible: ticket()" style="float: left;">
                   <i class="fa fa-link ticket-icon ticket-button" title="Link" data-bind="click: $parent.openTicketForJob.bind($data,$parent)"></i>
@@ -102,14 +101,13 @@
             <div class="col d-none d-md-inline d-lg-inline">
               <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
                 type="text">
-              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'text-input-job_'+_id() }, css: { active: description() }">Tätigkeit</label>
+              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'text-input-job_'+_id() }, labelState: description()">Tätigkeit</label>
               
             </div>
             <div class="col-2 d-none d-lg-inline d-lg-none">
-              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
+              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="selectizeProject: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
-              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
+              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, labelState: project()">Projekt</label>
             </div>
             <div class="col-auto">
               <div class="btn-group btn-group-sm" role="group">
@@ -199,8 +197,7 @@
               </div>
             </div>
             <div class="col-2 d-none d-md-inline d-lg-inline">
-              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
+              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="selectizeProject: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
               <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
             </div>
@@ -271,10 +268,9 @@
               </div>
             </div>
             <div class="col-2 d-none d-md-inline d-lg-inline">
-              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="optionsText: function(item) {
-                return item.name}, options: $parent.projectList(), optionsCaption: 'Projekt auswählen...', optionsValue: '_id', value: projectId, attr: { id: 'project-job_'+_id() }">
+              <select class="selectpicker form-control-sm selectbox projectSelect" style="width: 100%" data-bind="selectizeProject: projectId, attr: { id: 'project-job_'+_id() }">
               </select>
-              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, css: { active: project() }">Projekt</label>
+              <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'project-job_'+_id() }, labelState: project()">Projekt</label>
             </div>
             <div class="col-auto">
               <div class="btn-group btn-group-sm" role="group">

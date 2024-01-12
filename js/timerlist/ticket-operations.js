@@ -111,6 +111,8 @@ async function addNewTicketInternal(ticketList, ticketName) {
   var observableDbEntry = ko.mapping.fromJS(dbEntry)
   observableDbEntry.project = ko.observable()
   observableDbEntry['id'] = observableDbEntry._id()
+  observableDbEntry.nameString = observableDbEntry.name()
+
   ticketList.unshift(observableDbEntry)
   return observableDbEntry
 }

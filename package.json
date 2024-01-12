@@ -46,13 +46,14 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^23.1.2",
-    "electron-builder": "^22.14.5"
+    "electron-builder": "^22.14.5",
+    "patch-package": "^8.0.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
     "@fontsource/open-sans": "^4.5.2",
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "@selectize/selectize": "^0.14.0",
+    "@selectize/selectize": "^0.15.2",
     "@trodi/electron-splashscreen": "^1.0.2",
     "air-datepicker": "^3.3.0",
     "bootstrap": "^4.6.1",
