@@ -31,9 +31,9 @@ function watchTimerList(parents, child, item) {
     })
   }
 
-  if(child._fieldName == 'description') {
+  if(child._fieldName == 'descriptions') {
     const id = parents[0]._id()
-    const tippyInstance = $('#text-input-job_'+id)[0]._tippy
+    const tippyInstance = $('#job-description_'+id)[0]._tippy
     if(tippyInstance)
       tippyInstance.setContent(formatTicketDescriptionAsHtml(child(), 'Tätigkeit'))
   }

@@ -67,26 +67,24 @@ function copyTicketNumber(ticketList, ticketId) {
   toastr["info"]("Ticket wurde kopiert.")
 }
 
-function formatTicketDescriptionAsHtml(description, title) {
-  var lines = description.split(';')
+function formatTicketDescriptionAsHtml(descriptions, title) {
   var formatedString = ''
   if(title)
     formatedString = `<b>${title}:</b><br>`
   formatedString += '<ul>'
-  lines.forEach((line) => {
-    formatedString += `<li>${line}</li>`
+  descriptions.forEach((description) => {
+    formatedString += `<li>${description.name()}</li>`
   })
   formatedString += '</ul>'
   return formatedString
 }
 
-function formatTicketDescriptionAsList(description, title) {
-  var lines = description.split(';')
+function formatTicketDescriptionAsList(descriptions, title) {
   var formatedString = ''
   if(title)
     formatedString = `${title}\n`
-  lines.forEach((line) => {
-    formatedString += `- ${line}\n`
+  descriptions.forEach((description) => {
+    formatedString += `- ${description}\n`
   })
   return formatedString
 }

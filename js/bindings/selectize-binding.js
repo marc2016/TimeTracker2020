@@ -165,9 +165,75 @@ function applyProjectSelectize() {
   }
 }
 
+function applyJobDescriptionSelectize() {
+  ko.bindingHandlers.selectizeJobDescription = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      var that = bindingContext.$parent
+      const selectizeElement = $(element).selectize(
+        {
+          options: that.jobDescriptionList(),
+          create: function(input, callback) {
+            var newDate = new moment()
+            var newJobDescription = { name:input, active:true, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss') }
+            that.db_jobDescriptions.insert(newJobDescription).then((dbEntry) => {
+              var observableDbEntry = ko.mapping.fromJS(dbEntry)
+              observableDbEntry['id'] = observableDbEntry._id()
+              observableDbEntry.nameString = observableDbEntry.name()
+              that.jobDescriptionList.push(observableDbEntry)
+              callback( observableDbEntry )
+            })
+          },
+          labelField: "nameString",
+          valueField: "id",
+          searchField: ["nameString"],
+          placeholder: "",
+          delimiter: ";",
+          maxItems: null,
+          allowEmptyOption: true,
+          onChange: function onChange(valuesFromSelectize) {
+            _.each(valueAccessor()(), (valueFromAccessor) => {
+              const jobDescriptionId = _.find(valuesFromSelectize, (valueFromSelectize) => {
+                return valueFromSelectize == valueFromAccessor.id
+              })
+              if(!jobDescriptionId)
+                valueAccessor().remove(valueFromAccessor)
+            })
+            _.each(valuesFromSelectize, (valueFromSelectize) => {
+              const jobDescription = _.find(that.jobDescriptionList(), (i) => {
+                return i.id == valueFromSelectize
+              })
+              if(valueAccessor().indexOf(jobDescription) < 0)
+                valueAccessor().push(jobDescription)
+            })
+            
+          },
+        }
+      )
+      const selectizeInstance = selectizeElement[0].selectize
+      const jobDescriptionListSubscribtion = that.jobDescriptionList.subscribe(function(newValue) {
+        selectizeInstance.addOption(newValue)
+        selectizeInstance.refreshOptions(false)
+      })
+
+      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+        jobDescriptionListSubscribtion.dispose()
+      })
+    },
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      const $el = $(element)
+      const selectizeInstance = $el[0].selectize
+      const value = valueAccessor();
+      const valueUnwrapped = ko.unwrap(value)
+      const ids = _.map(valueUnwrapped, 'id')
+      selectizeInstance.setValue(ids)
+    }
+  }
+}
+
 function applySelectize() {
   applyProjectSelectize()
   applyTicketSelectize()
+  applyJobDescriptionSelectize()
 }
 
 module.exports = { applySelectize }

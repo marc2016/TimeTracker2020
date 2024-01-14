@@ -92,6 +92,7 @@ class TimerList extends BaseViewModel {
       this.db_projects = dataAccess.getDb('projects')
       this.db_tickets = dataAccess.getDb('tickets')
       this.db_absences = dataAccess.getDb('absences')
+      this.db_jobDescriptions = dataAccess.getDb('jobDescriptions')
 
       this.db.__original.persistence.compactDatafile()
       
@@ -100,7 +101,7 @@ class TimerList extends BaseViewModel {
       this.projectList = ko.observableArray()
       this.ticketList = ko.observableArray().extend({ deferred: true, rateLimit: 50 })
       this.timerTemplates = ko.observableArray()
-      this.descriptionList = []
+      this.jobDescriptionList = ko.observableArray()
 
       var that = this
 
@@ -135,10 +136,11 @@ class TimerList extends BaseViewModel {
         if (elem.nodeType === 1) {
           $(elem).hide().slideDown(600,'swing')
           const id = $(elem).attr('id')
-          const jobDescription = $('#text-input-job_'+id).val()
-          if(jobDescription) {
-            tippy.default('#text-input-job_'+id, {
-              content: formatTicketDescriptionAsHtml(jobDescription, 'Tätigkeit'),
+          const job = _.find(that.jobTimerList(), item => { return item._id() == id })
+          
+          if(job && job.descriptions) {
+            tippy.default('#job-description_'+id, {
+              content: formatTicketDescriptionAsHtml(job.descriptions(), 'Tätigkeit'),
               theme: 'light-border',
               delay: [2000, 500],
               allowHTML: true,
@@ -243,8 +245,6 @@ class TimerList extends BaseViewModel {
           this.currentDateDatePickerOpts.maxDate = new Date()
           this.currentDateDatePickerOpts.selectedDates = [new Date()]
           this.textCurrentDate.update(this.currentDateDatePickerOpts)
-
-          await this.refreshDescriptionList()
         }
 
         var dayStarted = moment()
@@ -286,7 +286,7 @@ class TimerList extends BaseViewModel {
   }
 
   jobListLoadedPostAction(nodes) {
-    this.createAutoComplete()
+    
   }
 
   async onLoad() {
@@ -296,10 +296,11 @@ class TimerList extends BaseViewModel {
 
     await this.refreshProjectList()
     await this.refreshTicketList()
+    await this.refreshJobDescriptionList()
+
     if(this.koWatcherTicketList)
       this.koWatcherTicketList.dispose()
     this.koWatcherTicketList = ko.watch(this.ticketList, { depth: 1, tagFields: true, oldValues: 1 }, watchTicketList.bind(this))
-    await this.refreshDescriptionList()
 
     var timerTemplatesList = await createTimerTemplateList()
     this.timerTemplates.removeAll()
@@ -440,6 +441,18 @@ class TimerList extends BaseViewModel {
       modal.find("#inputJobDuration").select()
     })
   }
+
+  async refreshJobDescriptionList() {
+    var docs = await this.db_jobDescriptions.find({active:true})
+    var observableDocs = ko.mapping.fromJS(docs)
+    _.forEach(observableDocs(), function(item) {
+      item['id'] = item._id()
+      item.nameString = item.name()
+    })
+    this.jobDescriptionList.removeAll()
+    ko.utils.arrayPushAll(this.jobDescriptionList, observableDocs())
+  }
+
   async refreshProjectList(){
     var docs = await this.db_projects.find({active:true})
     var newDate = new moment()
@@ -512,17 +525,6 @@ class TimerList extends BaseViewModel {
     this.ticketList.sort(sortTickets)
   }
 
-  async refreshDescriptionList() {
-    var today = new moment()
-    var past = moment().subtract(1, 'months');
-    var regex =  new RegExp('('+past.format('YYYY-MM')+'|'+today.format('YYYY-MM') + ')' + '-(.*)');
-    
-    var jobDocs = await this.db.find({date: regex})
-    var mappedDocs = _.map(jobDocs,(j) => { return j.description })
-    var filteredDocs = _.filter(mappedDocs, (o) => { return o != null })
-    this.descriptionList = _.uniq(filteredDocs)
-  }
-
   async refreshJobLists(momentValue) {
     await this.refreshJobTimerListForRange(momentValue)
   }
@@ -554,11 +556,14 @@ class TimerList extends BaseViewModel {
       if(!item.lastSync){
         item.lastSync = ""
       }
+      if(!item.descriptionIds){
+        item.descriptionIds = []
+      }
       item.isRunning = false
       if(this.currentJob && this.currentJob() && this.currentJob()._id && this.currentJob()._id() == item._id){
         item.isRunning = true
       }
-      
+
     }.bind(this))
 
     this.jobTimerList.removeAll()
@@ -577,6 +582,22 @@ class TimerList extends BaseViewModel {
       })
       item.ticket = ko.observable(ticket)
       item.copied = ko.observable(false)
+
+      const descriptionIds = item.descriptionIds()
+      item.descriptions = ko.observableArray()
+      _.each(descriptionIds, (descriptionId) => {
+        const foundDescriptionItem = _.find(this.jobDescriptionList(), (descriptionItem) => {
+          return descriptionItem._id() == descriptionId
+        })
+        item.descriptions.push(foundDescriptionItem)
+      })
+
+      if(!item.description) {
+       item.description = ko.pureComputed(function() {
+        const names =  _.map(item.descriptions(), (obj) => { return obj.name()})
+        return names.join('; ')
+       }, item.descriptions)
+      }
     }.bind(this))
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
@@ -691,40 +712,18 @@ class TimerList extends BaseViewModel {
   
   async saveAll(){
     await _.forEach(this.jobTimerList(), async function (element) {
-      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
+      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
     }.bind(this))
     
     this.db.__original.persistence.compactDatafile()
-
-    await this.createAutoComplete()
   }
 
   async saveItem(element){
-    await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), description: element.description(), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
-
-    await this.createAutoComplete()
-  }
-  
-  async createAutoComplete(entryId){
-    var autocompleteOptions = {
-      data: this.descriptionList,
-      list: {
-          match: {
-              enabled: true
-          }
-      },
-      theme: "bootstrap"
-    }
-    
-    $('.text-input-job').parent().not('.easy-autocomplete').children('.text-input-job').easyAutocomplete(autocompleteOptions).css("height",'31px').css('font-size', '0.875rem')
-    $('.easy-autocomplete.eac-bootstrap').removeAttr( 'style' )
-    if(entryId)
-      $('#text-input-job_'+entryId).focus()
-    
+    await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
   }
 
   async addNewJobTimer(description, ticketId, projetcId) {
-    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description:description, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description:description, descriptionIds: [], date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
@@ -750,8 +749,22 @@ class TimerList extends BaseViewModel {
 
     dbEntry.copied = ko.observable(false)
 
+    dbEntry.descriptions = ko.observableArray()
+    _.each(dbEntry.descriptionIds(), (descriptionId) => {
+      const foundDescriptionItem = _.find(this.jobDescriptionList(), (descriptionItem) => {
+        return descriptionItem._id() == descriptionId
+      })
+      dbEntry.descriptions.push(foundDescriptionItem)
+    })
+
+    dbEntry.description = ko.pureComputed(function() {
+      const names =  _.map(dbEntry.descriptions(), (obj) => { return obj.name()})
+      return names.join('; ')
+     }, dbEntry.descriptions)
+
+
     this.jobTimerList.unshift(dbEntry)
-    this.createAutoComplete(dbEntry._id())
+    //this.createAutoComplete(dbEntry._id())
 
     await this.saveAll()
     this.currentDateChanged(this.currentDate())
@@ -780,7 +793,7 @@ class TimerList extends BaseViewModel {
     if(!jobDescription){
       jobDescription = ""
     }
-    var newEntry = {jobNote:"", projectId: "", ticketId: ticketId,elapsedSeconds:0, description:jobDescription, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+    var newEntry = {jobNote:"", projectId: "", ticketId: ticketId,elapsedSeconds:0, descriptionIds: [], date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
@@ -806,8 +819,22 @@ class TimerList extends BaseViewModel {
 
     dbEntry.copied = ko.observable(false)
 
+    dbEntry.descriptions = ko.observableArray()
+    _.each(dbEntry.descriptionIds(), (descriptionId) => {
+      const foundDescriptionItem = _.find(this.jobDescriptionList(), (descriptionItem) => {
+        return descriptionItem._id() == descriptionId
+      })
+      dbEntry.descriptions.push(foundDescriptionItem)
+    })
+
+    dbEntry.description = ko.pureComputed(function() {
+      const names =  _.map(dbEntry.descriptions(), (obj) => { return obj.name()})
+      return names.join('; ')
+     }, dbEntry.descriptions)
+
+
     this.jobTimerList.push(dbEntry)
-    this.createAutoComplete(dbEntry._id())
+    // this.createAutoComplete(dbEntry._id())
 
     await this.saveAll()
     this.currentDateChanged(this.currentDate())

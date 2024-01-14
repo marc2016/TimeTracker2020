@@ -94,14 +94,17 @@
                 </div>
                 <div class="vertical-seperator d-inline d-md-none d-lg-none" style="float: left;"></div>
                 <div class="d-inline d-md-none d-lg-none" style="float: left;">
-                  Tätigkeit: <span data-bind="text: description()"></span>
+                  <!-- Tätigkeit: <span data-bind="text: description()"></span> -->
                 </div>
               </div>
             </div>
             <div class="col d-none d-md-inline d-lg-inline">
-              <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
-                type="text">
-              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'text-input-job_'+_id() }, labelState: description()">Tätigkeit</label>
+              <!-- <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job"
+                type="text"> -->
+              <select class="selectpicker form-control-sm selectbox descriptionSelect" style="width: 100%" data-bind="selectizeJobDescription: descriptions, attr: { id: 'job-description_'+_id() }">
+              </select>
+
+              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'job-description_'+_id() }, labelState: description()">Tätigkeit</label>
               
             </div>
             <div class="col-2 d-none d-lg-inline d-lg-none">

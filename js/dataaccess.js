@@ -21,6 +21,8 @@ class DataAccess {
                 return this.dbAbsences
             case 'timertemplates':
                 return this.dbTimerTemplates
+            case 'jobDescriptions':
+                return this.dbJobDescriptions
             default:
                 return undefined
         }
@@ -38,6 +40,7 @@ ipcRenderer.on('get-app-path-reply', (event, arg) => {
     instance.dbTickets = new Datastore({ filename: userDataPath+'/tickets.db', autoload: true });
     instance.dbAbsences = new Datastore({ filename: userDataPath+'/absences.db', autoload: true });
     instance.dbTimerTemplates = new Datastore({ filename: userDataPath+'/timertemplates.db', autoload: true });
+    instance.dbJobDescriptions = new Datastore({ filename: userDataPath+'/jobDescriptions.db', autoload: true });
 
     instance.dbJobs.ensureIndex({ fieldName: 'date' }, function (err) {});
 })
