@@ -542,7 +542,7 @@ class TimerList extends BaseViewModel {
     this.refreshJobTimerList(jobDocs)
   }
 
-  refreshJobTimerList(docs){
+  async refreshJobTimerList(docs){
     docs.forEach(function(item, index){
       if(!item.projectId){
         item.projectId = ""
@@ -569,7 +569,7 @@ class TimerList extends BaseViewModel {
     this.jobTimerList.removeAll()
     var observableDocs = ko.mapping.fromJS(docs,this.jobTimerList);
 
-    _.forEach(observableDocs(), function(item) {
+    for (const item of observableDocs()) {
       var projectId = item.projectId()
       var project = _.find(this.projectList(), (projectItem) => {
         return projectItem._id() == projectId
@@ -592,13 +592,33 @@ class TimerList extends BaseViewModel {
         item.descriptions.push(foundDescriptionItem)
       })
 
+      if(item.description) {
+        const descriptionStrings = item.description().split(";")
+        for (const descriptionValue of descriptionStrings) {
+          var newDate = new moment()
+          var newJobDescription = { name:descriptionValue, active:true, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss') }
+          var dbEntry =  await this.db_jobDescriptions.insert(newJobDescription)
+          var observableDbEntry = ko.mapping.fromJS(dbEntry)
+          observableDbEntry['id'] = observableDbEntry._id()
+          observableDbEntry.nameString = observableDbEntry.name()
+          this.jobDescriptionList.push(observableDbEntry)
+          item.descriptions.push(observableDbEntry)
+        }
+          
+          
+        
+        await this.db.update({ _id:item._id() }, { $set: { descriptionIds: _.map(item.descriptions(), item.descriptions(), d => d._id()) } },{ multi: false })
+        await this.db.update({ _id:item._id() }, { $unset: { description: true } },{ multi: false })
+        item.description = undefined
+      }
+
       if(!item.description) {
        item.description = ko.pureComputed(function() {
         const names =  _.map(item.descriptions(), (obj) => { return obj.name()})
         return names.join('; ')
        }, item.descriptions)
       }
-    }.bind(this))
+    }
 
     ko.utils.arrayPushAll(this.jobTimerList, observableDocs())
     if(this.currentJob && this.currentJob()){
