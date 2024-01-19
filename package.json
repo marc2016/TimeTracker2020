@@ -28,7 +28,7 @@
   "description": "Simple time tracking tool.",
   "main": "main.js",
   "scripts": {
-    "sass": "sass SCSS/combined.scss Styles/main.css",
+    "sass": "sass SCSS/combined.scss Styles/main.css && sass SCSS/selectize.scss Styles/selectize.css",
     "start": "npm run sass && electron --trace-warnings --inspect=5858 .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",

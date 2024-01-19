@@ -31,12 +31,12 @@ function watchTimerList(parents, child, item) {
     })
   }
 
-  if(child._fieldName == 'descriptions') {
-    const id = parents[0]._id()
-    const tippyInstance = $('#job-description_'+id)[0]._tippy
-    if(tippyInstance)
-      tippyInstance.setContent(formatTicketDescriptionAsHtml(child(), 'Tätigkeit'))
-  }
+  // if(child._fieldName == 'descriptions') {
+  //   const id = parents[0]._id()
+  //   const tippyInstance = $('#job-description_'+id)[0]._tippy
+  //   if(tippyInstance)
+  //     tippyInstance.setContent(formatTicketDescriptionAsHtml(child(), 'Tätigkeit'))
+  // }
 
   if(parents != null && parents.length > 0){
     this.saveItem(parents[0])

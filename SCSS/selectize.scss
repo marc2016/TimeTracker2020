@@ -1,0 +1,63 @@
+@import "partial/variables.scss";
+
+.selectize-dropdown .selected {
+  background: $highlightcolorOpacitiy;
+}
+
+
+.selectize-dropdown .option {
+  border-bottom: $maincolorOpacitiy;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+
+.selectize-dropdown-content {
+  max-height: 400px !important;
+}
+
+.selectize-input .item {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: calc(100% - 30px);
+  background: transparent;
+  border-color: $maincolor;
+}
+
+.selectize-input {
+  height: 31px !important;
+  min-height: 31px !important;
+  padding-top: 3px !important;
+
+  padding-right: 40px !important;
+}
+
+.descriptionSelect .selectize-input {
+  background: transparent;
+  border-color: $maincolor;
+}
+
+.selectize-control.single .selectize-input.full input {
+  top: -5px;
+  margin-left: 2px !important;
+}
+
+.selectize-input.has-items>input {
+  top: -5px;
+  margin-left: 2px !important;
+}
+
+.selectize-control.form-control-sm .selectize-input.has-items {
+  padding-top: 3px !important;
+}
+
+.selectize-control.multi .selectize-input>div {
+  margin: 0px 3px 0px 0px !important;
+}
+
+.selectize-control {
+  padding: 0px;
+  height: 31px;
+}

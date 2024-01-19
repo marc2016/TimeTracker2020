@@ -16,26 +16,13 @@
   padding-top: 42px;
 }
 
-.selectize-input {
-  height: 31px !important;
-  min-height: 31px !important;
-  padding-top: 3px !important;
-}
 
-.selectize-control.single .selectize-input.full input {
-  top: -5px;
-  margin-left: 2px !important;
-}
-
-.selectize-control {
-  padding: 0px;
-  height: 31px;
-}
 
 .timer-second-row {
   height: 24px;
   margin-top: 5px;
   display: inline-block;
+  width: 100%;
 }
 
 .ticket-icon {
@@ -111,6 +98,7 @@
 .text-input-job{
   box-shadow: none !important;
   padding: .25rem .5rem !important;
+  height: 31px;
 }
 
 .text-input-todo-ticket {
@@ -282,28 +270,6 @@
   margin-left: 0px;
 }
 
-.selectize-dropdown .option {
-  border-bottom: $maincolorOpacitiy;
-  border-style: solid;
-  border-width: 0px 0px 1px 0px;
-  padding-bottom: 8px;
-  padding-top: 8px;
-}
-
-.selectize-dropdown-content {
-  max-height: 400px !important;
-}
-
-.selectize-input .item {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: calc(100% - 30px);
-}
-
-.selectize-input {
-  padding-right: 40px !important;
-}
 
 .issueNumber {
   font-weight: bold;
