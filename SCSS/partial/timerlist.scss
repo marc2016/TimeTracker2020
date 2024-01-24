@@ -241,6 +241,7 @@
   padding: 0 .5rem;
   -webkit-transition: top .2s ease-in-out,  font-size .2s ease-in-out;
   transition: top .2s ease-in-out,  font-size .2s ease-in-out;
+  pointer-events: none;
 }
 
 .label-placeholder-text {
