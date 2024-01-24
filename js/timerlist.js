@@ -156,7 +156,7 @@ class TimerList extends BaseViewModel {
               inline: false,
               selectedDates: [jobForElement.date()],
               onSelect:function onSelect(obj) {
-                jobForElement.date(moment(obj.date))
+                jobForElement.date(moment(obj.date).format('YYYY-MM-DD'))
               }.bind(this)
             }
   
@@ -710,14 +710,14 @@ class TimerList extends BaseViewModel {
   
   async saveAll(){
     await _.forEach(this.jobTimerList(), async function (element) {
-      await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(),description: element.description(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
+      await this.db.update({ _id:element._id() }, { $set: { date: element.date(), billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(),description: element.description(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
     }.bind(this))
     
     this.db.__original.persistence.compactDatafile()
   }
 
   async saveItem(element){
-    await this.db.update({ _id:element._id() }, { $set: { billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(),description: element.description(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
+    await this.db.update({ _id:element._id() }, { $set: { date: element.date(), billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(),description: element.description(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
   }
 
   async addNewJobTimer(description, ticketId, projetcId) {
