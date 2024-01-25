@@ -295,8 +295,8 @@ class TimerList extends BaseViewModel {
     $('#background').css('background-image', 'url('+store.get('backgroundSrc')+')')
 
     await this.refreshProjectList()
-    await this.refreshTicketList()
     await this.refreshJobDescriptionList()
+    await this.refreshTicketList()
 
     if(this.koWatcherTicketList)
       this.koWatcherTicketList.dispose()
@@ -495,6 +495,9 @@ class TimerList extends BaseViewModel {
       if(!item.score){
         item.score = 0
       }
+      if(!item.descriptionIds){
+        item.descriptionIds = []
+      }
       if(!item.lastUse){
         item.lastUse = newDate.format('YYYY-MM-DD HH:mm:ss')
       } else {
@@ -511,14 +514,23 @@ class TimerList extends BaseViewModel {
     _.forEach(observableDocs(), function(item) {
       item['id'] = item._id()
       var projectId = item.projectId()
-      var project = _.find(that.projectList(), (projectItem) => {
+      var project = _.find(this.projectList(), (projectItem) => {
         return projectItem._id() == projectId
       })
       item.project = ko.observable(project)
       item.nameString = item.name()
       item.lastUseString = item.lastUse()
       item.disabled = !item.active()
-    })
+
+      const descriptionIds = item.descriptionIds()
+      item.descriptions = ko.observableArray()
+      _.each(descriptionIds, (descriptionId) => {
+        const foundDescriptionItem = _.find(this.jobDescriptionList(), (descriptionItem) => {
+          return descriptionItem._id() == descriptionId
+        })
+        item.descriptions.push(foundDescriptionItem)
+      })
+    }.bind(this))
 
     this.ticketList.removeAll()
     ko.utils.arrayPushAll(this.ticketList, observableDocs())
@@ -720,8 +732,8 @@ class TimerList extends BaseViewModel {
     await this.db.update({ _id:element._id() }, { $set: { date: element.date(), billable: element.billable(), lastSync: element.lastSync(), jobNote: element.jobNote(),description: element.description(), descriptionIds: _.map(element.descriptions(), d => d._id()), elapsedSeconds: element.elapsedSeconds(), projectId: element.projectId(), ticketId: element.ticketId() } },{ multi: false })
   }
 
-  async addNewJobTimer(description, ticketId, projetcId) {
-    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description: description, descriptionIds: [], date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
+  async addNewJobTimer(description, ticketId, projetcId, descriptionIds) {
+    var newEntry = {jobNote:"", projectId: projetcId, ticketId: ticketId,elapsedSeconds:0, description: description, descriptionIds: descriptionIds, date:this.currentDate().format('YYYY-MM-DD'), lastSync: "", billable: false}
     var dbEntry = await this.db.insert(newEntry)
     dbEntry = ko.mapping.fromJS(dbEntry)
     dbEntry.isRunning = ko.observable()
@@ -910,7 +922,7 @@ class TimerList extends BaseViewModel {
   }
 
   async addNewTimerFromTemplate(that, data) {
-    var newItem = await that.addNewJobTimer(data.description(), null, data.projectId())
+    var newItem = await that.addNewJobTimer(data.description(), null, data.projectId(), [])
 
     that.startTimer(that, newItem)
   }
@@ -952,7 +964,7 @@ class TimerList extends BaseViewModel {
   }
 
   async startTicket(that,data){
-    var newItem = await that.addNewJobTimer(null, data._id(), data.projectId())
+    var newItem = await that.addNewJobTimer(null, data._id(), data.projectId(), _.map(data.descriptions(), d => d._id()))
 
     that.startTimer(that, newItem)
   }

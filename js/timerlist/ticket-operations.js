@@ -113,7 +113,7 @@ async function addNewTicketInternal(ticketList, ticketName) {
   const db_tickets = dataAccess.getDb('tickets')
 
   var newDate = new moment()
-  var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss'), done: false, projectId: '' }
+  var newTicket = { name:ticketName, active: true, score: 5, lastUse: newDate.format('YYYY-MM-DD HH:mm:ss'), done: false, projectId: '', descriptionIds: [] }
   var dbEntry = await db_tickets.insert(newTicket)
   var observableDbEntry = ko.mapping.fromJS(dbEntry)
   observableDbEntry.project = ko.observable()

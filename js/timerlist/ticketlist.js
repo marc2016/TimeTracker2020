@@ -56,7 +56,12 @@ function watchTicketList(parents, child, item) {
   var newDate = new moment()
   ticket.lastUse(newDate.format('YYYY-MM-DD HH:mm:ss'))
   var saveObj = {}
-  saveObj[child._fieldName] = child()
+  if(child._fieldName == 'descriptions') {
+    saveObj['descriptionIds'] = _.map(child(), d => d._id())
+  } else {
+    saveObj[child._fieldName] = child()
+  }
+  
   saveObj['lastUse'] = ticket.lastUse()
   const db_tickets = dataAccess.getDb('tickets')
   db_tickets.update({ _id:ticket._id() }, { $set: saveObj },{ multi: false })

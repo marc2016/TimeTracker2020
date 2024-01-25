@@ -180,8 +180,15 @@
             </div>
             <div class="col">
               <div>
-                <input class="form-control text-input-todo-ticket" data-bind="value: name" type="text" readonly>
-                <label class="label-placeholder-static">Ticket</label>
+                <div style="float: left; width: 49%;">
+                  <input class="form-control text-input-todo-ticket" data-bind="value: name" type="text" readonly>
+                  <label class="label-placeholder-static">Ticket</label>
+                </div>
+                <div style="float: right; width: 50%;">
+                  <select class="selectpicker form-control-sm selectbox descriptionSelect" style="width: 100%" data-bind="selectizeJobDescription: descriptions, attr: { id: 'ticket-descriptions_'+_id() }">
+                  </select>
+                  <label class="label-placeholder label-placeholder-select" data-bind="attr: { for: 'ticket-descriptions_'+_id() }, labelState: descriptions().length > 0 ">Beschreibung</label>
+                </div>
               </div>
               
               <div class="timer-second-row">
