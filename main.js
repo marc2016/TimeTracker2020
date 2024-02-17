@@ -130,7 +130,7 @@ if (!gotTheLock) {
     mainWindow.webContents.send('open-url', urlParam)
 
     if (mainWindow) {
-      if (mainWindow.isMinimized()) myWindow.restore()
+      if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
     }
   })
