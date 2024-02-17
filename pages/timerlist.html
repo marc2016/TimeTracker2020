@@ -99,12 +99,11 @@
               </div>
             </div>
             <div class="col d-none d-md-inline d-lg-inline">
-              <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job" type="text">
-
-              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'text-input-job_'+_id() }, labelState: description()">Tätigkeit</label>
+              <select class="selectpicker form-control-sm selectbox descriptionSelect" style="width: 100%" data-bind="selectizeJobDescription: descriptions, attr: { id: 'job-descriptions_'+_id() }">
+              </select>
+              <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'job-descriptions_'+_id() }, labelState: descriptions().length > 0">Tätigkeit</label>
               <div class="timer-second-row">
-                <select class="selectpicker form-control-sm selectbox descriptionSelect" style="width: 100%" data-bind="selectizeJobDescription: descriptions, attr: { id: 'job-descriptions_'+_id() }">
-                </select>
+                <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job" type="text" placeholder="Notiz hinzufügen...">
               </div>
             </div>
             <div class="col-2 d-none d-lg-inline d-lg-none">

@@ -28,11 +28,13 @@
   min-height: 31px !important;
   padding-top: 3px !important;
   padding-right: 40px !important;
+  border-color: #222E83;
 }
 
-.descriptionSelect .selectize-input {
-  background: transparent;
-  border-color: #222E83;
+.selectize-input.focus {
+  border-color: #E65C00;
+  outline: 0;
+  box-shadow: none;
 }
 
 .selectize-control.single .selectize-input.full input {

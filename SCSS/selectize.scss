@@ -32,12 +32,18 @@
   padding-top: 3px !important;
 
   padding-right: 40px !important;
-}
 
-.descriptionSelect .selectize-input {
-  background: transparent;
   border-color: $maincolor;
 }
+.selectize-input.focus {
+  border-color: $highlightcolor;
+  outline: 0;
+  box-shadow: none;
+}
+
+// .descriptionSelect .selectize-input {
+//   border-color: $maincolor;
+// }
 
 .selectize-control.single .selectize-input.full input {
   top: -5px;

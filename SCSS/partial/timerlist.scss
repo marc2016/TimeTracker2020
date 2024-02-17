@@ -99,6 +99,13 @@
   box-shadow: none !important;
   padding: .25rem .5rem !important;
   height: 31px;
+  border-color: $maincolor;
+}
+
+.text-input-job:focus {
+  border-color: $highlightcolor;
+  outline: 0;
+  box-shadow: none;
 }
 
 .text-input-todo-ticket {
