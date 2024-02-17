@@ -2,7 +2,13 @@ var ko = require('knockout');
 ko.mapping = require('knockout-mapping')
 var BaseViewModel = require('./base.js')
 var _ = require('lodash');
+var Moment = require('moment-business-days');
+const MomentRange = require('moment-range');
+const moment = MomentRange.extendMoment(Moment);
 var Holidays = require('date-holidays')
+
+const AirDatepicker = require('air-datepicker');
+const localDe = require('air-datepicker/locale/de.js')
 
 class AppSettings extends BaseViewModel {
 
@@ -57,6 +63,29 @@ class AppSettings extends BaseViewModel {
             });
 
             this.loadBackgrounds()
+
+            this.selectedovertimeStartDate = ko.computed({
+                read: function () {
+                    return this.store.get('overtimeStartDate', '');
+                },
+                write: function (value) {
+                    this.store.set('overtimeStartDate', value)
+                },
+                owner: this
+            }).extend({ notify: 'always' });
+
+            const overtimeStartDatePickerOpts = {
+                locale: localDe.default,
+                autoClose:true,
+                toggleSelected: false,
+                inline: false,
+                maxDate: new Date(),
+                selectedDates: [this.selectedovertimeStartDate()],
+                onSelect:function onSelect(obj) {
+                    this.selectedovertimeStartDate(moment(obj.date).format('YYYY-MM-DD'))
+                }.bind(this)
+              }
+            this.overtimeStartDatePicker = new AirDatepicker('#overtimeStartDatePicker', overtimeStartDatePickerOpts)
 
             this.countries = ko.computed(function() {
                 var tmpContries = new Array()
