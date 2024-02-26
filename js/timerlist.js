@@ -52,12 +52,12 @@ toastr.options = {
   "debug": false,
   "newestOnTop": false,
   "progressBar": false,
-  "positionClass": "toast-bottom-left",
+  "positionClass": "toast-bottom-full-width",
   "preventDuplicates": false,
   "onclick": null,
   "showDuration": "300",
   "hideDuration": "1000",
-  "timeOut": "5000",
+  "timeOut": "7000",
   "extendedTimeOut": "1000",
   "showEasing": "swing",
   "hideEasing": "linear",
@@ -138,6 +138,19 @@ class TimerList extends BaseViewModel {
           const id = $(elem).attr('id')
           const job = _.find(that.jobTimerList(), item => { return item._id() == id })
           
+          if(job) {
+            const jobNoteContainer =  $('#job-note-container_'+id)[0]
+            jobNoteContainer.style.display = 'block'
+            tippy.default('#job-note-button_'+id, {
+              content: jobNoteContainer,
+              theme: 'light-border',
+              allowHTML: true,
+              trigger: 'click',
+              placement: 'right',
+              interactive: true,
+            })
+          }
+
           // if(job && job.descriptions) {
           //   tippy.default('#job-description_'+id, {
           //     content: formatTicketDescriptionAsHtml(job.descriptions(), 'Tätigkeit'),
@@ -1075,6 +1088,14 @@ class TimerList extends BaseViewModel {
 
   copyTicketNumberForTicket(that,data) {
     copyTicketNumber(that.ticketList(), data._id())
+  }
+
+  jobDescriptionToTicket(that, data) {
+    data.ticket().descriptions.removeAll() 
+    for (const description of data.descriptions()) {
+      data.ticket().descriptions.push(description)
+    }
+    toastr["info"]("Tätigkeit in Ticket übernommen.")
   }
 
   reloadDoneTickets() {

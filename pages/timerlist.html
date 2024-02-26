@@ -103,7 +103,11 @@
               </select>
               <label class="label-placeholder label-placeholder-text" data-bind="attr: { for: 'job-descriptions_'+_id() }, labelState: descriptions().length > 0">Tätigkeit</label>
               <div class="timer-second-row">
-                <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job" type="text" placeholder="Notiz hinzufügen...">
+                <i class="fas fa-arrow-circle-down ticket-icon ticket-button" title="Link" data-bind="visible: ticket(), click: $parent.jobDescriptionToTicket.bind($data,$parent), attr: { id: 'job-descriptions-to-ticket-button_'+_id() }"></i>
+                <i class="fa fa-sticky-note ticket-icon ticket-button" title="Link" data-bind="attr: { id: 'job-note-button_'+_id() }"></i>
+                <div data-bind="attr: { id: 'job-note-container_'+_id() }">
+                  <input data-bind="value: description, attr: { id: 'text-input-job_'+_id() }" class="form-control text-input-job" type="text" placeholder="Notiz hinzufügen...">
+                </div>
               </div>
             </div>
             <div class="col-2 d-none d-lg-inline d-lg-none">
