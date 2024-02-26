@@ -10,6 +10,7 @@ const { getJobTimerForTicket, sortTickets, watchTicketList } = require('./timerl
 const { createTimerTemplateList, insertTimerTemplate, deleteTimerTemplate } = require('./timerlist/timer-templates.js')
 const { applySelectize } = require('./bindings/selectize-binding.js')
 const { applyLabelBinding } = require('./bindings/label-binding.js')
+const { setTooltipsForJobTimer } = require('./timerlist/timerlist-tooltips.js')
 
 var dataAccess = require('./dataaccess.js')
 var BaseViewModel = require('./base.js')
@@ -150,6 +151,8 @@ class TimerList extends BaseViewModel {
               interactive: true,
             })
           }
+
+          setTooltipsForJobTimer()
 
           // if(job && job.descriptions) {
           //   tippy.default('#job-description_'+id, {
