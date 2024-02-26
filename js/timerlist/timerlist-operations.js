@@ -29,6 +29,13 @@ function watchTimerList(parents, child, item) {
       element.addItem(job.projectId)
       that.jobTimerList()[0].projectId(job.projectId)
     })
+
+    if(parents[0].ticket()) {
+      for (const description of parents[0].ticket().descriptions()) {
+        parents[0].descriptions.push(description)
+      }
+    }
+     
   }
 
   // if(child._fieldName == 'descriptions') {
