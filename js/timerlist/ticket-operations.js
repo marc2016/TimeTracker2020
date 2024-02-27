@@ -72,13 +72,18 @@ function formatTicketDescriptionAsHtml(descriptions, description, title) {
   if(title)
     formatedString = `<b>${title}:</b><br>`
   formatedString += '<ul>'
-  descriptions.forEach((d) => {
-    formatedString += `<li>${d.name()}</li>`
-  })
-  var lines = description.split(';')
-  lines.forEach((line) => {
-    formatedString += `<li>${line}</li>`
-  })
+  if(descriptions) {
+    descriptions.forEach((d) => {
+      formatedString += `<li>${d.name()}</li>`
+    })
+  }
+
+  if(description) {
+    var lines = description.split(';')
+    lines.forEach((line) => {
+      formatedString += `<li>${line}</li>`
+    })
+  }
 
   formatedString += '</ul>'
   return formatedString
@@ -88,13 +93,19 @@ function formatTicketDescriptionAsList(descriptions, description, title) {
   var formatedString = ''
   if(title)
     formatedString = `${title}\n`
-  descriptions.forEach((d) => {
-    formatedString += `- ${d.name()}\n`
-  })
-  var lines = description.split(';')
-  lines.forEach((line) => {
-    formatedString += `- ${line}\n`
-  })
+  if(descriptions) {
+    descriptions.forEach((d) => {
+      formatedString += `- ${d.name()}\n`
+    })
+  }
+
+  if(description) {
+    var lines = description.split(';')
+    lines.forEach((line) => {
+      formatedString += `- ${line}\n`
+    })
+  }
+
   return formatedString
 }
 
