@@ -102,7 +102,7 @@ function formatTicketDescriptionAsList(descriptions, description, title) {
   if(description) {
     var lines = description.split(';')
     lines.forEach((line) => {
-      formatedString += `- ${line}\n`
+      formatedString += `// ${line}\n`
     })
   }
 

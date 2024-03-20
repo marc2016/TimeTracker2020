@@ -907,19 +907,26 @@ class TimerList extends BaseViewModel {
 
     if(copyJobFormat == 'copyJobFormatPlaintext') {
       var result = ""
-      result += `Ticket: ${ticket ? ticket.name() || "-" : "-"}\n`
-      result += `Tätigkeit: ${data.descriptionSummary() || "-"}\n`
-      result += `Projekt: ${project ? project.name() || "-" : "-"}\n`
+      if(ticket)
+        result += `Ticket: ${ticket.name()}\n`
+      if(item.descriptions && item.descriptions())
+        result += `Tätigkeit: ${_.map(item.descriptions(), (obj) => { return obj.name()})}\n`
+      if(item.description)
+        result += `Notizen: ${item.description}\n`
+      if(project && project.name && project.name())
+        result += `Projekt: ${project.name()}\n`
       result += `Dauer: ${that.getTimeString(data.elapsedSeconds())}\n`
       clipboard.writeText(result)
     } else {
       var obj = {
         date: data.date(),
         description: formatTicketDescriptionAsList(data.descriptions(), data.description()),
-        ticket: ticket ? ticket.name() || "-" : "-",
-        project: project ? project.name() || "-" : "-",
         duration: that.getFormatedDurationHHmm(data.elapsedSeconds())
       }
+      if(ticket)
+        obj.ticket = ticket.name()
+      if(project)
+        obj.project = project.name()
       clipboard.writeText(JSON.stringify(obj))
     }
     data.copied(true)
